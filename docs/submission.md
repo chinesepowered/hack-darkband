@@ -27,8 +27,8 @@ per agent). Everything runs headless on one cloud machine.
 
 - The human mentions only the Architect, once, and replies only to Nap Guard (`ship`).
 - The Architect asks Scout for data, then asks the Examiner to seal the exam with that data, then hands stages to the Builder.
-- The Builder posts `[ready]` to the Examiner **and** the Reviewer together. It asks Scout for docs and facts, and
-  disputes a failure with Nap Guard instead of bending the data.
+- The Builder posts `[ready]` to the Examiner **and** the Reviewer together. It asks Scout for docs and facts. When
+  it disputes a failure, it posts `[dispute]` to the Examiner and Nap Guard instead of bending the data.
 - The Examiner and the Reviewer reply to the Builder and copy Nap Guard. Scout copies Nap Guard only on low-confidence
   answers.
 - Nap Guard mentions the Architect (stage accepted or reopened) and the human (wake-ups only).

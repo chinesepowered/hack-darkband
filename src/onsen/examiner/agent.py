@@ -83,7 +83,7 @@ def split_command(text: str) -> tuple[str, str]:
     word = word.lower().rstrip(":")
     if word in ("seal", "exam", "reveal", "tally", "status", "help"):
         return word, remainder.strip()
-    return "help", text
+    return "note", text  # acks and notes need no answer
 
 
 class ExaminerAdapter(SimpleAdapter[Any]):
@@ -114,6 +114,8 @@ class ExaminerAdapter(SimpleAdapter[Any]):
                 await self._appeal(arg, msg, tools, reply_to, room_id)
             elif cmd in ("tally", "status"):
                 await tools.send_message(self._tally(room_id), mentions=reply_to)
+            elif cmd == "note":
+                await tools.no_reply("an ack or a note; nothing to grade")
             else:
                 await tools.send_message(HELP, mentions=reply_to)
         except Exception as exc:  # noqa: BLE001 - report, never go silent

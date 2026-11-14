@@ -46,6 +46,19 @@ Examiner ──[exam] FAIL "what a user noticed"──▶ Builder   ·   Reviewe
 Nap Guard ──[wake] #1 "ship or hold?"──▶ human ──ship──▶ [receipt] ──▶ Examiner [reveal] (hash matches the seal)
 ```
 
+## Real runs
+
+Every run happened in a real BAND room. Cleaned transcripts, receipts and the code each run built are in [runs/](runs/):
+
+| Run | What it shows |
+|---|---|
+| [run4](runs/run4/) | the recorded run: one kickoff, one wake-up, `ship`, receipt, exam revealed with a matching hash |
+| [run3-dispute](runs/run3-dispute/) | the hidden exam caught a real race; the per-commit gate held; the Builder disputed a bad check with evidence, which led to appeals |
+| [run2-partial](runs/run2-partial/) | stages 1–2 passed on the first try with commit-bound approvals; stage 3's exam slips led to automatic repairs |
+| [run1-rehearsal](runs/run1-rehearsal/) | the Reviewer caught the Builder editing data to pass a bad check, which led to per-commit gates, reopening, and disputes |
+
+Each failure taught the factory something, and the fix went into the factory itself rather than into one run's code.
+
 ## Run it
 
 You need:
@@ -99,6 +112,10 @@ Other commands:
     otherwise fail correct apps for invented reasons.
   - Values are captured from live responses, so the exam works with whatever data Scout found.
   - The file is hashed at seal time and re-checked before every grading. Only Nap Guard or a human can trigger the reveal.
+  - **Appeals:** a builder that believes a check contradicts the spec posts `[dispute]` with evidence instead of
+    bending the code. The Examiner re-examines just those checks against the spec and the data. Wrong checks are
+    voided, listed at reveal, and the stage is re-graded; the sealed file never changes. A scenario that breaks in its
+    own setup (an exam bug) never counts against the builder.
 - **Scout** ([src/onsen/scout.py](src/onsen/scout.py)) uses three parts of Nimble:
   - **Web Search Agents** in `research` mode, for answers with a per-claim trust report
   - **Search** in `focus=coding` mode plus **Extract** to markdown, for current docs saved to `docs/vendor/`
