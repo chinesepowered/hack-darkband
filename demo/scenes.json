@@ -4,9 +4,12 @@
   {"n": 3, "kind": "replay", "from": null, "to": "[data] rows="},
   {"n": 4, "kind": "replay", "from": null, "to": "[seal] run="},
   {"n": 5, "kind": "replay", "from": null, "to": "[gate] stage=1 ACCEPTED"},
-  {"n": 6, "kind": "replay", "from": null, "to": "[wake]"},
-  {"n": 7, "kind": "card", "card": "rehearsal"},
-  {"n": 8, "kind": "replay", "from": null, "to": "[reveal]"},
-  {"n": 9, "kind": "app"},
-  {"n": 10, "kind": "card", "card": "outro"}
+  {"n": 6, "kind": "replay", "from": null, "to": "[chill] #1"},
+  {"n": 7, "kind": "card", "card": "run4"},
+  {"n": 8, "kind": "replay", "from": null, "to": "[gate] stage=2 ACCEPTED"},
+  {"n": 9, "kind": "replay", "from": null, "to": "[wake]"},
+  {"n": 10, "kind": "card", "card": "rehearsal"},
+  {"n": 11, "kind": "replay", "from": null, "to": "[reveal]"},
+  {"n": 12, "kind": "app"},
+  {"n": 13, "kind": "card", "card": "outro"}
 ]

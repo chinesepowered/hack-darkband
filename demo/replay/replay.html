@@ -157,7 +157,7 @@ function show(m) {
       bar.classList.toggle('ok', ex[2] === 'PASS'); r.querySelector('.pct').textContent = `${ex[3]}/${ex[4]} · ${ex[5]}%`; }
     if (/^\[(wake|chill)\]/.test(m.text)) { counts.wake++; $('capy').classList.add('awake');
       $('capy-state').textContent = '👀 woken up'; $('capy-sub').textContent = 'wake-ups: ' + counts.wake; }
-    if (m.human && /ship|hold/.test(m.text)) { setTimeout(() => { $('capy').classList.remove('awake');
+    if (m.human && /ship|hold|resume/.test(m.text)) { setTimeout(() => { $('capy').classList.remove('awake');
       $('capy-state').textContent = '😴 back to napping'; }, 900); }
   }
   while (feed.children.length > 40) feed.removeChild(feed.firstChild);

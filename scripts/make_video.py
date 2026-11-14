@@ -59,6 +59,18 @@ CARDS = {
       <span style="color:#f7b733;font-weight:700">worcestershire</span> … That is special-casing data to a test-looking input, and it is not a contract fix.</div>
       <p>The Builder reverted it. Then we fixed the factory: approvals now bind to the commit that passed, a late block reopens
       the stage, and builders get a <code>[dispute]</code> channel instead of a reason to bend data.</p></div>""",
+    "run4": """<div class="wrap" style="text-align:left;max-width:1040px"><div class="tag">Run 4 · the bugs were in the factory</div>
+      <p style="color:#e6edf3;font-size:24px">Stage 2 stalled on our mistakes, not the Builder's. Each fix went into the factory:</p>
+      <div class="cell" style="font-size:20px;line-height:1.6;color:#e6edf3">
+      <div style="color:#e6edf3;font-size:20px">1 · The exam asked for a <code>textbox</code>; the spec said <code>input type=search</code>.
+        <span style="color:#7ee787">Role checks now follow ARIA: a searchbox is a textbox.</span></div>
+      <div style="color:#e6edf3;font-size:20px">2 · A parser read <code>stage=N</code> from a hint line and crashed Nap Guard.
+        <span style="color:#7ee787">The header line wins.</span></div>
+      <div style="color:#e6edf3;font-size:20px">3 · An LLM judge passed a page, then failed it unchanged.
+        <span style="color:#7ee787">It sees form state, and failing you takes 2 of 3 reads.</span></div>
+      <div style="color:#e6edf3;font-size:20px">4 · "Please re-run" was filed as a note.
+        <span style="color:#7ee787">A re-run request now gets a re-run.</span></div>
+      </div></div>""",
     "outro": """<div class="wrap"><img src="capybara.svg" width="220"><h1>Onsen</h1>
       <p>Specs go in. Software comes out. The capybara keeps napping.</p>
       <div class="foot">Built on BAND · with Nimble · Qwen 3.8 on W&amp;B</div></div>""",

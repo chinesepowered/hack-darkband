@@ -40,11 +40,24 @@ SLUG_NAMES = {"architect": "Architect", "builder": "Builder", "reviewer": "Revie
               "examiner": "Examiner", "nap-guard": "Nap Guard"}
 
 
+OWNER_HANDLE = re.compile(r"@?([a-z0-9_.-]+)/(?:architect|builder|reviewer|scout|examiner|nap-guard)\b")
+NO_ID = "00000000-0000-0000-0000-000000000000"
+# The human's account id, display name and handle, gathered by collect_names(). Raw tool output (participant
+# listings, mention errors) can carry them anywhere in a message, not just in mentions.
+_human: dict[str, set[str]] = {"ids": set(), "names": set(), "handles": set()}
+
+
 def clean_text(text: str, names: dict[str, str]) -> str:
     text = UUID_MENTION.sub(lambda m: "@" + names.get(m.group(1), "someone"), text or "")
     text = AGENT_HANDLE.sub(lambda m: "@" + SLUG_NAMES[m.group(1)], text)  # owner handles reveal the account name
     text = PATH_RE.sub(r"~/onsen-runs/\1", text)
     text = re.sub(r"/tmp/claude-[^\s\"']+", "~/.onsen", text)
+    for i in _human["ids"]:
+        text = text.replace(i, NO_ID)
+    for n in sorted(_human["names"], key=len, reverse=True):
+        text = text.replace(n, HUMAN)
+    for h in _human["handles"]:
+        text = re.sub(rf"(?<![\w/.-]){re.escape(h)}(?![\w-])", "you", text)
     return text.strip()
 
 
@@ -53,9 +66,17 @@ def collect_names(msgs: list[dict]) -> dict[str, str]:
     for m in msgs:
         if m.get("sender_id") and m.get("sender_name"):
             names[m["sender_id"]] = HUMAN if m.get("sender_type") == "User" else m["sender_name"]
+            if m.get("sender_type") == "User":
+                _human["ids"].add(m["sender_id"])
+                _human["names"].add(m["sender_name"])
         for men in (m.get("metadata") or {}).get("mentions", []) or []:
             if men.get("id") and men.get("name"):
                 names.setdefault(men["id"], HUMAN if men.get("type") == "user" else men["name"])
+                if men.get("type") == "user":
+                    _human["ids"].add(men["id"])
+                    _human["names"].add(men["name"])
+        _human["handles"].update(OWNER_HANDLE.findall(m.get("content") or ""))
+    _human["names"].discard(HUMAN)
     return names
 
 
@@ -114,7 +135,10 @@ def build_items(msgs: list[dict], speed: float, events_per_gap: int, start: int 
         items += pending_events[-events_per_gap:]
         pending_events = []
         text = clean_text(m.get("content") or "", names)
-        text = re.sub(r"^(?:@[A-Z][\w]*(?: Guard)?\s+)+", "", text) if m.get("sender_type") != "User" else text
+        # Leading @mentions are routing, not content; "@You (the capybara)" has to go too, or a message that
+        # also mentions the human (an exam, the receipt) no longer starts with its [tag].
+        lead = r"^(?:@(?:" + re.escape(HUMAN) + r"|[A-Z][\w]*(?: Guard)?)\s+)+"
+        text = re.sub(lead, "", text) if m.get("sender_type") != "User" else text
         human = m.get("sender_type") == "User"
         delay = min(5200, 1500 + 12 * len(text)) / speed
         items.append({"kind": "msg", "sender_id": m.get("sender_id"), "sender": sender, "text": text[:900],

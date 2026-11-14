@@ -40,17 +40,47 @@ Left out on purpose:
 
 ## 3. One flow, end to end
 
-From run 2 (to fill in from the receipt):
+From run 4, the recorded run (full receipt and timeline in `runs/run4/RUN.md`):
 
 1. You post `@Architect build SPEC.md` (human touch #1).
-2. The Architect writes PLAN.md and asks Scout for data. Nimble's dataset agent returns spots with a `source_url` on every
-   row.
-3. The Architect asks the Examiner to seal the exam. Qwen writes it, the Examiner proofreads it against the spec and the
-   data profile, and posts only the SHA-256.
-4. For each stage, the Builder posts `[ready]`, the exam reports user-visible failures, and the Reviewer approves or blocks
-   a specific commit. When the exam PASSes and the review APPROVES the same commit, Nap Guard posts `[gate] ACCEPTED`.
-5. Nap Guard wakes you once: "ship or hold?". You say `ship` (human touch #2).
+2. The Architect writes PLAN.md and asks Scout for data. 55 seconds later, Nimble's dataset agent returns 36 capybara
+   spots in 4 countries, each with a `source_url`.
+3. The Architect asks the Examiner to seal the exam. Qwen writes 20 scenarios, the Examiner proofreads them against the
+   spec and the data profile, and posts only the SHA-256.
+4. For each stage, the Builder posts `[ready]`, the exam reports user-visible failures, and the Reviewer approves or
+   blocks a specific commit. When the exam PASSes and the review APPROVES the same commit, Nap Guard posts
+   `[gate] ACCEPTED`. Stage 1 passed 7/7 on the first try, stage 2 took five rounds (below), and stage 3 passed 6/6 on
+   the first try.
+5. Nap Guard wakes you: "ship or hold?". You say `ship`.
 6. The receipt follows, then the Examiner reveals the exam, and its hash matches the seal.
+
+```
+[receipt] 🛁 Onsen run complete
+• Human touches: 4 (the spec + 3 replies to Nap Guard) · wake-ups: 2 · chill breaks: 1
+• Stages: 1 ✔ 100% (1 rounds) · 2 ✔ 57%→86%→86%→86%→100% (5 rounds) · 3 ✔ 100% (1 rounds)
+• Docs fetched: 0 · datasets built: 1 · exam rounds: 7 · exam checks voided on appeal: 0
+• Time from seal to ship: 56m 42s
+The capybara was woken 2 times. 🍊
+```
+
+### What run 4 showed
+
+**The hidden exam caught what the Reviewer missed.** The Reviewer approved stage 2 after checking the server-rendered
+HTML. The exam drives a real browser, and there a JavaScript syntax error left live search and the filters dead. All
+the Builder saw was the user-visible symptom, and that was enough to find the bug. From then on, the Reviewer verified
+every stage in headless Chrome itself.
+
+**The rest of stage 2's failures were the factory's own bugs.**
+- A check asked for role `textbox`, where the spec says `input type=search` (role `searchbox`).
+- Nap Guard's parser read `stage=N` from the dispute hint at the bottom of the Examiner's messages and crashed on every
+  failing exam.
+- An LLM judge failed a page it had passed the round before.
+- The Examiner filed the Builder's "please re-run" as a note.
+
+After four rounds without progress, Nap Guard called a chill break and woke the human. That is the
+thrash guard doing its job. Each bug was then fixed in the factory, with tests (commit `f0f616a`), and the Examiner and
+Nap Guard were restarted mid-run. The sealed exam file never changed. The human said `resume`, relayed the Builder's
+re-run request once, and stage 2 passed 7/7 on the commit the Reviewer had approved. The receipt counts all of it.
 
 ### What run 1 (the rehearsal) showed
 
@@ -88,8 +118,9 @@ Nimble is how the factory runs without waking the human. It replaces the human a
 | "What's the current API for X?" | Search `focus=coding` + Extract → markdown | Current docs land in the workspace's `docs/vendor/`, so builders code against today's API |
 
 Measured:
-- dataset: 40 sourced capybara spots across Japan, the US and the UK in about 60s
-- research: a cited, high-confidence answer in about 45s, live in a BAND room
+- dataset (run 4): 36 sourced capybara spots across Brazil, Japan, the UK and the US in 55 seconds, with nothing
+  dropped for a missing source
+- research (smoke-test room): a cited, high-confidence answer in about 45 seconds, live in a BAND room
 
 ## BAND Desktop
 
@@ -100,6 +131,6 @@ agents, their tool calls and the Work tab live.
 
 ## Checklist
 
-- [ ] Demo video (`demo/onsen-demo.mp4`)
-- [ ] Run 2 transcript + receipt in `runs/`
+- [x] Demo video (`demo/onsen-demo.mp4`, built from run 4)
+- [x] Run 4 transcript, receipt and revealed exam in `runs/run4/`
 - [ ] README quickstart verified from a clean checkout

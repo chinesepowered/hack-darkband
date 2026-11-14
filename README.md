@@ -4,6 +4,8 @@
 
 **A dark software factory on BAND that has one rule: don't wake the capybara.**
 
+▶ **Demo video:** [demo/onsen-demo.mp4](demo/onsen-demo.mp4) (3 minutes, built from the real run in [runs/run4](runs/run4/))
+
 The human is a capybara napping in a hot spring. Six agents in one BAND room turn a written spec into working
 software. Two ideas make it a *dark* factory you can trust:
 
@@ -52,7 +54,7 @@ Every run happened in a real BAND room. Cleaned transcripts, receipts and the co
 
 | Run | What it shows |
 |---|---|
-| [run4](runs/run4/) | the recorded run: one kickoff, one wake-up, `ship`, receipt, exam revealed with a matching hash |
+| [run4](runs/run4/) | the recorded run: the exam caught a browser-only bug the Reviewer had approved; four factory bugs surfaced, caused a chill break, and were fixed live; `ship`, an honest receipt (4 touches, 2 wake-ups), exam revealed with a matching hash |
 | [run3-dispute](runs/run3-dispute/) | the hidden exam caught a real race; the per-commit gate held; the Builder disputed a bad check with evidence, which led to appeals |
 | [run2-partial](runs/run2-partial/) | stages 1–2 passed on the first try with commit-bound approvals; stage 3's exam slips led to automatic repairs |
 | [run1-rehearsal](runs/run1-rehearsal/) | the Reviewer caught the Builder editing data to pass a bad check, which led to per-commit gates, reopening, and disputes |
@@ -116,6 +118,9 @@ Other commands:
     bending the code. The Examiner re-examines just those checks against the spec and the data. Wrong checks are
     voided, listed at reveal, and the stage is re-graded; the sealed file never changes. A scenario that breaks in its
     own setup (an exam bug) never counts against the builder.
+  - **Fair grading** (from run 4): role checks follow WAI-ARIA subclass roles, so a `searchbox` counts as a `textbox`.
+    An LLM judge sees each form control's current value, and its "no" fails the builder only if two of three reads
+    agree. A builder that asks for a re-run gets one.
 - **Scout** ([src/onsen/scout.py](src/onsen/scout.py)) uses three parts of Nimble:
   - **Web Search Agents** in `research` mode, for answers with a per-claim trust report
   - **Search** in `focus=coding` mode plus **Extract** to markdown, for current docs saved to `docs/vendor/`
@@ -136,7 +141,7 @@ opencode/       opencode.json: Qwen 3.8 on W&B + one permission profile per role
 src/onsen/      scout.py · napguard.py · examiner/ · crew.py · llm.py · register/kickoff/watch/smoke
 scripts/        run-factory.sh · stop-factory.sh · new-run.sh · voiceover.py
 runs/           transcripts and receipts from real runs
-demo/           the 3-minute video script
+demo/           the 3-minute demo video (onsen-demo.mp4), its narration script and scene list
 docs/           submission.md (the write-up BAND asks for)
 tests/          reference app + fixture exam + unit tests
 ```

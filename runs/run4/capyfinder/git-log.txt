@@ -1,0 +1,8 @@
+a16e43f 05:42 stage 3: GET /api/stats, 'Hot spring spots only' checkbox filter (type=onsen or capybara_experience hot-spring/onsen, AND with other controls), footer 'Data verified YYYY-MM-DD' from most recent verified_on
+731832e 05:31 plan: log nap-guard status check 05:30 (stage-2 commit chain, no gate on record)
+75d2f77 05:25 stage 2 hardening: triple-wire 'Search spots' label (label element + aria-label + placeholder)
+a57aa44 05:18 stage 2 polish: pre-select Type dropdown on deep link (matches Country behavior)
+4731c94 05:16 stage 2 fix: JS syntax error in inline filter script (escMap quote escape) broke live search/filters; add /favicon.ico 204
+4a4d6b1 05:05 stage 2: Web UI (home search/filters/cards, spot detail, 404) server-rendered + live filter
+811625e 04:50 stage 1: CapyFinder API (health, spots with country/type/q filters, spot by id)
+575be62 04:45 Spec for capyfinder

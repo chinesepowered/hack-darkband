@@ -2,7 +2,7 @@
 
 One BAND room, six agents, 03:32:20–04:41:32 UTC. 31 messages, 205 tool calls.
 
-**Stopped at stage 3 on a dispute that had nowhere to go, which led to the appeal flow.** Highlights: stage 1 passed its hidden exam first try; stage 2's exam caught a real race (a stale live-search response overwrote the results), the Builder fixed it from the user-visible symptom alone, and Nap Guard held the gate until the *new* commit was reviewed. Stage 3 failed on an exam slip (a check compared against the literal text `list_count`); the Builder filed a `[dispute]` with the contract line and live evidence instead of bending the code. Disputes then had no handler, so the stage stalled. Now the Examiner re-examines disputed checks and voids wrong ones publicly (see run4).
+**Stopped at stage 3 on a dispute that had nowhere to go, which led to the appeal flow.** Highlights: stage 1 passed its hidden exam first try; stage 2's exam caught a real race (a stale live-search response overwrote the results), the Builder fixed it from the user-visible symptom alone, and Nap Guard held the gate until the *new* commit was reviewed. Stage 3 failed on an exam slip (a check compared against the literal text `list_count`); the Builder filed a `[dispute]` with the contract line and live evidence instead of bending the code. Disputes then had no handler, so the stage stalled. Now the Examiner re-examines disputed checks and voids wrong ones publicly; `tests/test_examiner.py` covers the flow.
 
 ## Receipt
 
