@@ -143,7 +143,8 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         elif os.environ.get("ONSEN_EXAM_FILE"):
             exam = load_fixture_exam(os.environ["ONSEN_EXAM_FILE"], path.stem, spec_text)
         else:
-            raise RuntimeError("I need ANTHROPIC_API_KEY to write the exam (or ONSEN_EXAM_FILE for a fixture exam)")
+            raise RuntimeError("I need an LLM key (WANDB_API_KEY or ONSEN_LLM_API_KEY) to write the exam, "
+                               "or ONSEN_EXAM_FILE for a fixture exam")
         run_id = new_run_id()
         digest = save_sealed(exam, run_id)
         (exam_dir(run_id) / "sha256.txt").write_text(digest + "\n")
@@ -189,7 +190,8 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         failures = [r for r in results if not r.passed]
         lines = [
             f"[exam] stage={stage} verdict={verdict} passed={passed}/{total} satisfaction={sat:.0%} "
-            f"threshold={threshold():.0%} round={len(rounds)} by={(msg.sender_name or 'unknown').replace(' ', '_')} run={run_id}",
+            f"threshold={threshold():.0%} round={len(rounds)} by={(msg.sender_name or 'unknown').replace(' ', '_')} run={run_id}"
+            + (f" commit={kv['commit']}" if kv.get("commit") else ""),
         ]
         if failures:
             lines.append("What a user would notice (the scenarios themselves stay sealed):")

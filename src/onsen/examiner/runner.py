@@ -21,7 +21,7 @@ from .models import Check, HttpRequest, Scenario, ScenarioResult, WebStep
 
 Judge = Callable[[str, str], Awaitable[tuple[bool, str]]]
 
-VAR_RE = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_]*)((?:\|[a-z]+)*)\}")
+VAR_RE = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_]*)((?:\|[a-z_]+)*)\}")
 PATH_TOKEN_RE = re.compile(r"\[(\d+)\]|([^.\[\]]+)")
 STEP_TIMEOUT_MS = int(os.environ.get("ONSEN_STEP_TIMEOUT_MS", "6000"))
 
@@ -96,8 +96,8 @@ def compare(actual: Any, op: str | None, expected: str | None) -> bool:
         return a.strip().lower() == e.strip().lower()
     if op == "ne":
         return a.strip().lower() != e.strip().lower()
-    if op == "contains":
-        return e in a
+    if op == "contains":  # case-insensitive like eq: acceptance checks are about what a user sees
+        return e.lower() in a.lower()
     if op == "icontains":
         return e.lower() in a.lower()
     if op == "not_icontains":
@@ -179,7 +179,8 @@ async def run_http_request(client: httpx.AsyncClient, req: HttpRequest, env: dic
         if payload is _MISSING:
             raise ScenarioFailure(f"{label} did not return JSON (HTTP {resp.status_code})")
         if t == "json_type":
-            ok = isinstance(payload, list) if value == "list" else isinstance(payload, dict)
+            wants_list = (value or "").strip().lower() in ("list", "array")
+            ok = isinstance(payload, list) if wants_list else isinstance(payload, dict)
             if not ok:
                 raise ScenarioFailure(f"{label} returned a JSON {type(payload).__name__}, expected a {value}")
             continue
@@ -192,7 +193,8 @@ async def run_http_request(client: httpx.AsyncClient, req: HttpRequest, env: dic
             fields = [f.strip() for f in (value or "").split(",") if f.strip()]
             targets = as_items(payload) if isinstance(payload, list) else [payload]
             for i, item in enumerate(targets or []):
-                missing = [f for f in fields if get_path(item, f) in (_MISSING, None, "")]
+                # Presence, not emptiness: a contract field may legitimately be "" (e.g. "may be empty").
+                missing = [f for f in fields if get_path(item, f) in (_MISSING, None)]
                 if missing:
                     raise ScenarioFailure(f"{label}: item {i + 1} is missing {', '.join(missing)}")
             continue
@@ -288,11 +290,14 @@ async def run_web_step(page: Any, base_url: str, st: WebStep, env: dict[str, Any
                 what = st.testid or (f"{st.role} {st.name or ''}".strip() if st.role else st.text or st.label)
                 raise ScenarioFailure(f"expected between {st.min} and {st.max} of {what!r} on the page, found {n}")
         elif a == "expect_visible":
+            loc = _locator(page, st, env).first
             try:
-                await expect(_locator(page, st, env).first).to_be_visible(timeout=STEP_TIMEOUT_MS)
+                await expect(loc).to_be_visible(timeout=STEP_TIMEOUT_MS)
             except AssertionError as exc:
-                what = st.testid or st.name or st.text or st.label
-                raise ScenarioFailure(f"{what!r} never became visible") from exc
+                # <option> text and similar are never "visible" to Playwright; being on the page is enough.
+                if not (st.text and not st.role and not st.testid and await loc.count() > 0):
+                    what = st.testid or st.name or st.text or st.label
+                    raise ScenarioFailure(f"{what!r} never became visible") from exc
         elif a == "expect_url_contains":
             deadline = time.monotonic() + STEP_TIMEOUT_MS / 1000
             while (value or "") not in page.url:

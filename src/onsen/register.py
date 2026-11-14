@@ -1,12 +1,12 @@
 """Register Onsen's SDK agents on BAND and store their keys OUTSIDE the repo.
 
-    uv run onsen-register                  # scout, examiner, napguard
+    uv run onsen-register                  # the whole crew
     uv run onsen-register --only scout
     uv run onsen-register --check          # show plan limits and existing agents only
 
 Needs BAND_USER_KEY (a user API key from app.band.ai) in the environment or .env.
 Keys land in ~/.onsen/agent_config.yaml (chmod 600), never in the working tree.
-The Desktop crew (Architect, Builder, Reviewer) is created in BAND Desktop instead.
+Registers the whole crew: Architect, Builder, Reviewer, Scout, Examiner, Nap Guard.
 """
 
 from __future__ import annotations
@@ -24,6 +24,12 @@ from .common import NAMES, agent_config_path, load_env
 API = os.environ.get("BAND_REST_URL", "https://app.band.ai").rstrip("/")
 
 AGENTS = {
+    "architect": (NAMES["architect"], "Plans the build from the spec, hands out one stage at a time, and recruits "
+                                      "specialists when the spec needs them. Never writes product code."),
+    "builder": (NAMES["builder"], "Builds each stage of the spec in the product workspace and fixes whatever the "
+                                  "sealed exam and the review report."),
+    "reviewer": (NAMES["reviewer"], "Reads every diff against the spec and blocks with the missing evidence. "
+                                    "Never edits code."),
     "scout": (NAMES["scout"], "Answers the factory's questions from the live web via Nimble, with sources and "
                               "confidence grades. Builders ask me before they ask a human."),
     "examiner": (NAMES["examiner"], "Holds the sealed acceptance exam. Grades each stage against hidden scenarios "

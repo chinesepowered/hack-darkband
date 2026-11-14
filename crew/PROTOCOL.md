@@ -14,9 +14,9 @@ agents it @mentions, so **who you mention is the routing**.
 | `[answer]` / `[docs]` / `[data]` | Scout → asker (+ Nap Guard if `confidence=low`) | cited result |
 | `[task] stage=N` | Architect → Builder | build stage N |
 | `[ready] stage=N url=… commit=…` | Builder → Examiner **and** Reviewer | stage N is running; grade it |
-| `[exam] stage=N verdict=PASS/FAIL satisfaction=…` | Examiner → Builder, Nap Guard | sealed-exam result; failures as user-visible behavior |
-| `[review] stage=N APPROVED` / `BLOCKED: …` | Reviewer → Builder, Nap Guard | code review verdict; BLOCKED names the missing evidence |
-| `[gate] stage=N ACCEPTED` | Nap Guard → Architect | exam PASS + review APPROVED; start the next stage |
+| `[exam] stage=N verdict=PASS/FAIL satisfaction=… commit=…` | Examiner → Builder, Nap Guard | sealed-exam result; failures as user-visible behavior |
+| `[review] stage=N commit=… APPROVED` / `BLOCKED: …` | Reviewer → Builder, Nap Guard | code review verdict; BLOCKED names the missing evidence |
+| `[gate] stage=N ACCEPTED` | Nap Guard → Architect | exam PASS + review APPROVED **for the same commit**; start the next stage |
 | `[blocking-question]` | anyone → Nap Guard | wakes the human immediately; use only when no assumption is safe |
 | `[wake]` | Nap Guard → human | the one wake-up: ship or hold? |
 | `[chill]` | Nap Guard → human | thrash or budget stop; looping agent removed from the room |

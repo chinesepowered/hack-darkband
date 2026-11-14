@@ -153,7 +153,7 @@ scenario fails they only see its one-sentence story and what went wrong. Your ex
 Write scenarios in this executable language (the JSON schema is enforced):
 - kind=http: `requests` run in order. Each has method, path (with query), optional body_json, optional
   capture ("name=dotted.path; other=[0].field"), and `checks`:
-  status(number) | json_type(value list|object) | min_items(number) | max_items(number) |
+  status(number) | json_type(value "list" or "object") | min_items(number) | max_items(number) |
   every_item / some_item / no_item (field, op, value) | has_fields(value "a,b,c") | field(field, op, value on an object) |
   body_contains / body_not_contains(value) | header_contains(field=header, value).
   ops: eq ne contains icontains not_icontains gte lte exists regex. Comparisons are case-insensitive for eq/ne.
@@ -180,62 +180,189 @@ Rules:
 5. Stories are one sentence in user language ("A visitor who searches for a city sees only spots in that city").
 6. Use at most one `judge` step per web scenario, and only for something a check cannot express.
 7. Ids: s<stage>-<two digits>, e.g. s2-04.
+8. A comparison always has an expected value. To check that a field is present, use op=exists with value null.
+   Never compare against a type name like "number".
+9. After filling a search box, press Enter: the spec lets results update on Enter.
+10. Checks must hold for ANY correct implementation and ANY data Scout finds. When unsure, test less, not more.
+11. When a filter may match any of several fields (like a search over name OR city), check the results with
+    some_item, never every_item on one of those fields.
 """
 
 
+VAR_HINT = "{"
+ROUTE_RE = re.compile(r"`(?:GET|POST|PUT|PATCH|DELETE)?\s*(/[A-Za-z0-9_/{}.-]*)")
+QUERY_NAME_RE = re.compile(r"[?&]([A-Za-z_][A-Za-z0-9_]*)=")
+CAPTURE_PATH_RE = re.compile(r"length|(?:\[\d+\]|[A-Za-z_][A-Za-z0-9_]*)(?:\.?[A-Za-z_][A-Za-z0-9_]*|\[\d+\])*")
+
+
+def _route_patterns(spec_text: str) -> list[re.Pattern[str]]:
+    pats = []
+    for route in set(ROUTE_RE.findall(spec_text)):
+        rx = re.escape(route).replace(r"\{", "{").replace(r"\}", "}")
+        rx = re.sub(r"\{[^}]*\}", r"[^/?]+", rx)
+        pats.append(re.compile(rf"^{rx}/?$"))
+    return pats
+
+
+TYPE_WORDS = {"number", "integer", "string", "boolean", "bool", "array", "list", "object", "null", "true/false"}
+
+
+def repair_stage(exam: StageExam) -> StageExam:
+    """Fix the slips models make in the scenario language before linting:
+    a comparison with no expected value means "exists"; type names aren't values; a status check
+    without a number means 200; a search box gets an Enter after it's filled (the spec allows results
+    to update on Enter); plain-text visibility checks become text checks."""
+    from .models import WebStep
+
+    for sc in exam.scenarios:
+        for req in sc.requests:
+            fixed = []
+            for chk in req.checks:
+                if chk.type == "status" and chk.number is None:
+                    chk.number = 200
+                if chk.type in ("min_items", "max_items") and chk.number is None:
+                    continue
+                if chk.type in ("every_item", "some_item", "no_item", "field"):
+                    if chk.op not in (None, "exists") and (chk.value is None or chk.value.strip().lower() in TYPE_WORDS):
+                        chk.op, chk.value = "exists", None
+                if chk.type == "has_fields" and not chk.value:
+                    continue
+                fixed.append(chk)
+            req.checks = fixed
+        steps: list[WebStep] = []
+        for i, st in enumerate(sc.steps):
+            if st.action == "expect_visible" and st.text and not (st.role or st.testid or st.label):
+                st.action = "expect_text"
+            steps.append(st)
+            nxt = sc.steps[i + 1] if i + 1 < len(sc.steps) else None
+            if st.action == "fill" and (nxt is None or nxt.action != "press"):
+                steps.append(WebStep(action="press", path=None, label=st.label, role=None, name=None, text=None,
+                                     testid=st.testid, value="Enter", min=None, max=None))
+        sc.steps = steps
+    return exam
+
+
+def lint_stage(spec_text: str, exam: StageExam) -> tuple[StageExam, list[str]]:
+    """Drop scenarios that use anything the spec's contract doesn't define: unknown routes, query
+    parameters, labels or test ids, or literal UI text the spec never promises. Model-written exams
+    otherwise fail correct apps for invented reasons."""
+    spec_lower = spec_text.lower()
+    routes = _route_patterns(spec_text)
+
+    def known(text: str | None) -> bool:
+        return text is None or VAR_HINT in text or text.lower() in spec_lower
+
+    def route_ok(path: str) -> bool:
+        bare = path.split("?", 1)[0]
+        if VAR_HINT in bare:
+            bare = re.sub(r"\{[^}]*\}", "x", bare)
+        return any(p.match(bare) for p in routes)
+
+    param_routes = [(re.compile("^" + re.sub(r"\\\{([^}]*)\\\}", r"(?P<\1>[^/?]+)", re.escape(r)) + "/?$"), r)
+                    for r in set(ROUTE_RE.findall(spec_text)) if "{" in r]
+
+    kept, dropped = [], []
+    for sc in exam.scenarios:
+        problems: list[str] = []
+        captured_from: dict[str, str] = {}
+        for req in sc.requests:
+            for part in (req.capture or "").split(";"):
+                if "=" in part:
+                    name, path = (x.strip() for x in part.split("=", 1))
+                    if not CAPTURE_PATH_RE.fullmatch(path):
+                        problems.append(f"capture path {path!r}")
+                    captured_from[name] = path
+        for req in sc.requests:
+            if not route_ok(req.path):
+                problems.append(f"route {req.path}")
+            bare = req.path.split("?", 1)[0]
+            expects_ok = any(c.type == "status" and (c.number or 200) < 300 for c in req.checks)
+            for rx, _route in param_routes:
+                m = rx.match(bare)
+                if not m:
+                    continue
+                for param, segment in m.groupdict().items():
+                    var = re.fullmatch(r"\{([a-zA-Z_]\w*)(?:\|[a-z_]+)*\}", segment)
+                    if var is None and expects_ok:
+                        problems.append(f"hard-coded {param} {segment!r}")
+                    elif var is not None and var.group(1) in captured_from:
+                        leaf = re.split(r"[.\[\]]", captured_from[var.group(1)].strip())[-1]
+                        if leaf != param:
+                            problems.append(f"{param} taken from {captured_from[var.group(1)]!r}")
+            problems += [f"query {q}" for q in QUERY_NAME_RE.findall(req.path) if f"`{q}`" not in spec_text]
+            for chk in req.checks:
+                if chk.field and chk.type in ("every_item", "some_item", "no_item", "field"):
+                    leaf = re.split(r"[.\[\]]", chk.field.strip())[-1] or chk.field
+                    if leaf not in ("length",) and not known(leaf):
+                        problems.append(f"field {chk.field}")
+        for st in sc.steps:
+            if st.action == "goto" and st.path and not route_ok(st.path):
+                problems.append(f"page {st.path}")
+            for attr in ("label", "testid"):
+                if not known(getattr(st, attr)):
+                    problems.append(f"{attr} {getattr(st, attr)!r}")
+            if st.action in ("click", "expect_visible", "expect_link", "expect_count") and st.name and not known(st.name):
+                problems.append(f"name {st.name!r}")
+            if st.action == "expect_text" and st.text and not known(st.text):
+                problems.append(f"text {st.text!r}")
+        if sc.kind == "web" and (not sc.steps or sc.steps[0].action != "goto"):
+            problems.append("web scenario doesn't start with goto")
+        if sc.kind == "http" and not sc.requests:
+            problems.append("http scenario has no requests")
+        (dropped if problems else kept).append((sc, problems))
+    exam.scenarios = [sc for sc, _ in kept]
+    return exam, [f"{sc.id}: {', '.join(p)}" for sc, p in dropped]
+
+
 class ScenarioWriter:
-    """Claude writes the exam (once, at seal time) and judges `judge` steps."""
+    """The LLM (Qwen 3.8 on W&B by default) writes the exam once, at seal time, and judges `judge` steps."""
 
     def __init__(self, model: str | None = None):
-        from anthropic import AsyncAnthropic
+        from ..llm import LLM, llm_model
 
-        self.client = AsyncAnthropic()
-        self.model = model or os.environ.get("ONSEN_EXAMINER_MODEL", "claude-opus-5-5")
-
-    async def _parse(self, *, system: list[dict[str, Any]], prompt: str, output: type, effort: str) -> Any:
-        resp = await self.client.beta.messages.parse(
-            model=self.model,
-            max_tokens=16000,
-            betas=["server-side-fallback-2026-07-01"],
-            fallbacks="default",  # if a safety classifier declines, the API retries on a fallback model
-            output_config={"effort": effort},
-            system=system,
-            messages=[{"role": "user", "content": prompt}],
-            output_format=output,
-        )
-        if resp.stop_reason == "refusal":
-            raise RuntimeError(f"Claude declined to write this exam ({getattr(resp.stop_details, 'category', None)})")
-        if resp.parsed_output is None:
-            raise RuntimeError(f"Claude returned no structured output (stop_reason={resp.stop_reason})")
-        return resp.parsed_output
+        self.llm = LLM(model=model or llm_model("ONSEN_EXAMINER_MODEL"))
+        self.model = self.llm.model
+        self.dropped: list[str] = []
 
     async def write_stage(self, spec_text: str, stage: int, per_stage: int) -> StageExam:
-        system = [
-            {"type": "text", "text": WRITER_SYSTEM},
-            # The spec is identical for every stage's call, so cache it.
-            {"type": "text", "text": f"<spec>\n{spec_text}\n</spec>", "cache_control": {"type": "ephemeral"}},
-        ]
+        system = f"{WRITER_SYSTEM}\n<spec>\n{spec_text}\n</spec>"
         prompt = (
             f"Write exactly {per_stage} hidden scenarios for Stage {stage}. Earlier stages must keep working, so "
-            f"at most one of them may re-check an earlier stage. Return stage={stage}."
+            f"at most one of them may re-check an earlier stage. Return stage={stage}. Every field in the schema "
+            f"must be present; use null for fields a check or step doesn't use."
         )
-        exam: StageExam = await self._parse(system=system, prompt=prompt, output=StageExam, effort="high")
-        for sc in exam.scenarios:
-            sc.stage = stage
+        reasoning = os.environ.get("ONSEN_EXAMINER_REASONING", "none")
+        # Guided JSON decoding can occasionally loop on whitespace; a tighter cap fails fast and retries.
+        exam = await self.llm.structured(system=system, prompt=prompt, output=StageExam, reasoning=reasoning,
+                                         max_tokens=8000)
+        exam, dropped = lint_stage(spec_text, repair_stage(exam))
+        if len(exam.scenarios) < max(3, per_stage // 2):
+            feedback = ("These scenarios used routes, fields, labels or text the spec doesn't define, so they were "
+                        "dropped:\n" + "\n".join(dropped[:12]) + "\nUse ONLY what the acceptance contract defines.")
+            again = await self.llm.structured(system=system, prompt=f"{prompt}\n\n{feedback}", output=StageExam,
+                                              reasoning=reasoning, max_tokens=8000)
+            again, dropped_again = lint_stage(spec_text, repair_stage(again))
+            exam.scenarios += again.scenarios
+            dropped += dropped_again
+        self.dropped += [f"stage {stage} {d}" for d in dropped]
         exam.stage = stage
+        exam.scenarios = exam.scenarios[: per_stage + 2]
+        for i, sc in enumerate(exam.scenarios, start=1):
+            sc.stage = stage
+            sc.id = f"s{stage}-{i:02d}"
         return exam
 
     async def judge(self, claim: str, page_text: str) -> tuple[bool, str]:
-        system = [{"type": "text", "text": (
-            "You check a web page the way a careful, fair user would. Given the visible text of a page and a claim, "
-            "decide whether the page satisfies the claim. Be strict about facts, lenient about wording."
-        )}]
+        system = ("You check a web page the way a careful, fair user would. Given the visible text of a page and a "
+                  "claim, decide whether the page satisfies the claim. Be strict about facts, lenient about wording.")
         prompt = f"Claim: {claim}\n\n<page_text>\n{page_text}\n</page_text>"
-        verdict: JudgeVerdict = await self._parse(system=system, prompt=prompt, output=JudgeVerdict, effort="low")
+        verdict = await self.llm.structured(system=system, prompt=prompt, output=JudgeVerdict, max_tokens=4000)
         return verdict.satisfied, verdict.reason
 
 
 def llm_enabled() -> bool:
     if os.environ.get("ONSEN_EXAMINER_LLM", "on").lower() in ("off", "0", "false", "no"):
         return False
-    return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+    from ..llm import llm_api_key
+
+    return bool(llm_api_key())

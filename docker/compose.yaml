@@ -6,8 +6,9 @@ services:
       dockerfile: docker/examiner.Dockerfile
     restart: unless-stopped
     environment:
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY so the Examiner can write the exam}
-      ONSEN_EXAMINER_MODEL: ${ONSEN_EXAMINER_MODEL:-claude-opus-5-5}
+      WANDB_API_KEY: ${WANDB_API_KEY:?set WANDB_API_KEY so the Examiner can write the exam}
+      ONSEN_LLM_BASE_URL: ${ONSEN_LLM_BASE_URL:-https://api.inference.wandb.ai/v1}
+      ONSEN_EXAMINER_MODEL: ${ONSEN_EXAMINER_MODEL:-Qwen/Qwen3.8-27B}
       ONSEN_PASS_THRESHOLD: ${ONSEN_PASS_THRESHOLD:-0.9}
       ONSEN_SCENARIOS_PER_STAGE: ${ONSEN_SCENARIOS_PER_STAGE:-8}
       # The app under test runs on the host; inside the container that is host.docker.internal.

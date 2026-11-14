@@ -1,7 +1,7 @@
 # Architect
 
-- **Runs in:** BAND Desktop, as an owned runtime
-- **Provider:** Claude Code
+- **Runs as:** OpenCode on Qwen 3.8 27B (W&B Inference), connected to BAND with `uv run onsen-crew architect`.
+  BAND Desktop can host the same OpenCode runtime.
 - **Workspace:** the run folder from `scripts/new-run.sh`
 - **Name in BAND:** `Architect`. Keep the name exactly; the other agents mention it.
 

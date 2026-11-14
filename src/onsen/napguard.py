@@ -54,6 +54,12 @@ def _pct(value: str | None) -> float:
     return v / 100 if v > 1 else v
 
 
+def _same_commit(a: str, b: str) -> bool:
+    a, b = a.strip().lower(), b.strip().lower()
+    n = min(len(a), len(b), 7)
+    return n >= 4 and a[:n] == b[:n]
+
+
 def thrash_limit() -> int:
     return int(os.environ.get("ONSEN_THRASH_LIMIT", "3"))
 
@@ -171,7 +177,7 @@ class NapGuardAdapter(SimpleAdapter[Any]):
         s = self._stage(st, n)
         sat = _pct(kv.get("satisfaction"))
         verdict = (kv.get("verdict") or "FAIL").upper()
-        s["exams"].append({"satisfaction": sat, "verdict": verdict, "at": now()})
+        s["exams"].append({"satisfaction": sat, "verdict": verdict, "at": now(), "commit": kv.get("commit")})
         s["by"] = (kv.get("by") or s.get("by") or NAMES["builder"]).replace("_", " ")
         st.data["started_at"] = st.data["started_at"] or now()
         if verdict == "PASS":
@@ -195,11 +201,23 @@ class NapGuardAdapter(SimpleAdapter[Any]):
         s = self._stage(st, n)
         approved = "APPROVED" in rest.upper() and "BLOCKED" not in rest.upper()
         s["review"] = "APPROVED" if approved else "BLOCKED"
+        s["review_commit"] = kv.get("commit")
         s["review_note"] = clip(rest, 300)
         if not approved:
             s["fails_in_row"] += 1
             if s["fails_in_row"] >= thrash_limit():
                 await self._chill(tools, st, n, s)
+                return
+            if s["accepted"]:
+                # A block after acceptance reopens the stage: approval is about the code as it is now.
+                s["accepted"] = False
+                await self._say(
+                    tools,
+                    f"[gate] stage={n} REOPENED reason=review-blocked commit={kv.get('commit') or '?'}\n"
+                    f"The Reviewer blocked stage {n} after it was accepted. Builder: fix it and post `[ready]` again. "
+                    f"Architect: stage {n} isn't done.",
+                    [NAMES["architect"], NAMES["builder"]],
+                )
                 return
         await self._maybe_gate(tools, st, n, s)
 
@@ -210,8 +228,19 @@ class NapGuardAdapter(SimpleAdapter[Any]):
         await tools.no_reply("question batched for the single wake-up")
 
     async def _maybe_gate(self, tools: Any, st: JsonState, n: int, s: dict[str, Any]) -> None:
-        last_exam = s["exams"][-1]["verdict"] if s["exams"] else None
-        if last_exam == "PASS" and s["review"] == "APPROVED" and not s["accepted"]:
+        last = s["exams"][-1] if s["exams"] else {}
+        last_exam = last.get("verdict")
+        exam_commit, review_commit = last.get("commit"), s.get("review_commit")
+        same_code = not exam_commit or not review_commit or _same_commit(exam_commit, review_commit)
+        if last_exam == "PASS" and s["review"] == "APPROVED" and not same_code and not s["accepted"]:
+            await self._say(
+                tools,
+                f"[gate] stage={n} WAITING exam passed commit={exam_commit} but the approval was for "
+                f"commit={review_commit}. Please review commit {exam_commit}.",
+                [NAMES["reviewer"]],
+            )
+            return
+        if last_exam == "PASS" and s["review"] == "APPROVED" and same_code and not s["accepted"]:
             s["accepted"] = True
             curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"])
             total = st.data["stages_total"]

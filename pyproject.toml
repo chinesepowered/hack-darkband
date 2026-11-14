@@ -5,14 +5,14 @@ description = "Onsen: a dark software factory on BAND where the capybara gets to
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-  "band-sdk[anthropic]==9.2.1",
+  "band-sdk[opencode]==9.2.1",
   "nimble_python==1.6.0",
-  "anthropic>=0.75.0,<3",
   "httpx>=0.27",
   "pydantic>=2.6",
   "python-dotenv>=1.0",
   "pyyaml>=6.0",
   "playwright>=1.49",
+  "openai>=1.60",
 ]
 
 [project.optional-dependencies]
@@ -24,6 +24,10 @@ onsen-examiner = "onsen.examiner.agent:main"
 onsen-nap-guard = "onsen.napguard:main"
 onsen-register = "onsen.register:main"
 onsen-smoke = "onsen.smoke:main"
+onsen-crew = "onsen.crew:main"
+onsen-kickoff = "onsen.kickoff:main"
+onsen-watch = "onsen.watch:main"
+onsen-say = "onsen.say:main"
 
 [build-system]
 requires = ["hatchling"]

@@ -66,3 +66,26 @@ async def test_improving_failures_are_not_thrash():
     for sat in ("40%", "60%", "80%"):
         await deliver(ng, f"@nap-guard [exam] stage=1 verdict=FAIL satisfaction={sat} by=Builder", "Examiner", tools)
     assert not any(m["content"].startswith("[chill]") for m in tools.messages_sent)
+
+
+async def test_approval_must_be_for_the_commit_that_passed():
+    ng, tools = NapGuardAdapter(), FakeAgentTools(participants=CREW)
+    await deliver(ng, "@nap-guard [seal] run=r3 stages=2 sha256=x", "Examiner", tools)
+    await deliver(ng, "@nap-guard [review] stage=1 commit=aaaa111 APPROVED", "Reviewer", tools)
+    await deliver(ng, "@nap-guard [exam] stage=1 verdict=PASS satisfaction=100% by=Builder commit=bbbb222", "Examiner", tools)
+    assert "WAITING" in last(tools) and "bbbb222" in last(tools)
+    await deliver(ng, "@nap-guard [review] stage=1 commit=bbbb222 APPROVED", "Reviewer", tools)
+    assert last(tools).startswith("[gate] stage=1 ACCEPTED")
+
+
+async def test_block_after_acceptance_reopens_the_stage():
+    ng, tools = NapGuardAdapter(), FakeAgentTools(participants=CREW)
+    await deliver(ng, "@nap-guard [seal] run=r4 stages=2 sha256=x", "Examiner", tools)
+    await deliver(ng, "@nap-guard [exam] stage=1 verdict=PASS satisfaction=100% by=Builder", "Examiner", tools)
+    await deliver(ng, "@nap-guard [review] stage=1 APPROVED", "Reviewer", tools)
+    assert last(tools).startswith("[gate] stage=1 ACCEPTED")
+    await deliver(ng, "@nap-guard [review] stage=1 commit=ccc3333 BLOCKED: data mutated to match a test", "Reviewer", tools)
+    assert last(tools).startswith("[gate] stage=1 REOPENED")
+    await deliver(ng, "@nap-guard [review] stage=1 commit=ddd4444 APPROVED", "Reviewer", tools)
+    await deliver(ng, "@nap-guard [exam] stage=1 verdict=PASS satisfaction=100% by=Builder commit=ddd4444", "Examiner", tools)
+    assert last(tools).startswith("[gate] stage=1 ACCEPTED")

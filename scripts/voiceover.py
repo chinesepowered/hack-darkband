@@ -35,6 +35,19 @@ def scenes(script: str) -> list[tuple[int, str, str]]:
     return out
 
 
+def synthesize(text: str, out: Path, *, voice: str = JESSICA, model: str = "eleven_v4", key: str | None = None) -> Path:
+    """One narration clip. Used by make_video.py too."""
+    key = key or os.environ["ELEVENLABS_API_KEY"]
+    with httpx.Client(base_url="https://api.elevenlabs.io", headers={"xi-api-key": key}, timeout=120) as c:
+        r = c.post(f"/v1/text-to-speech/{voice}", params={"output_format": "mp3_44100_128"},
+                   json={"text": text, "model_id": model,
+                         "voice_settings": {"stability": 0.45, "similarity_boost": 0.8, "style": 0.35}})
+        r.raise_for_status()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(r.content)
+    return out
+
+
 def main() -> int:
     load_dotenv(ROOT / ".env", override=False)
     ap = argparse.ArgumentParser()

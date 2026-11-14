@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onsen room replay</title>
+<style>
+  :root {
+    --bg: #0f1419; --panel: #161c23; --panel2: #1c242d; --line: #2a3440; --text: #e6edf3; --muted: #8b98a5;
+    --pass: #3fb950; --fail: #f85149; --warn: #d29922; --yuzu: #f7b733; --water: #58a6ff; --chip: #243040;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .app { display: grid; grid-template-columns: 230px 1fr 290px; height: 100vh; }
+  aside, .right { background: var(--panel); border-right: 1px solid var(--line); padding: 16px; overflow: hidden; }
+  .right { border-right: 0; border-left: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 4px; }
+  .brand img { width: 34px; height: 34px; }
+  .sub { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+  .who { display: flex; gap: 10px; align-items: center; padding: 7px 6px; border-radius: 8px; }
+  .who.active { background: var(--panel2); }
+  .av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 700;
+    font-size: 12px; color: #0b0f14; flex: none; }
+  .who .n { font-weight: 600; font-size: 13px; }
+  .who .r { color: var(--muted); font-size: 11px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pass); margin-left: auto; opacity: .8; }
+  main { display: flex; flex-direction: column; min-width: 0; }
+  header { padding: 12px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+  header .t { font-weight: 700; }
+  header .clock { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--chip); color: var(--muted); }
+  #feed { flex: 1; overflow: hidden; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: auto; }
+  .msg { display: grid; grid-template-columns: 34px 1fr; gap: 10px; animation: in .35s ease-out; }
+  .msg .head { display: flex; gap: 8px; align-items: baseline; }
+  .msg .name { font-weight: 700; }
+  .msg .time { color: var(--muted); font-size: 11px; }
+  .msg .body { white-space: pre-wrap; word-break: break-word; color: #d5dde5; max-height: 9.5em; overflow: hidden; }
+  .msg.human .body { color: var(--yuzu); font-weight: 600; }
+  .ev { color: var(--muted); font-size: 12px; padding-left: 44px; animation: in .2s ease-out; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; }
+  .ev b { color: #9fb0c0; font-weight: 600; }
+  .mention { color: var(--water); font-weight: 600; }
+  .tag { font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace; padding: 1px 6px; border-radius: 4px;
+    background: var(--chip); color: #c9d4df; }
+  .tag.exam.pass, .tag.review.ok, .tag.gate { background: #1d3b26; color: var(--pass); }
+  .tag.exam.fail, .tag.review.no, .tag.chill { background: #44201f; color: var(--fail); }
+  .tag.wake, .tag.receipt { background: #4a3a12; color: var(--yuzu); }
+  .tag.seal, .tag.reveal { background: #1d2c45; color: var(--water); }
+  code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: #0b0f14; padding: 0 4px; border-radius: 4px; }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .card { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+  .card h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .capy { text-align: center; }
+  .capy img { width: 150px; transition: filter .4s; }
+  .capy .state { font-weight: 700; margin-top: 4px; }
+  .capy.awake img { filter: drop-shadow(0 0 14px var(--yuzu)); }
+  .hash { font: 11px ui-monospace, monospace; color: var(--water); word-break: break-all; }
+  .stage { margin: 8px 0; }
+  .stage .lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .bar { height: 8px; background: #0b0f14; border-radius: 99px; overflow: hidden; margin-top: 4px; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--fail); transition: width .6s, background .6s; }
+  .bar > i.ok { background: var(--pass); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { background: #0b0f14; border-radius: 8px; padding: 8px; }
+  .stat .v { font-size: 20px; font-weight: 800; }
+  .stat .k { font-size: 11px; color: var(--muted); }
+  .note { padding: 6px 18px; border-top: 1px solid var(--line); color: #5f6d7a; font-size: 11px; }
+  .av img { width: 30px; height: 30px; border-radius: 50%; background: #2b2216; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><img src="capybara.svg" alt="">Onsen</div>
+    <div class="sub">BAND room · <span id="room-title"></span></div>
+    <div id="people"></div>
+  </aside>
+  <main>
+    <header><span class="t" id="title">#onsen</span><span class="badge" id="speed"></span><span class="clock" id="clock"></span></header>
+    <div id="feed"></div>
+    <div class="note" id="note"></div>
+  </main>
+  <div class="right">
+    <div class="card capy" id="capy"><img src="capybara.svg" alt="The capybara"><div class="state" id="capy-state">😴 napping</div>
+      <div class="sub" id="capy-sub">wake-ups: 0</div></div>
+    <div class="card"><h3>Sealed exam</h3><div class="hash" id="hash">not sealed yet</div><div id="stages"></div></div>
+    <div class="card"><h3>Run</h3><div class="stats">
+      <div class="stat"><div class="v" id="s-msgs">0</div><div class="k">handoffs</div></div>
+      <div class="stat"><div class="v" id="s-tools">0</div><div class="k">tool calls</div></div>
+      <div class="stat"><div class="v" id="s-web">0</div><div class="k">Scout · Nimble</div></div>
+      <div class="stat"><div class="v" id="s-human">0</div><div class="k">human touches</div></div>
+    </div></div>
+  </div>
+</div>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+const D = JSON.parse(document.getElementById('data').textContent);
+const P = Object.fromEntries(D.people.map(p => [p.id, p]));
+const byName = Object.fromEntries(D.people.map(p => [p.name, p]));
+const $ = id => document.getElementById(id);
+$('room-title').textContent = D.title; $('title').textContent = '# ' + D.title;
+$('note').textContent = D.note || '';
+$('speed').textContent = D.speedLabel || '';
+for (const p of D.people) {
+  const el = document.createElement('div'); el.className = 'who'; el.id = 'who-' + p.id;
+  el.innerHTML = `${avatar(p)}<div><div class="n">${p.name}</div><div class="r">${p.role}</div></div><span class="dot"></span>`;
+  $('people').appendChild(el);
+}
+function avatar(p) {
+  return p.img ? `<div class="av"><img src="${p.img}" alt=""></div>`
+               : `<div class="av" style="background:${p.color}">${p.initials}</div>`;
+}
+const stages = {};
+function stageRow(n) {
+  if (stages[n]) return stages[n];
+  const el = document.createElement('div'); el.className = 'stage';
+  el.innerHTML = `<div class="lbl"><span>Stage ${n}</span><span class="pct">–</span></div><div class="bar"><i></i></div>`;
+  $('stages').appendChild(el); stages[n] = el; return el;
+}
+const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function render(text) {
+  let h = esc(text);
+  h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
+  h = h.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  h = h.replace(/@([A-Z][\w]*(?: Guard)?)/g, '<span class="mention">@$1</span>');
+  h = h.replace(/^\[([a-z-]+)\]/, (m, t) => {
+    let cls = t;
+    if (t === 'exam') cls += /verdict=PASS/.test(text) ? ' pass' : ' fail';
+    if (t === 'review') cls += /APPROVED/.test(text) && !/BLOCKED/.test(text) ? ' ok' : ' no';
+    return `<span class="tag ${cls}">[${t}]</span>`;
+  });
+  return h;
+}
+let counts = {msgs: 0, tools: 0, web: 0, human: 0, wake: 0};
+function bump(k) { counts[k]++; $('s-' + k) && ($('s-' + k).textContent = counts[k]); }
+function show(m) {
+  const feed = $('feed');
+  document.querySelectorAll('.who.active').forEach(e => e.classList.remove('active'));
+  const who = $('who-' + m.sender_id); who && who.classList.add('active');
+  $('clock').textContent = m.time;
+  if (m.kind === 'event') {
+    const el = document.createElement('div'); el.className = 'ev';
+    el.innerHTML = `<b>${esc(m.sender)}</b> · ${esc(m.text)}`; feed.appendChild(el); bump('tools');
+  } else {
+    const p = P[m.sender_id] || {color: '#888', initials: '?'};
+    const el = document.createElement('div'); el.className = 'msg' + (m.human ? ' human' : '');
+    el.innerHTML = `${avatar(p)}<div><div class="head"><span class="name">${esc(m.sender)}</span><span class="time">${m.time}</span></div><div class="body">${render(m.text)}</div></div>`;
+    feed.appendChild(el); bump('msgs');
+    if (m.human) bump('human');
+    if (m.sender === 'Scout') bump('web');
+    const seal = m.text.match(/^\[seal\].*sha256=([0-9a-f]{64})/);
+    if (seal) $('hash').textContent = 'sha256 ' + seal[1];
+    const ex = m.text.match(/^\[exam\] stage=(\d+) verdict=(\w+) passed=(\d+)\/(\d+) satisfaction=(\d+)%/);
+    if (ex) { const r = stageRow(ex[1]); const bar = r.querySelector('i'); bar.style.width = ex[5] + '%';
+      bar.classList.toggle('ok', ex[2] === 'PASS'); r.querySelector('.pct').textContent = `${ex[3]}/${ex[4]} · ${ex[5]}%`; }
+    if (/^\[(wake|chill)\]/.test(m.text)) { counts.wake++; $('capy').classList.add('awake');
+      $('capy-state').textContent = '👀 woken up'; $('capy-sub').textContent = 'wake-ups: ' + counts.wake; }
+    if (m.human && /ship|hold/.test(m.text)) { setTimeout(() => { $('capy').classList.remove('awake');
+      $('capy-state').textContent = '😴 back to napping'; }, 900); }
+  }
+  while (feed.children.length > 40) feed.removeChild(feed.firstChild);
+  feed.scrollTop = feed.scrollHeight;
+}
+(async () => {
+  for (const m of D.items) { show(m); await new Promise(r => setTimeout(r, m.delay)); }
+  window.__done = true;
+})();
+</script>
+</body>
+</html>

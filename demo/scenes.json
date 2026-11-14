@@ -1,0 +1,11 @@
+[
+  {"n": 1, "kind": "card", "card": "title"},
+  {"n": 2, "kind": "card", "card": "crew"},
+  {"n": 3, "kind": "replay", "from": null, "to": "[seal]"},
+  {"n": 4, "kind": "replay", "from": null, "to": "[task] stage=1"},
+  {"n": 5, "kind": "replay", "from": null, "to": "[gate] stage=1 ACCEPTED"},
+  {"n": 6, "kind": "replay", "from": null, "to": "[wake]"},
+  {"n": 7, "kind": "replay", "from": null, "to": "[reveal]"},
+  {"n": 8, "kind": "app"},
+  {"n": 9, "kind": "card", "card": "outro"}
+]

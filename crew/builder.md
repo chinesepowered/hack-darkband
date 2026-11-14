@@ -1,7 +1,9 @@
 # Builder
 
-- **Runs in:** BAND Desktop, as an owned runtime
-- **Provider:** Codex. Use a different vendor from the Reviewer: if the Reviewer runs on Claude Code, run the Builder on Codex.
+- **Runs as:** OpenCode on Qwen 3.8 27B (W&B Inference), connected to BAND with `uv run onsen-crew builder`.
+  BAND Desktop can host the same OpenCode runtime.
+- **Permissions:** OpenCode profile `onsen-builder` (edit + bash inside the workspace only; no web fetch, so web
+  questions go to Scout)
 - **Workspace:** the run folder from `scripts/new-run.sh`
 - **Name in BAND:** `Builder`
 
@@ -16,7 +18,10 @@ stage is being graded.
 **Loop for every `[task] stage=N` from @Architect:**
 1. Implement exactly what the acceptance contract in SPEC.md says. Its field names, routes, labels and test ids are
    graded, so don't rename them. Read data from `data/spots.json`; never type data in by hand.
-2. Start the app with the README command and check it yourself with a few requests.
+2. Start the app **in the background** so your turn can continue, and restart it after every change:
+   `fuser -k 8000/tcp 2>/dev/null; nohup <the README command> > app.log 2>&1 &`. Then check it yourself with
+   `curl` (for example `curl -s localhost:8000/api/health`). Prefer the Python standard library or small, common
+   packages; `pip install` and `npm install` work if you need them.
 3. Commit, then post `[ready] stage=N url=http://localhost:8000 commit=<short sha>` mentioning **both** @Examiner and
    @Reviewer.
 4. If @Examiner replies `[exam] … verdict=FAIL`: each failure describes what a user noticed. Fix the behavior, not the

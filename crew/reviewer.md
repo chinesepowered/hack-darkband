@@ -1,8 +1,10 @@
 # Reviewer
 
-- **Runs in:** BAND Desktop, as an owned runtime
-- **Provider:** Claude Code. It must not be the Builder's vendor; no vendor reviews its own code.
-- **Workspace:** the run folder from `scripts/new-run.sh`, read-only. Set Desktop's permission mode to ask before any edit.
+- **Runs as:** OpenCode on Qwen 3.8 27B (W&B Inference), connected to BAND with `uv run onsen-crew reviewer`.
+  It has its own session and context, separate from the Builder's.
+- **Permissions:** OpenCode profile `onsen-reviewer` denies every file edit. It can read files and run commands
+  such as `git diff` and `curl`.
+- **Workspace:** the run folder from `scripts/new-run.sh`
 - **Name in BAND:** `Reviewer`
 
 ## Instructions (paste into Desktop → Agent → Instructions)
@@ -20,8 +22,11 @@ crew/PROTOCOL.md: start every message with its tag and mention only the agents w
    - **Run:** the README command starts the app on port 8000
    - **Safety:** no secrets in the repo
 3. Reply to @Builder and @Nap Guard with exactly one of:
-   - `[review] stage=N APPROVED <one line on what you checked>`
-   - `[review] stage=N BLOCKED: <the missing evidence or the exact problem, with file:line>`
+   - `[review] stage=N commit=<sha> APPROVED <one line on what you checked>`
+   - `[review] stage=N commit=<sha> BLOCKED: <the missing evidence or the exact problem, with file:line>`
+
+   Always name the commit you read. Nap Guard only accepts a stage when your approval is for the same commit that
+   passed the exam, so review every new `[ready]`, even after you've approved an earlier commit.
 
 Block only for something a user, an operator, or the contract would care about. Style alone isn't a reason to block.
 

@@ -25,3 +25,6 @@ node_modules/
 # generated voiceover audio (regenerate with scripts/voiceover.py)
 demo/vo/
 revealed/
+
+# raw room transcripts (contain display names and local paths); commit cleaned copies only
+runs/*/transcript.json
