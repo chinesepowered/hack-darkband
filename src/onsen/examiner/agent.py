@@ -38,6 +38,8 @@ from .models import SealedExam
 from .runner import run_scenarios, satisfaction
 from .seal import (
     RoomRuns,
+    load_voided,
+    void,
     ScenarioWriter,
     append_history,
     exam_dir,
@@ -71,6 +73,8 @@ def split_command(text: str) -> tuple[str, str]:
     tag, rest = parse_tagged(text)
     if tag in ("ready", "exam"):
         return "exam", rest
+    if tag in ("dispute", "appeal"):
+        return "appeal", rest
     if tag == "tally-request":
         return "tally", rest
     if tag in ("seal", "reveal", "status", "tally", "help"):
@@ -106,6 +110,8 @@ class ExaminerAdapter(SimpleAdapter[Any]):
                 await self._exam(arg, msg, tools, reply_to, room_id)
             elif cmd == "reveal":
                 await self._reveal(msg, tools, reply_to, room_id)
+            elif cmd == "appeal":
+                await self._appeal(arg, msg, tools, reply_to, room_id)
             elif cmd in ("tally", "status"):
                 await tools.send_message(self._tally(room_id), mentions=reply_to)
             else:
@@ -130,13 +136,13 @@ class ExaminerAdapter(SimpleAdapter[Any]):
             raise ValueError(f"{path.name} has no '## Stage N' sections to examine")
         per_stage = int(kv.get("per_stage") or os.environ.get("ONSEN_SCENARIOS_PER_STAGE", "8"))
         dropped_note = ""
+        facts = ""
         if self.writer is not None:
             self.writer.dropped = []
             await tools.send_event(content=f"Writing hidden scenarios for {len(stages)} stages in parallel…",
                                    message_type="thought")
             import asyncio
 
-            facts = ""
             data_arg = kv.get("data")
             if data_arg:
                 data_path = Path(data_arg)
@@ -164,6 +170,8 @@ class ExaminerAdapter(SimpleAdapter[Any]):
                                "or ONSEN_EXAM_FILE for a fixture exam")
         run_id = new_run_id()
         digest = save_sealed(exam, run_id)
+        if self.writer is not None and facts:
+            (exam_dir(run_id) / "facts.txt").write_text(facts)
         (exam_dir(run_id) / "sha256.txt").write_text(digest + "\n")
         self.rooms.set(room_id, run_id)
         await self._mention_with_napguard(
@@ -197,19 +205,29 @@ class ExaminerAdapter(SimpleAdapter[Any]):
             raise ValueError(f"The sealed exam has no stage {stage}")
         await tools.send_event(content=f"Running {len(stage_exam.scenarios)} hidden scenarios for stage {stage}…",
                                message_type="tool_call", metadata={"stage": stage, "url": url})
+        await self._grade(run_id, stage_exam, stage, url, kv.get("commit"), msg.sender_name or "unknown", tools,
+                          reply_to, note=None)
+
+    async def _grade(self, run_id: str, stage_exam: Any, stage: int, url: str, commit: str | None, by: str,
+                     tools: Any, reply_to: list[str], note: str | None) -> None:
+        voided = load_voided(run_id)
+        scenarios = [sc for sc in stage_exam.scenarios if sc.id not in voided]
         judge = self.writer.judge if self.writer is not None else None
-        results = await run_scenarios(url, stage_exam.scenarios, judge=judge,
+        results = await run_scenarios(url, scenarios, judge=judge,
                                       repeats=int(os.environ.get("ONSEN_EXAM_REPEATS", "1")))
         passed, total, sat = satisfaction(results)
         verdict = "PASS" if total and sat >= threshold() else "FAIL"
+        failed_ids = sorted({r.id for r in results if not r.passed and not r.invalid})
+        observed = {r.id: r.observed for r in results if not r.passed and not r.invalid}
         rounds = append_history(run_id, stage, {"passed": passed, "total": total, "satisfaction": round(sat, 4),
-                                                "verdict": verdict, "by": msg.sender_name})
+                                                "verdict": verdict, "by": by, "url": url, "commit": commit,
+                                                "failed": failed_ids, "observed": observed})
         invalid = [r for r in results if r.invalid]
         failures = [r for r in results if not r.passed and not r.invalid]
         lines = [
             f"[exam] stage={stage} verdict={verdict} passed={passed}/{total} satisfaction={sat:.0%} "
-            f"threshold={threshold():.0%} round={len(rounds)} by={(msg.sender_name or 'unknown').replace(' ', '_')} run={run_id}"
-            + (f" commit={kv['commit']}" if kv.get("commit") else ""),
+            f"threshold={threshold():.0%} round={len(rounds)} by={by.replace(' ', '_')} run={run_id}"
+            + (f" commit={commit}" if commit else ""),
         ]
         if failures:
             lines.append("What a user would notice (the scenarios themselves stay sealed):")
@@ -227,7 +245,55 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         if invalid:
             lines.append(f"({len({r.id for r in invalid})} scenario(s) broke in their own setup — an exam bug, not yours — "
                          f"and were left out of the score.)")
+        if note:
+            lines.insert(1, note)
+        if failures:
+            lines.append("If you're sure a failure contradicts SPEC.md, post `[dispute] stage=N` to me and Nap Guard with "
+                         "the contract line and your evidence. Don't bend the code or the data.")
         await self._mention_with_napguard(tools, "\n".join(lines), reply_to)
+
+    async def _appeal(self, arg: str, msg: PlatformMessage, tools: Any, reply_to: list[str], room_id: str) -> None:
+        """Re-examine the scenarios a builder disputes. Void the ones that are wrong, then re-grade."""
+        import json as _json
+
+        kv = parse_kv(arg)
+        stage = int(kv.get("stage") or 0)
+        run_id, exam, _ = self._load_run(room_id)
+        hist = load_history(run_id).get(str(stage)) or []
+        last = hist[-1] if hist else {}
+        failed = [i for i in last.get("failed", []) if i not in load_voided(run_id)]
+        stage_exam = exam.stage(stage)
+        if not stage or stage_exam is None or not failed or self.writer is None:
+            await self._mention_with_napguard(tools, f"[appeal] stage={stage} nothing to re-examine "
+                                              f"(no failing scenarios on record).", reply_to)
+            return
+        spec_text = spec_path(exam.spec_name).read_text()
+        facts_file = exam_dir(run_id) / "facts.txt"
+        facts = facts_file.read_text() if facts_file.exists() else ""
+        await tools.send_event(content=f"Re-examining {len(failed)} disputed scenario(s) for stage {stage}…",
+                               message_type="thought")
+        voided_now, upheld = [], []
+        for sc in stage_exam.scenarios:
+            if sc.id not in failed:
+                continue
+            verdict = await self.writer.appeal(spec_text, facts, _json.dumps(sc.model_dump(), ensure_ascii=False),
+                                               (last.get("observed") or {}).get(sc.id, ""), arg)
+            if verdict.valid:
+                upheld.append((sc, verdict.reason))
+            else:
+                void(run_id, sc.id, verdict.reason)
+                voided_now.append((sc, verdict.reason))
+        if not voided_now:
+            reasons = "; ".join(f"{sc.story} — {clip(r, 160)}" for sc, r in upheld)
+            await self._mention_with_napguard(
+                tools, f"[appeal] stage={stage} rejected — the failing check(s) follow from the spec: {clip(reasons, 900)}\n"
+                       "Fix the behavior and post `[ready]` again.", reply_to)
+            return
+        note = (f"Appeal: {len(voided_now)} scenario(s) voided as exam errors — "
+                + "; ".join(f"{sc.story} ({clip(r, 140)})" for sc, r in voided_now)
+                + (f". Upheld: {len(upheld)}." if upheld else "."))
+        await self._grade(run_id, stage_exam, stage, last.get("url") or os.environ.get("ONSEN_APP_URL", ""),
+                          last.get("commit"), msg.sender_name or "unknown", tools, reply_to, note=note)
 
     async def _reveal(self, msg: PlatformMessage, tools: Any, reply_to: list[str], room_id: str) -> None:
         is_human = str(msg.sender_type or "").lower() == "user"
@@ -239,10 +305,14 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         reveal_dir.mkdir(parents=True, exist_ok=True)
         target = reveal_dir / f"exam-{run_id}.json"
         shutil.copyfile(exam_dir(run_id) / "sealed.json", target)
+        voided = load_voided(run_id)
         stories = []
         for st in exam.stages:
             stories.append(f"Stage {st.stage}:")
-            stories.extend(f"  • {sc.id}: {sc.story}" for sc in st.scenarios)
+            stories.extend(f"  • {sc.id}: {sc.story}" + (" — VOIDED on appeal" if sc.id in voided else "")
+                           for sc in st.scenarios)
+        if voided:
+            stories.append(f"Voided on appeal ({len(voided)}): " + "; ".join(f"{k}: {clip(v, 120)}" for k, v in voided.items()))
         await tools.send_message(
             f"[reveal] run={run_id} sha256={digest} scenarios={exam.scenario_count} author={exam.author}\n"
             f"The exam file is at {target} — `sha256sum` it and compare with the [seal] message.\n"
@@ -259,7 +329,8 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         curves = "; ".join(
             f"{stage}:" + "→".join(f"{r['satisfaction']:.0%}" for r in entries) for stage, entries in sorted(hist.items())
         ) or "none"
-        return f"[tally] agent=examiner run={run_id} rounds={rounds} curves={curves.replace(' ', '')}"
+        return (f"[tally] agent=examiner run={run_id} rounds={rounds} curves={curves.replace(' ', '')} "
+                f"voided={len(load_voided(run_id))}")
 
 
 def main() -> None:

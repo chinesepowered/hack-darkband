@@ -18,10 +18,10 @@ words.
 > VO: Next, the Examiner writes a hidden exam from the spec, proofreads it against the data, and posts only its fingerprint. The builders never see it. BAND only delivers a message to the agents it mentions.
 
 ### 5. The loop
-> VO: The Builder ships stage one. The Reviewer reads the diff and re-runs the contract on its own server. The sealed exam passes. Because the approval and the exam are for the same commit, Nap Guard accepts the stage and hands the next one to the Architect.
+> VO: The Builder ships stage one in three minutes. The sealed exam passes five out of five, and the Reviewer re-runs the whole contract on its own server before approving that exact commit. Nap Guard accepts the stage and hands the next one to the Architect.
 
 ### 6. Stages two and three
-> VO: Stages two and three run the same loop: build, exam, review, gate. When a check fails, the Builder only learns what a user would notice. Nobody asks me anything.
+> VO: Stage two fails its first exam. All the Builder learns is what a user would notice: clear the search, and a stale result stays on screen. It finds the race and fixes it, and the exam passes six out of six. But the Reviewer had approved the old commit, so Nap Guard waits until the new one is reviewed too. Nobody asks me anything.
 
 ### 7. The rehearsal
 > VO: It wasn't always this smooth. In our rehearsal, the Builder edited the dataset to pass a bad check. The Reviewer blocked it, the Builder reverted, and we fixed the factory, not just the code.

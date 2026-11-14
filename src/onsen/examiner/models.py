@@ -134,3 +134,8 @@ class ScenarioFlag(BaseModel):
 
 class ExamAudit(BaseModel):
     flags: list[ScenarioFlag] = Field(description="Only scenarios that are wrong; empty if all are sound")
+
+
+class AppealVerdict(BaseModel):
+    valid: bool = Field(description="True if the scenario's expectation follows from the spec and the data")
+    reason: str = Field(description="One sentence in user terms; never quote the scenario's steps")

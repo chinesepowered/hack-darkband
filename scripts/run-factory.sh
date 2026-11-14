@@ -40,6 +40,9 @@ start() {  # start <name> <command...>
 ( cd "$ONSEN_WORKSPACE" && start opencode "$opencode_bin" serve --hostname=127.0.0.1 --port="$port" )
 for _ in $(seq 1 60); do curl -fsS -m 5 "$ONSEN_OPENCODE_URL/config" >/dev/null 2>&1 && break; sleep 1; done
 
+# Agents rejoin every room they're in when they start: take them out of old runs' rooms first.
+uv run onsen-cleanup --all >/dev/null || true
+
 start scout     uv run onsen-scout
 start examiner  uv run onsen-examiner
 start napguard  uv run onsen-nap-guard

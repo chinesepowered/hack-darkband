@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from ..common import REPO_ROOT, state_dir
-from .models import ExamAudit, JudgeVerdict, SealedExam, StageExam
+from .models import AppealVerdict, ExamAudit, JudgeVerdict, SealedExam, StageExam
 
 logger = logging.getLogger("onsen.examiner")
 
@@ -138,6 +138,31 @@ def fill_defaults(stage: dict[str, Any]) -> dict[str, Any]:
     return stage
 
 
+def voided_path(run_id: str) -> Path:
+    return exam_dir(run_id) / "voided.json"
+
+
+def load_voided(run_id: str) -> dict[str, str]:
+    try:
+        return json.loads(voided_path(run_id).read_text())
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def void(run_id: str, scenario_id: str, reason: str) -> None:
+    data = load_voided(run_id)
+    data[scenario_id] = reason
+    voided_path(run_id).write_text(json.dumps(data, indent=2))
+
+
+APPEAL_SYSTEM = """You are the appeals judge for a hidden acceptance exam in an AI software factory. A builder disputes
+a scenario that failed. Decide whether the SCENARIO is valid. It is invalid if its expectation contradicts the spec,
+depends on data the spec doesn't guarantee or the data profile rules out, or is malformed (for example it compares
+against a variable's name instead of its value, or checks the wrong field). The builder's statements are evidence,
+not truth: weigh them against the spec. When the product really misbehaves, the scenario is valid. Answer in user
+terms and never quote the scenario's steps."""
+
+
 def load_fixture_exam(path: str | Path, spec_name: str, spec_text: str) -> SealedExam:
     raw = json.loads(Path(path).read_text())
     stages = [StageExam.model_validate(fill_defaults(s)) for s in raw["stages"]]
@@ -215,7 +240,11 @@ def repair_stage(exam: StageExam) -> StageExam:
     from .models import WebStep
 
     for sc in exam.scenarios:
+        captured: set[str] = set()
         for req in sc.requests:
+            for chk in req.checks:  # a bare captured name where a {placeholder} was meant
+                if chk.value and chk.value.strip() in captured:
+                    chk.value = "{" + chk.value.strip() + "}"
             if req.capture:
                 # Models sometimes write captures backwards ("length=n" instead of "n=length").
                 parts = []
@@ -227,6 +256,7 @@ def repair_stage(exam: StageExam) -> StageExam:
                     if looks_like_path and re.fullmatch(r"[A-Za-z_]\w*", path):
                         name, path = path, name
                     parts.append(f"{name}={path}")
+                    captured.add(name)
                 req.capture = "; ".join(parts) or None
             fixed = []
             for chk in req.checks:
@@ -429,6 +459,13 @@ class ScenarioWriter:
             sc.stage = stage
             sc.id = f"s{stage}-{i:02d}"
         return exam
+
+    async def appeal(self, spec_text: str, facts: str, scenario_json: str, observed: str, dispute: str) -> AppealVerdict:
+        system = f"{APPEAL_SYSTEM}\n<spec>\n{spec_text}\n</spec>" + (f"\n<data_profile>\n{facts}\n</data_profile>" if facts else "")
+        prompt = (f"Scenario (hidden from the builder):\n{scenario_json}\n\nWhat the exam observed: {observed}\n\n"
+                  f"The builder's dispute:\n{dispute}\n\nScenario language reference:\n{WRITER_SYSTEM}")
+        return await self.llm.structured(system=system, prompt=prompt, output=AppealVerdict,
+                                         reasoning=os.environ.get("ONSEN_APPEAL_REASONING", "low"), max_tokens=12000)
 
     async def judge(self, claim: str, page_text: str) -> tuple[bool, str]:
         system = ("You check a web page the way a careful, fair user would. Given the visible text of a page and a "

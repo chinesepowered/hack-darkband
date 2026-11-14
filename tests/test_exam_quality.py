@@ -92,3 +92,13 @@ def test_repair_swaps_backwards_captures_and_fixes_judge_text():
     sc = exam.scenarios[0]
     assert sc.requests[0].capture == "n=length; first=[0].id"
     assert [s.action for s in sc.steps] == ["goto", "judge"] and sc.steps[1].text == "every card is a hot-spring spot"
+
+
+def test_repair_wraps_bare_captured_names():
+    exam = StageExam(stage=3, scenarios=[
+        Scenario(id="x", stage=3, story="x", kind="http", steps=[],
+                 requests=[req("/api/spots", capture="list_count=length"),
+                           req("/api/stats", check("field", field="total", op="eq", value="list_count"))]),
+    ])
+    repair_stage(exam)
+    assert exam.scenarios[0].requests[1].checks[0].value == "{list_count}"

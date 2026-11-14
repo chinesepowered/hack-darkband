@@ -28,6 +28,7 @@ onsen-crew = "onsen.crew:main"
 onsen-kickoff = "onsen.kickoff:main"
 onsen-watch = "onsen.watch:main"
 onsen-say = "onsen.say:main"
+onsen-cleanup = "onsen.cleanup:main"
 
 [build-system]
 requires = ["hatchling"]

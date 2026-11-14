@@ -1,0 +1,5 @@
+8e16935 04:35 Stage 3: onsen mode and stats (api/stats, hot-spring filter + labelled checkbox, data-verified footer)
+abdaa1d 04:20 Stage 2 fix: debounce and supersede live-search requests so stale responses cannot overwrite the results list
+1e6bd56 03:47 Stage 2: web UI (home with labelled controls and live search, spot detail pages, 404 state)
+2689ec9 03:37 Stage 1: data and API (health, spots with AND filters, spot by id)
+fcb3314 03:32 Spec for capyfinder

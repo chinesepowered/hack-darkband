@@ -235,7 +235,10 @@ def _locator(page: Any, st: WebStep, env: dict[str, Any]) -> Any:
         return page.get_by_label(substitute(st.label, env) or "", exact=False)
     if st.text:
         return page.get_by_text(substitute(st.text, env) or "", exact=False)
-    raise ScenarioFailure("a step had nothing to act on")
+    if st.name:  # a name without a role: look for it as visible text (a label, heading or link)
+        name = substitute(st.name, env) or ""
+        return page.get_by_label(name, exact=False).or_(page.get_by_text(name, exact=False))
+    raise ExamError("a step had nothing to act on")
 
 
 async def _count_between(locator: Any, lo: int | None, hi: int | None) -> int:
@@ -325,6 +328,13 @@ async def run_web_step(page: Any, base_url: str, st: WebStep, env: dict[str, Any
             if judge is None:
                 return "skipped"
             claim = substitute(st.text, env) or ""
+            # A judge reads the page once, so let live updates (debounced search, redraws) settle first;
+            # assertions elsewhere retry on their own.
+            try:
+                await page.wait_for_load_state("networkidle", timeout=STEP_TIMEOUT_MS)
+            except PWError:
+                pass
+            await page.wait_for_timeout(int(os.environ.get("ONSEN_JUDGE_SETTLE_MS", "1200")))
             body = await page.inner_text("body")
             ok, reason = await judge(claim, body[:12000])
             if not ok:

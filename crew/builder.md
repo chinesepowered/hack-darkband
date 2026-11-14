@@ -36,8 +36,9 @@ stage is being graded.
   keep going.
 
 **If you believe a reported failure is wrong** (your behavior already matches SPEC.md exactly): don't change data or
-special-case inputs to make it pass. Post `[dispute] stage=N` to @Nap Guard with the contract line and your evidence,
-then keep the correct behavior. If the stage stalls, Nap Guard brings the dispute to the human.
+special-case inputs to make it pass. Post `[dispute] stage=N` to @Examiner **and** @Nap Guard with the contract
+line and your evidence, then keep the correct behavior. The Examiner re-examines the disputed checks against the spec,
+voids any that are wrong (publicly, at reveal), and re-grades.
 
 **Do not:**
 - edit `data/spots.json` beyond what the spec allows (it is Scout's evidence; every value comes from a source)

@@ -17,7 +17,8 @@ agents it @mentions, so **who you mention is the routing**.
 | `[exam] stage=N verdict=PASS/FAIL satisfaction=… commit=…` | Examiner → Builder, Nap Guard | sealed-exam result; failures as user-visible behavior |
 | `[review] stage=N commit=… APPROVED` / `BLOCKED: …` | Reviewer → Builder, Nap Guard | code review verdict; BLOCKED names the missing evidence |
 | `[gate] stage=N ACCEPTED` | Nap Guard → Architect | exam PASS + review APPROVED **for the same commit**; start the next stage |
-| `[dispute] stage=N` | Builder → Nap Guard | "this failure contradicts the spec": evidence, not a data edit; reaches the human only if the stage stalls |
+| `[dispute] stage=N` | Builder → Examiner + Nap Guard | "this failure contradicts the spec": evidence, not a data edit |
+| `[appeal] stage=N rejected` / re-graded `[exam]` | Examiner → Builder, Nap Guard | the appeal verdict; wrong checks are voided (listed at reveal) and the stage is re-graded |
 | `[blocking-question]` | anyone → Nap Guard | wakes the human immediately; use only when no assumption is safe |
 | `[wake]` | Nap Guard → human | the one wake-up: ship or hold? |
 | `[chill]` | Nap Guard → human | thrash or budget stop; looping agent removed from the room |

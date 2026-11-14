@@ -129,6 +129,8 @@ class NapGuardAdapter(SimpleAdapter[Any]):
                                  "I'll pass it on.", reason="blocking-question")
             elif tag == "tally":
                 await self._on_tally(rest, tools, st)
+            elif tag == "appeal":
+                await tools.no_reply("appeal verdict noted")
             else:
                 await tools.no_reply("not addressed to Nap Guard's protocol")
         finally:
@@ -337,7 +339,8 @@ class NapGuardAdapter(SimpleAdapter[Any]):
             "• Stages: " + (" · ".join(stage_lines) or "none"),
             f"• Questions the web answered: {scout.get('answered', '?')} · escalated: {scout.get('escalated', '?')} "
             f"(batched into the wake-up)",
-            f"• Docs fetched: {scout.get('docs', '?')} · datasets built: {scout.get('data', '?')} · exam rounds: {exam.get('rounds', '?')}",
+            f"• Docs fetched: {scout.get('docs', '?')} · datasets built: {scout.get('data', '?')} · exam rounds: {exam.get('rounds', '?')}"
+            f" · exam checks voided on appeal: {exam.get('voided', '0')}",
             f"• Time from seal to ship: {elapsed}",
             f"• Sealed exam sha256={(d.get('seal_sha256') or '?')[:16]}… — asking the Examiner to reveal it now.",
             f"The capybara was woken {wakeups} time{'s' if wakeups != 1 else ''}. 🍊",

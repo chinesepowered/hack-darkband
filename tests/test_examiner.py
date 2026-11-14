@@ -108,3 +108,42 @@ async def test_builders_cannot_open_the_exam(app, monkeypatch):
     digest = reveal.split("sha256=")[1].split()[0]
     path = Path(reveal.split("The exam file is at ")[1].split(" ")[0])
     assert sha256_hex(path.read_bytes()) == digest
+
+
+async def test_dispute_voids_a_wrong_check_and_regrades(app, monkeypatch, tmp_path):
+    import json
+
+    from onsen.examiner.models import AppealVerdict
+
+    wrong = {"stages": [{"stage": 1, "scenarios": [
+        {"id": "s1-01", "story": "Health is up.", "kind": "http",
+         "requests": [{"path": "/api/health", "checks": [{"type": "status", "number": 200}]}]},
+        {"id": "s1-02", "story": "An unknown type is accepted.", "kind": "http",  # contradicts the spec (400)
+         "requests": [{"path": "/api/spots?type=volcano", "checks": [{"type": "status", "number": 200}]}]},
+    ]}]}
+    f = tmp_path / "wrong_exam.json"
+    f.write_text(json.dumps(wrong))
+    monkeypatch.setenv("ONSEN_EXAM_FILE", str(f))
+    url = app()
+
+    class FakeWriter:
+        model = "fake"
+        dropped: list = []
+
+        async def appeal(self, spec, facts, scenario_json, observed, dispute):
+            return AppealVerdict(valid="volcano" not in scenario_json, reason="the spec says an unknown type is a 400")
+
+        async def judge(self, claim, page):
+            return True, "ok"
+
+    adapter = ExaminerAdapter(writer=None)
+    tools = FakeAgentTools(participants=CREW)
+    await deliver(adapter, "@examiner seal", "Architect", tools)  # fixture exam (no writer yet)
+    await deliver(adapter, f"@examiner [ready] stage=1 url={url} commit=abc1234", "Builder", tools)
+    assert "verdict=FAIL" in tools.messages_sent[-1]["content"]
+    adapter._writer = FakeWriter()
+    await deliver(adapter, "@examiner [dispute] stage=1 SPEC says unknown type -> 400; we return 400.", "Builder", tools)
+    regraded = tools.messages_sent[-1]["content"]
+    assert "verdict=PASS" in regraded and "voided" in regraded
+    await deliver(adapter, "@examiner reveal", "Nap Guard", tools)
+    assert "VOIDED on appeal" in tools.messages_sent[-1]["content"]
