@@ -78,12 +78,21 @@ class LLM:
         )
         last_error = ""
         for attempt in range(1, attempts + 1):
+            # Constrained decoding first; if it fails (Qwen can loop on "]}]}" under a grammar), the last attempt
+            # uses plain JSON mode with the schema in the prompt, and Pydantic still validates the result.
+            constrained = attempt < attempts or attempts == 1
+            fmt: dict[str, Any] = (
+                {"type": "json_schema", "json_schema": {"name": output.__name__, "schema": schema, "strict": True}}
+                if constrained else {"type": "json_object"}
+            )
+            if not constrained:
+                messages = [*messages, {"role": "user", "content": "Return one JSON object that validates against "
+                                        f"this JSON schema, and nothing else:\n{json.dumps(schema)}"}]
             resp = await self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 max_tokens=max_tokens,
-                response_format={"type": "json_schema",
-                                 "json_schema": {"name": output.__name__, "schema": schema, "strict": True}},
+                response_format=fmt,
                 **thinking,
             )
             choice = resp.choices[0]
@@ -96,7 +105,11 @@ class LLM:
                 last_error = f"invalid JSON: {exc}"
             logger.warning("LLM output failed validation (attempt %d/%d, finish=%s): %s",
                            attempt, attempts, choice.finish_reason, last_error[:300])
-            messages += [{"role": "assistant", "content": content[:20000]},
-                         {"role": "user", "content": f"That didn't validate against the schema: {last_error}\n"
-                                                     "Return the corrected JSON only."}]
+            if choice.finish_reason == "length":
+                # A runaway (usually repeated brackets): retrying from a clean slate works better than repairing it.
+                messages = messages[:2]
+            else:
+                messages += [{"role": "assistant", "content": content[:20000]},
+                             {"role": "user", "content": f"That didn't validate against the schema: {last_error}\n"
+                                                         "Return the corrected JSON only."}]
         raise RuntimeError(f"{self.model} never produced valid {output.__name__}: {last_error[:300]}")

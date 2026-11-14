@@ -43,7 +43,7 @@ The exam only uses what this section defines. Builders must not rename anything 
   - Filters combine with AND. No match → `200` and `[]`.
 - `GET /api/spots/{id}` → `200` spot, or `404` `{"error": "..."}`.
 - `GET /api/stats` *(stage 3)* → `200` `{"total": n, "by_country": {"JP": n, …}, "by_type": {"zoo": n, …}}`; the
-  counts agree with `/api/spots`.
+  counts agree with `/api/spots`. `by_country` and `by_type` only have keys for values that appear in the data.
 
 ### Web UI
 
@@ -66,8 +66,9 @@ The exam only uses what this section defines. Builders must not rename anything 
 
 ## Stage 1 — Data and API
 
-- Ask Scout for the data: `@Scout data: places where the public can see capybaras (zoos, hot-spring parks, cafes,
-  sanctuaries, farms) — 20 to 40 spots across at least 3 countries out=data/spots.json`
+- The Architect (only the Architect) asks Scout for the data, once: `@Scout data: places where the public can see
+  capybaras (zoos, hot-spring parks, cafes, sanctuaries, farms) — 20 to 40 spots across at least 3 countries
+  out=data/spots.json`
 - Implement `/api/health`, `/api/spots` (all filters) and `/api/spots/{id}` per the contract.
 - Done when the server starts with one command and the API contract holds for whatever data Scout found.
 

@@ -60,3 +60,14 @@ async def test_low_confidence_answer_is_copied_to_nap_guard():
 def test_format_answer_mentions_batching_when_unsure():
     ans = ResearchAnswer("x", "low", [], [], {}, "r", 1.0)
     assert "Nap Guard" in format_answer(ans, "Builder")
+
+
+async def test_notes_to_scout_are_not_researched():
+    tools = FakeAgentTools(participants=CREW)
+    await deliver(ScoutAdapter(FakeNimble(True)), "@scout heads-up: the file is final, do not rewrite it.", "Architect", tools)
+    assert not tools.messages_sent
+
+
+def test_split_command_question_vs_note():
+    assert split_command("is the zoo open on mondays?")[0] == "ask"
+    assert split_command("thanks, noted")[0] == "note"

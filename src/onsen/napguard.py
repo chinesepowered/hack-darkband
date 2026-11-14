@@ -78,6 +78,7 @@ DEFAULT_STATE: dict[str, Any] = {
     "seal_sha256": None,
     "stages": {},
     "questions": [],
+    "disputes": [],
     "wakeups": [],
     "chill_breaks": 0,
     "human_touches": 0,
@@ -117,6 +118,11 @@ class NapGuardAdapter(SimpleAdapter[Any]):
                 await self._on_review(rest, msg, tools, st)
             elif tag == "answer":
                 await self._on_answer(rest, msg, tools, st)
+            elif tag == "dispute":
+                kv = parse_kv(rest)
+                st.data["disputes"].append({"stage": kv.get("stage"), "from": msg.sender_name, "text": clip(rest, 600),
+                                            "at": now()})
+                await tools.no_reply("dispute recorded; it goes to the human only if the stage stalls")
             elif tag == "blocking-question":
                 await self._wake(tools, st, f"[wake] #{len(st.data['wakeups']) + 1} reason=blocking-question "
                                  f"from={msg.sender_name}\n{clip(rest, 1200)}\nReply to me with your answer; "
@@ -223,7 +229,8 @@ class NapGuardAdapter(SimpleAdapter[Any]):
 
     async def _on_answer(self, rest: str, msg: PlatformMessage, tools: Any, st: JsonState) -> None:
         kv = parse_kv(rest)
-        if kv.get("confidence", "").lower() in ("low", "none"):
+        empty = kv.get("claims") == "0" and kv.get("sources") == "0"  # a failed lookup, not an open question
+        if kv.get("confidence", "").lower() in ("low", "none") and not empty:
             st.data["questions"].append({"for": kv.get("for"), "text": clip(rest, 600), "at": now()})
         await tools.no_reply("question batched for the single wake-up")
 
@@ -289,11 +296,14 @@ class NapGuardAdapter(SimpleAdapter[Any]):
                     action = f"I couldn't take {culprit} out of the room ({clip(str(exc), 80)})."
         reason = "thrash" if s["fails_in_row"] >= thrash_limit() else "round-budget"
         last_review = s.get("review_note") or "none"
+        disputes = [d for d in st.data.get("disputes", []) if str(d.get("stage")) == str(n)]
+        dispute_note = ("\nThe builders dispute the exam on this stage (they believe the check contradicts the spec):\n"
+                        + "\n".join(f"  • {clip(d['text'], 300)}" for d in disputes[-3:])) if disputes else ""
         await self._wake(
             tools, st,
             f"[chill] #{len(st.data['wakeups']) + 1} stage={n} reason={reason}\n"
             f"🧘 Chill break. Stage {n} has gone {len(s['exams'])} exam round(s) ({curve}) and isn't getting better. "
-            f"Last review: {clip(last_review, 200)}\n{action}\n"
+            f"Last review: {clip(last_review, 200)}{dispute_note}\n{action}\n"
             "Reply `resume` to put it back and keep going, or `hold` to stop the run.",
             reason=f"chill-{reason}",
         )

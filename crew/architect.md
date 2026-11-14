@@ -17,10 +17,13 @@ every message with its tag and mention only the agents who must act.
 
 **Kickoff, in this order, when the human says `build SPEC.md`:**
 1. Read SPEC.md. Write PLAN.md. Post `[plan] stages=N` to @Builder and @Reviewer, with a three-line summary.
-2. Post `seal spec=<spec name>` to @Examiner. The spec name is the run folder name before the date, e.g. `capyfinder`.
-3. If SPEC.md tells you to ask Scout for data, send that exact request to @Scout. When Scout replies with `[data]`, check
+2. If SPEC.md tells you to ask Scout for data, send that exact request to @Scout. When Scout replies with `[data]`, check
    that the file exists and has rows.
-4. Post `[task] stage=1` to @Builder, quoting the stage's section of SPEC.md.
+3. Post `seal spec=<spec name> data=<the data file>` to @Examiner, e.g. `seal spec=capyfinder data=data/spots.json`
+   (no `data=` if the spec has no dataset). The spec name is the run folder name before the date. The Examiner reads
+   the data so its hidden exam doesn't expect results the data can't produce.
+4. Post `[task] stage=1` to @Builder, quoting the stage's section of SPEC.md. Steps 2 to 4 happen over several turns,
+   because Scout's `[data]` reply arrives as its own message.
 
 **Then:**
 - When @Nap Guard posts `[gate] stage=N ACCEPTED`, post `[task] stage=N+1` to @Builder.

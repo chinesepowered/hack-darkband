@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from ..common import REPO_ROOT, state_dir
-from .models import JudgeVerdict, SealedExam, StageExam
+from .models import ExamAudit, JudgeVerdict, SealedExam, StageExam
 
 logger = logging.getLogger("onsen.examiner")
 
@@ -222,10 +222,14 @@ def repair_stage(exam: StageExam) -> StageExam:
                     chk.number = 200
                 if chk.type in ("min_items", "max_items") and chk.number is None:
                     continue
+                if chk.value is not None and chk.value.strip().lower() in ("none", "null", ""):
+                    chk.value = None
                 if chk.type in ("every_item", "some_item", "no_item", "field"):
                     if chk.op not in (None, "exists") and (chk.value is None or chk.value.strip().lower() in TYPE_WORDS):
                         chk.op, chk.value = "exists", None
                 if chk.type == "has_fields" and not chk.value:
+                    continue
+                if chk.type == "json_type" and (chk.value or "").strip().lower() not in ("list", "array", "object", "dict"):
                     continue
                 fixed.append(chk)
             req.checks = fixed
@@ -314,6 +318,40 @@ def lint_stage(spec_text: str, exam: StageExam) -> tuple[StageExam, list[str]]:
     return exam, [f"{sc.id}: {', '.join(p)}" for sc, p in dropped]
 
 
+
+AUDIT_SYSTEM = """You proofread a hidden acceptance exam before it is sealed. Builders will be graded by it and can't
+see it, so a wrong scenario fails correct work. Flag a scenario only if it is WRONG:
+- its expectation contradicts the spec (e.g. it expects 200 where the spec says 400),
+- it relies on a data value the spec does not guarantee (the data comes from the live web and changes), or it
+  expects a result the data profile says is impossible (e.g. at least one spot of a type that has 0 spots),
+- it compares a count to a literal number instead of a captured `length`,
+- it can't be satisfied by a correct implementation for some other clear reason.
+Do not flag scenarios for style, weak coverage, or anything a correct implementation would pass.
+"""
+
+
+def data_profile(path: Path) -> str:
+    """Facts about the dataset the app will serve, so the exam doesn't expect what the data can't produce."""
+    import collections
+
+    rows = json.loads(Path(path).read_text())
+    if not isinstance(rows, list):
+        return ""
+    lines = [f"rows: {len(rows)}"]
+    for field in ("country", "type"):
+        counts = collections.Counter(str(r.get(field, "")) for r in rows)
+        lines.append(f"{field}: " + ", ".join(f"{k}={v}" for k, v in sorted(counts.items())))
+    for field in ("capybara_experience", "hours", "adult_price"):
+        empty = sum(1 for r in rows if not str(r.get(field) or "").strip())
+        lines.append(f"{field}: empty in {empty} of {len(rows)} rows")
+    hot = sum(1 for r in rows if r.get("type") == "onsen"
+              or any(w in str(r.get("capybara_experience", "")).lower() for w in ("hot spring", "onsen")))
+    lines.append(f"spots that count as hot-spring (type onsen, or experience mentions hot spring/onsen): {hot}")
+    multi_city = [c for c, n in collections.Counter(str(r.get("city", "")) for r in rows).items() if n > 1]
+    lines.append(f"cities with more than one spot: {len(multi_city)}")
+    return "\n".join(lines)
+
+
 class ScenarioWriter:
     """The LLM (Qwen 3.8 on W&B by default) writes the exam once, at seal time, and judges `judge` steps."""
 
@@ -324,26 +362,50 @@ class ScenarioWriter:
         self.model = self.llm.model
         self.dropped: list[str] = []
 
-    async def write_stage(self, spec_text: str, stage: int, per_stage: int) -> StageExam:
-        system = f"{WRITER_SYSTEM}\n<spec>\n{spec_text}\n</spec>"
-        prompt = (
-            f"Write exactly {per_stage} hidden scenarios for Stage {stage}. Earlier stages must keep working, so "
-            f"at most one of them may re-check an earlier stage. Return stage={stage}. Every field in the schema "
-            f"must be present; use null for fields a check or step doesn't use."
-        )
+    async def write_stage(self, spec_text: str, stage: int, per_stage: int, data_facts: str = "") -> StageExam:
+        facts = (f"\n<data_profile>\n{data_facts}\n</data_profile>\nThese facts describe the data the app will serve. "
+                 "Never expect a result the data can't produce (e.g. a type with 0 spots). Still capture values "
+                 "instead of hard-coding them, and compare counts to captured `length`, never to literal numbers.") \
+            if data_facts else ""
+        system = f"{WRITER_SYSTEM}\n<spec>\n{spec_text}\n</spec>{facts}"
         reasoning = os.environ.get("ONSEN_EXAMINER_REASONING", "none")
-        # Guided JSON decoding can occasionally loop on whitespace; a tighter cap fails fast and retries.
-        exam = await self.llm.structured(system=system, prompt=prompt, output=StageExam, reasoning=reasoning,
-                                         max_tokens=8000)
-        exam, dropped = lint_stage(spec_text, repair_stage(exam))
-        if len(exam.scenarios) < max(3, per_stage // 2):
-            feedback = ("These scenarios used routes, fields, labels or text the spec doesn't define, so they were "
-                        "dropped:\n" + "\n".join(dropped[:12]) + "\nUse ONLY what the acceptance contract defines.")
-            again = await self.llm.structured(system=system, prompt=f"{prompt}\n\n{feedback}", output=StageExam,
-                                              reasoning=reasoning, max_tokens=8000)
-            again, dropped_again = lint_stage(spec_text, repair_stage(again))
-            exam.scenarios += again.scenarios
-            dropped += dropped_again
+        batch = int(os.environ.get("ONSEN_EXAM_BATCH", "4"))
+        exam = StageExam(stage=stage, scenarios=[])
+        dropped: list[str] = []
+        stories: list[str] = []
+        rounds = 0
+        while len(exam.scenarios) < per_stage and rounds < (per_stage // batch) + 3:
+            rounds += 1
+            want = min(batch, per_stage - len(exam.scenarios))
+            covered = ("\nAlready covered (write DIFFERENT behaviors):\n" + "\n".join(f"- {t}" for t in stories)
+                       if stories else "")
+            feedback = ("\nThese earlier scenarios were dropped because they used something the spec doesn't define:\n"
+                        + "\n".join(dropped[-6:])) if dropped else ""
+            prompt = (
+                f"Write exactly {want} hidden scenarios for Stage {stage}. Earlier stages must keep working, so at most "
+                f"one scenario in the whole stage may re-check an earlier stage. Return stage={stage}. Every field in "
+                f"the schema must be present; use null for fields a check or step doesn't use.{covered}{feedback}"
+            )
+            # Guided JSON decoding can occasionally loop; short outputs and a tight cap fail fast and retry.
+            part = await self.llm.structured(system=system, prompt=prompt, output=StageExam, reasoning=reasoning,
+                                             max_tokens=6000)
+            part, part_dropped = lint_stage(spec_text, repair_stage(part))
+            dropped += part_dropped
+            for sc in part.scenarios:
+                sc.id = f"s{stage}-{len(exam.scenarios) + 1:02d}"
+                exam.scenarios.append(sc)
+                stories.append(sc.story)
+        # Proofread: drop scenarios that contradict the spec or depend on unguaranteed data.
+        if exam.scenarios and os.environ.get("ONSEN_EXAM_AUDIT", "on") != "off":
+            listing = json.dumps([sc.model_dump(exclude={"stage"}) for sc in exam.scenarios], ensure_ascii=False)
+            audit = await self.llm.structured(
+                system=f"{AUDIT_SYSTEM}\n<spec>\n{spec_text}\n</spec>{facts}",
+                prompt=f"Stage {stage} scenarios (the executable language is documented below the spec):\n{listing}\n\n"
+                       f"Scenario language reference:\n{WRITER_SYSTEM}",
+                output=ExamAudit, reasoning=os.environ.get("ONSEN_EXAM_AUDIT_REASONING", "low"), max_tokens=12000)
+            bad = {f.id: f.reason for f in audit.flags}
+            dropped += [f"{sc.id}: {bad[sc.id]}" for sc in exam.scenarios if sc.id in bad]
+            exam.scenarios = [sc for sc in exam.scenarios if sc.id not in bad]
         self.dropped += [f"stage {stage} {d}" for d in dropped]
         exam.stage = stage
         exam.scenarios = exam.scenarios[: per_stage + 2]

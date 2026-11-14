@@ -123,3 +123,12 @@ class ScenarioResult(BaseModel):
 class JudgeVerdict(BaseModel):
     satisfied: bool
     reason: str = Field(description="One sentence a user would agree with")
+
+
+class ScenarioFlag(BaseModel):
+    id: str
+    reason: str = Field(description="Which spec rule the scenario contradicts, or which unguaranteed data it relies on")
+
+
+class ExamAudit(BaseModel):
+    flags: list[ScenarioFlag] = Field(description="Only scenarios that are wrong; empty if all are sound")

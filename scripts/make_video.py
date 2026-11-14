@@ -39,6 +39,7 @@ font-family:Inter,ui-sans-serif,system-ui,sans-serif}
 .cell{background:#161c23;border:1px solid #2a3440;border-radius:14px;padding:16px}
 .cell b{font-size:22px} .cell div{color:#9fb0c0;font-size:16px;margin-top:6px} .cell i{font-style:normal;font-size:13px;color:#f7b733}
 .foot{margin-top:26px;font-size:18px;color:#8b98a5}
+code{font-family:ui-monospace,Menlo,monospace;background:#0b0f14;padding:0 6px;border-radius:6px}
 """
 CARDS = {
     "title": """<div class="wrap"><img src="capybara.svg" width="260"><h1>Onsen</h1>
@@ -51,6 +52,13 @@ CARDS = {
       <div class="cell"><b>Examiner</b><div>sealed, hidden exam</div><i>Qwen 3.8 + Playwright</i></div>
       <div class="cell"><b>Nap Guard</b><div>the only one who wakes you</div><i>deterministic</i></div>
       </div><div class="foot">Qwen 3.8 27B on W&amp;B Inference · BAND rooms · Nimble · ElevenLabs</div></div>""",
+    "rehearsal": """<div class="wrap" style="text-align:left;max-width:980px"><div class="tag">From the rehearsal run</div>
+      <p style="color:#e6edf3;font-size:24px">To pass a bad check, the Builder edited the dataset. The Reviewer said no:</p>
+      <div class="cell" style="font-size:21px;line-height:1.5;color:#ffb3ad"><b style="color:#ff7b72">[review] stage=1 BLOCKED</b>:
+      data/spots.json:352 — <code>city</code> was mutated from Scout's <span style="color:#f7b733;font-weight:700">Worcestershire</span> to
+      <span style="color:#f7b733;font-weight:700">worcestershire</span> … That is special-casing data to a test-looking input, and it is not a contract fix.</div>
+      <p>The Builder reverted it. Then we fixed the factory: approvals now bind to the commit that passed, a late block reopens
+      the stage, and builders get a <code>[dispute]</code> channel instead of a reason to bend data.</p></div>""",
     "outro": """<div class="wrap"><img src="capybara.svg" width="220"><h1>Onsen</h1>
       <p>Specs go in. Software comes out. The capybara keeps napping.</p>
       <div class="foot">Built on BAND · with Nimble · Qwen 3.8 on W&amp;B</div></div>""",
@@ -71,6 +79,7 @@ async def render_card(name: str, out_png: Path) -> Path:
     from playwright.async_api import async_playwright
 
     html = out_png.with_suffix(".html")
+    html.parent.mkdir(parents=True, exist_ok=True)
     html.write_text(f"<!doctype html><meta charset=utf-8><style>{CARD_CSS}</style>{CARDS[name]}")
     shutil.copyfile(ROOT / "assets" / "capybara.svg", html.parent / "capybara.svg")
     async with async_playwright() as p:

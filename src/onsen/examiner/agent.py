@@ -129,17 +129,34 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         if not stages:
             raise ValueError(f"{path.name} has no '## Stage N' sections to examine")
         per_stage = int(kv.get("per_stage") or os.environ.get("ONSEN_SCENARIOS_PER_STAGE", "8"))
+        dropped_note = ""
         if self.writer is not None:
-            stage_exams = []
-            for n, _section in stages:
-                await tools.send_event(content=f"Writing hidden scenarios for stage {n}…", message_type="thought")
-                stage_exams.append(await self.writer.write_stage(spec_text, n, per_stage))
+            self.writer.dropped = []
+            await tools.send_event(content=f"Writing hidden scenarios for {len(stages)} stages in parallel…",
+                                   message_type="thought")
+            import asyncio
+
+            facts = ""
+            data_arg = kv.get("data")
+            if data_arg:
+                data_path = Path(data_arg)
+                if not data_path.is_absolute():
+                    data_path = Path(os.environ.get("ONSEN_WORKSPACE", ".")) / data_arg
+                if data_path.exists():
+                    from .seal import data_profile
+
+                    facts = data_profile(data_path)
+            stage_exams = list(await asyncio.gather(*(self.writer.write_stage(spec_text, n, per_stage, facts)
+                                                      for n, _section in stages)))
             from datetime import UTC, datetime
             import secrets
 
             exam = SealedExam(spec_name=path.stem, spec_sha256=sha256_hex(spec_text.encode()),
                               created_at=datetime.now(UTC).isoformat(), nonce=secrets.token_hex(16),
                               author=self.writer.model, stages=stage_exams)
+            if self.writer.dropped:
+                dropped_note = (f" ({len(self.writer.dropped)} model-written scenarios were dropped by the contract lint "
+                                f"and proofreading before sealing)")
         elif os.environ.get("ONSEN_EXAM_FILE"):
             exam = load_fixture_exam(os.environ["ONSEN_EXAM_FILE"], path.stem, spec_text)
         else:
@@ -152,7 +169,7 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         await self._mention_with_napguard(
             tools,
             f"[seal] run={run_id} spec={exam.spec_name} stages={len(exam.stages)} scenarios={exam.scenario_count} "
-            f"sha256={digest}\nThe exam is sealed. Builders won't see it: it's on my disk, and BAND only delivers "
+            f"sha256={digest}\nThe exam is sealed{dropped_note}. Builders won't see it: it's on my disk, and BAND only delivers "
             f"messages to the agents they mention. When a stage is ready, post `[ready] stage=N url=…` to me. "
             f"I'll publish the exam after the human ships, and its hash will match this one.",
             reply_to,

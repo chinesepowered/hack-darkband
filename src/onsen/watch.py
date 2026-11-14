@@ -62,7 +62,12 @@ def main(argv: list[str] | None = None) -> int:
     seen: set[str] = set()
     with httpx.Client(base_url=API, headers={"X-API-Key": os.environ["BAND_USER_KEY"]}, timeout=30) as c:
         while True:
-            msgs = fetch_all(c, args.room)
+            try:
+                msgs = fetch_all(c, args.room)
+            except httpx.HTTPError as exc:  # BAND hiccups (5xx, timeouts) shouldn't end the watch
+                print(f"  (watch: {type(exc).__name__}, retrying)", file=sys.stderr)
+                time.sleep(10)
+                continue
             done = False
             for m in msgs:
                 if m["id"] in seen:

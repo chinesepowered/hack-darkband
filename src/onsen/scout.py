@@ -60,6 +60,8 @@ HELP = (
 
 
 def split_command(text: str) -> tuple[str, str]:
+    """Commands are explicit. An untagged message is only researched if it is actually a question;
+    notes, acks and instructions addressed to Scout get no web search (and no reply)."""
     tag, rest = parse_tagged(text)
     if tag in ("question", "blocking-question"):
         return "ask", rest
@@ -68,7 +70,8 @@ def split_command(text: str) -> tuple[str, str]:
     m = re.match(r"^\s*(ask|docs|data|tally|help)\s*[:\-]?\s*(.*)$", rest if tag else text, re.I | re.S)
     if m:
         return m.group(1).lower(), m.group(2).strip()
-    return "ask", (rest if tag else text).strip()
+    body = (rest if tag else text).strip()
+    return ("ask", body) if "?" in body else ("note", body)
 
 
 def workspace() -> Path:
@@ -128,7 +131,9 @@ class ScoutAdapter(SimpleAdapter[Any]):
         reply_to = [msg.sender_id]
         state = JsonState("scout", room_id, {"answered": 0, "escalated": 0, "docs": 0, "data": 0, "failed": 0})
         try:
-            if cmd == "help" or (cmd == "ask" and not arg):
+            if cmd == "note":
+                await tools.no_reply("not a question or command; nothing to look up")
+            elif cmd == "help" or (cmd == "ask" and not arg):
                 await tools.send_message(HELP, mentions=reply_to)
             elif cmd == "tally":
                 d = state.data
@@ -200,6 +205,16 @@ class ScoutAdapter(SimpleAdapter[Any]):
     async def _data(self, arg: str, tools: Any, reply_to: list[str], state: JsonState) -> None:
         kv = parse_kv(arg)
         request = re.sub(r"\b(schema|out|effort)=\S+", "", arg).strip()
+        out_rel = kv.get("out") or "data/dataset.json"
+        done = state.data.setdefault("datasets", {})
+        if out_rel in done and not kv.get("refresh"):
+            prev = done[out_rel]
+            await tools.send_message(
+                f"[data] rows={prev['rows']} duplicate=true saved={out_rel}\nThat dataset is already built for this room "
+                f"(at {prev['at']}), so I'm not running Nimble again or overwriting it. Add `refresh=true` to rebuild it.",
+                mentions=reply_to,
+            )
+            return
         schema_path = Path(kv.get("schema") or os.environ.get("ONSEN_DEFAULT_SCHEMA",
                                                              REPO_ROOT / "specs" / "capyfinder.spot.schema.json"))
         if not schema_path.is_absolute():
@@ -209,13 +224,22 @@ class ScoutAdapter(SimpleAdapter[Any]):
                                metadata={"tool": "nimble.agents.run", "use_case": "dataset_building", "schema": schema_path.name})
         result: DatasetResult = await self.nimble.dataset(request, schema, effort=kv.get("effort"))
         rows = normalize_rows(result.rows)
-        out_path = workspace() / (kv.get("out") or "data/dataset.json")
+        # Every row carries every field the schema defines ("" when the web had nothing), so the data is uniform.
+        item_props = (((schema.get("properties") or {}).get(next(iter(schema.get("properties") or {"": 0})), {})
+                       .get("items") or {}).get("properties") or {})
+        for row in rows:
+            for field in item_props:
+                row.setdefault(field, "")
+        out_path = workspace() / out_rel
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(rows, indent=2, ensure_ascii=False) + "\n")
         out_path.with_suffix(".sources.json").write_text(
             json.dumps({"trust": result.trust, "sources": result.sources}, indent=2, ensure_ascii=False, default=str)
         )
         state.data["data"] += 1
+        from datetime import datetime, timezone
+
+        done[out_rel] = {"rows": len(rows), "at": datetime.now(timezone.utc).strftime("%H:%M UTC")}
         sample = "\n".join(
             f"• {r.get('name')} — {r.get('city')}, {r.get('country')} ({r.get('type', '?')}) · {r.get('source_url')}"
             for r in rows[:5]

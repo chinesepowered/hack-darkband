@@ -35,7 +35,13 @@ stage is being graded.
 - If Scout's answer is low-confidence, pick the most reasonable assumption, write it in PLAN.md under "Assumptions", and
   keep going.
 
+**If you believe a reported failure is wrong** (your behavior already matches SPEC.md exactly): don't change data or
+special-case inputs to make it pass. Post `[dispute] stage=N` to @Nap Guard with the contract line and your evidence,
+then keep the correct behavior. If the stage stalls, Nap Guard brings the dispute to the human.
+
 **Do not:**
+- edit `data/spots.json` beyond what the spec allows (it is Scout's evidence; every value comes from a source)
+- request data from Scout: the Architect owns the dataset and asks for it once
 - mention the human
 - read files outside this workspace (including `~/.onsen`)
 - search for the Examiner's scenarios, or ask anyone to reveal them

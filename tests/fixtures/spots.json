@@ -56,7 +56,8 @@
     "source_url": "https://www.ishikawazoo.jp/index.html",
     "adult_price": "¥840",
     "capybara_experience": "'Capybara-yu' winter bath in a 400-liter rock bath with mini waterfall, with locally grown yuzu added",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": ""
   },
   {
     "id": "suzaka-city-zoo-suzaka",
@@ -67,7 +68,8 @@
     "source_url": "https://japancurious.com/blog/japan-capybara-onsen-winter",
     "adult_price": "Free",
     "capybara_experience": "Capybara onsen runs early November to late February in a mountain setting; free admission",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": ""
   },
   {
     "id": "anitouch-kichijoji-tokyo-kichijoji",
@@ -78,7 +80,8 @@
     "source_url": "https://izushaboten.com/news/",
     "adult_price": "¥1,600 (weekday) / ¥1,800 (weekend/holiday)",
     "capybara_experience": "Indoor animal-interaction venue by the Izu Shaboten Zoo group; first Anitouch with a capybara rock bath, no time limit",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": ""
   },
   {
     "id": "capybara-cafe-moffu-tokyo-harajuku",
@@ -148,7 +151,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Viewing only; capybaras in Elephant Odyssey, shared with tapirs and guanacos",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "houston-zoo-houston",
@@ -158,7 +163,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Viewing only; South America's Pantanal exhibit, herd usually 3-5 capybaras",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "san-antonio-zoo-san-antonio",
@@ -168,7 +175,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Behind-the-scenes feeding encounter with Ralphie, Fauna and Tupi; Fri-Sun 1:15pm, online booking",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "dallas-zoo-dallas",
@@ -178,7 +187,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Viewing only; Simmons Hippo Outpost, grassy banks",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "austin-zoo-austin",
@@ -189,7 +200,8 @@
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "adult_price": "$40 (encounter)",
     "capybara_experience": "Rescue zoo; capybara encounters booked weekends plus Monday and Wednesday, minimum age 10",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": ""
   },
   {
     "id": "wildlife-world-zoo-aquarium-litchfield-park",
@@ -199,7 +211,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Encounter available (phone booking); outdoor season Oct-Apr",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "out-of-africa-wildlife-park-camp-verde",
@@ -209,7 +223,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Safari-style viewing; capybaras roam a mixed habitat",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "jacksonville-zoo-and-gardens-jacksonville",
@@ -219,7 +235,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Viewing only; River's Edge, inside Range of the Jaguar",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "palm-beach-zoo-west-palm-beach",
@@ -229,7 +247,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Capybara Experience encounter at the Tropics of the Americas exhibit; online booking",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "zoo-miami-miami",
@@ -239,7 +259,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Viewing only; Amazon and Beyond exhibit with large naturalistic pool",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "brevard-zoo-melbourne",
@@ -249,7 +271,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Viewing only; Rainforest Revealed exhibit",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "turtle-back-zoo-west-orange",
@@ -259,7 +283,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Viewing only; South American exhibit with pool and grassy area",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "cape-may-county-park-zoo-cape-may-court-house",
@@ -270,7 +296,8 @@
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "adult_price": "Free admission",
     "capybara_experience": "Viewing only; spacious South American-themed yard with a pond; free admission",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": ""
   },
   {
     "id": "lehigh-valley-zoo-schnecksville",
@@ -280,7 +307,9 @@
     "country": "US",
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "capybara_experience": "Seasonal small-group capybara encounter, staff-led, booked online",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "smithsonian-s-national-zoo-washington",
@@ -291,7 +320,8 @@
     "source_url": "https://capybaratalks.com/which-zoos-have-capybaras/",
     "adult_price": "Free admission",
     "capybara_experience": "Viewing only; Amazonia exhibit, indoor rainforest building, free admission",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": ""
   },
   {
     "id": "the-capybara-caf-st-augustine-st-augustine",
@@ -301,7 +331,9 @@
     "country": "US",
     "source_url": "https://capyfinder.com/locations",
     "capybara_experience": "Capybara cafe",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "capyfriends-cafe-north-georgia-wildlife-park-helen",
@@ -312,7 +344,8 @@
     "source_url": "https://capyfinder.com/locations",
     "adult_price": "$65 (Capybara and Friends Experience)",
     "capybara_experience": "Capybara cafe at North Georgia Wildlife Park; also offers Capybara Experience packages",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": ""
   },
   {
     "id": "dk-farms-gardens-largo",
@@ -322,7 +355,9 @@
     "country": "US",
     "source_url": "https://capyfinder.com/locations",
     "capybara_experience": "Capybara farm",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "nurtured-by-nature-valley-center",
@@ -332,7 +367,9 @@
     "country": "US",
     "source_url": "https://capyfinder.com/locations",
     "capybara_experience": "Sanctuary/rescue",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "london-zoo-london",
@@ -342,7 +379,9 @@
     "country": "GB",
     "source_url": "https://grumpycapy.com/guides/see-capybaras-uk",
     "capybara_experience": "General viewing plus a bookable meet-the-capybara experience",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "hertfordshire-zoo-hertfordshire",
@@ -352,7 +391,9 @@
     "country": "GB",
     "source_url": "https://grumpycapy.com/guides/see-capybaras-uk",
     "capybara_experience": "Keeper-led encounter with hand-feeding and scratching",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "hobbledown-heath-hounslow-london",
@@ -362,7 +403,9 @@
     "country": "GB",
     "source_url": "https://grumpycapy.com/guides/see-capybaras-uk",
     "capybara_experience": "One of the few explicit hand-feeding sessions",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "drusillas-park-east-sussex",
@@ -372,7 +415,9 @@
     "country": "GB",
     "source_url": "https://grumpycapy.com/guides/see-capybaras-uk",
     "capybara_experience": "General viewing, strong for younger children",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "hoo-zoo-and-dinosaur-world-shropshire",
@@ -382,7 +427,9 @@
     "country": "GB",
     "source_url": "https://grumpycapy.com/guides/see-capybaras-uk",
     "capybara_experience": "Encounters available; smaller site",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "twycross-zoo-leicestershire",
@@ -392,7 +439,9 @@
     "country": "GB",
     "source_url": "https://grumpycapy.com/guides/see-capybaras-uk",
     "capybara_experience": "General viewing",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "blackpool-zoo-blackpool",
@@ -402,7 +451,9 @@
     "country": "GB",
     "source_url": "https://grumpycapy.com/guides/see-capybaras-uk",
     "capybara_experience": "General viewing",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "longleat-wiltshire",
@@ -412,7 +463,9 @@
     "country": "GB",
     "source_url": "https://grumpycapy.com/guides/see-capybaras-uk",
     "capybara_experience": "Drive-through safari, African Village section; first capybara birth recorded there",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   },
   {
     "id": "jersey-zoo-durrell-jersey",
@@ -422,6 +475,8 @@
     "country": "GB",
     "source_url": "https://grumpycapy.com/guides/see-capybaras-uk",
     "capybara_experience": "General viewing; repeat breeding and public naming votes for pups",
-    "verified_on": "2026-11-14"
+    "verified_on": "2026-11-14",
+    "hours": "",
+    "adult_price": ""
   }
 ]
