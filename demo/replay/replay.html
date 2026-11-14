@@ -25,12 +25,13 @@
   .who .n { font-weight: 600; font-size: 13px; }
   .who .r { color: var(--muted); font-size: 11px; }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pass); margin-left: auto; opacity: .8; }
-  main { display: flex; flex-direction: column; min-width: 0; }
+  main { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100vh; overflow: hidden; }
   header { padding: 12px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
   header .t { font-weight: 700; }
   header .clock { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
   .badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--chip); color: var(--muted); }
-  #feed { flex: 1; overflow: hidden; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: auto; }
+  #feed { flex: 1 1 0; min-height: 0; overflow: hidden; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: auto; }
+  #feed > * { flex: none; }
   .msg { display: grid; grid-template-columns: 34px 1fr; gap: 10px; animation: in .35s ease-out; }
   .msg .head { display: flex; gap: 8px; align-items: baseline; }
   .msg .name { font-weight: 700; }
@@ -127,7 +128,7 @@ function render(text) {
   h = h.replace(/^\[([a-z-]+)\]/, (m, t) => {
     let cls = t;
     if (t === 'exam') cls += /verdict=PASS/.test(text) ? ' pass' : ' fail';
-    if (t === 'review') cls += /APPROVED/.test(text) && !/BLOCKED/.test(text) ? ' ok' : ' no';
+    if (t === 'review') cls += /BLOCKED/.test(text) ? ' no' : (/APPROVED/.test(text) ? ' ok' : '');
     return `<span class="tag ${cls}">[${t}]</span>`;
   });
   return h;

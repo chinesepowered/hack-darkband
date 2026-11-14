@@ -35,8 +35,14 @@ UUID_MENTION = re.compile(r"@\[\[([0-9a-f-]{36})\]\]")
 PATH_RE = re.compile(r"/tmp/claude-[^\s\"']*?/runs/([^/\s\"']+)")
 
 
+AGENT_HANDLE = re.compile(r"@?[a-z0-9_.-]+/(architect|builder|reviewer|scout|examiner|nap-guard)\b")
+SLUG_NAMES = {"architect": "Architect", "builder": "Builder", "reviewer": "Reviewer", "scout": "Scout",
+              "examiner": "Examiner", "nap-guard": "Nap Guard"}
+
+
 def clean_text(text: str, names: dict[str, str]) -> str:
     text = UUID_MENTION.sub(lambda m: "@" + names.get(m.group(1), "someone"), text or "")
+    text = AGENT_HANDLE.sub(lambda m: "@" + SLUG_NAMES[m.group(1)], text)  # owner handles reveal the account name
     text = PATH_RE.sub(r"~/onsen-runs/\1", text)
     text = re.sub(r"/tmp/claude-[^\s\"']+", "~/.onsen", text)
     return text.strip()
@@ -76,7 +82,7 @@ def event_line(m: dict) -> str | None:
     except json.JSONDecodeError:
         return None
     name, args = j.get("name", ""), j.get("args") or {}
-    if name.startswith("band_") or name in ("todowrite", "todoread"):
+    if name.startswith("band_") or name in ("todowrite", "todoread", "invalid", ""):
         return None
     if name == "bash":
         return "bash: " + (args.get("command") or "").splitlines()[0][:110]
