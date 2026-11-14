@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "spots": {
+      "type": "array",
+      "description": "One row per public place where visitors can see capybaras",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "city": {"type": "string"},
+          "country": {"type": "string", "description": "ISO 3166-1 alpha-2 code, uppercase"},
+          "type": {"type": "string", "enum": ["zoo", "onsen", "cafe", "sanctuary", "farm", "park"]},
+          "capybara_experience": {"type": "string", "description": "What visitors can do with the capybaras"},
+          "hours": {"type": "string"},
+          "adult_price": {"type": "string", "description": "Adult admission in local currency, as written by the source"},
+          "source_url": {"type": "string", "description": "The page this row's facts came from"}
+        },
+        "required": ["name", "city", "country", "type", "source_url"]
+      }
+    }
+  },
+  "required": ["spots"]
+}

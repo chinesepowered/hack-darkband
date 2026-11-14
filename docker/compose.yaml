@@ -1,0 +1,25 @@
+# docker compose -f docker/compose.yaml up --build examiner
+services:
+  examiner:
+    build:
+      context: ..
+      dockerfile: docker/examiner.Dockerfile
+    restart: unless-stopped
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY so the Examiner can write the exam}
+      ONSEN_EXAMINER_MODEL: ${ONSEN_EXAMINER_MODEL:-claude-opus-5-5}
+      ONSEN_PASS_THRESHOLD: ${ONSEN_PASS_THRESHOLD:-0.9}
+      ONSEN_SCENARIOS_PER_STAGE: ${ONSEN_SCENARIOS_PER_STAGE:-8}
+      # The app under test runs on the host; inside the container that is host.docker.internal.
+      ONSEN_LOCALHOST_ALIAS: host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Sealed exams live only in this named volume, never on the host's filesystem.
+      - examiner-data:/data/onsen
+      # Revealed exams (after shipping) land here so you can sha256sum them.
+      - ../revealed:/data/revealed
+      - ${HOME}/.onsen/agent_config.yaml:/run/secrets/agent_config.yaml:ro
+
+volumes:
+  examiner-data: {}

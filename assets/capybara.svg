@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t d">
+  <title id="t">Onsen mascot</title>
+  <desc id="d">A sleepy capybara soaking in a hot spring with a yuzu on its head while steam rises.</desc>
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fd3e6"/>
+      <stop offset="1" stop-color="#4fa3c0"/>
+    </linearGradient>
+    <linearGradient id="fur" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b9845b"/>
+      <stop offset="1" stop-color="#9a6743"/>
+    </linearGradient>
+    <radialGradient id="yuzu" cx="0.38" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#ffe08a"/>
+      <stop offset="0.55" stop-color="#f7b733"/>
+      <stop offset="1" stop-color="#e8962a"/>
+    </radialGradient>
+    <clipPath id="pool">
+      <ellipse cx="256" cy="366" rx="210" ry="58"/>
+    </clipPath>
+    <clipPath id="above-water">
+      <rect x="0" y="0" width="512" height="352"/>
+    </clipPath>
+  </defs>
+
+  <!-- steam -->
+  <g fill="none" stroke="#bcd9e3" stroke-width="10" stroke-linecap="round" opacity="0.9">
+    <path d="M118 150c-18-22 18-34 0-58s18-36 0-60"/>
+    <path d="M404 170c-18-22 18-34 0-58s18-36 0-60"/>
+    <path d="M440 260c-12-15 12-24 0-40"/>
+  </g>
+
+  <!-- stone rim of the onsen -->
+  <ellipse cx="256" cy="372" rx="226" ry="70" fill="#8b8f98"/>
+  <ellipse cx="256" cy="366" rx="210" ry="58" fill="#a4a8b1"/>
+
+  <!-- capybara (only the part above the water is drawn) -->
+  <g clip-path="url(#above-water)">
+    <!-- back / body -->
+    <ellipse cx="236" cy="330" rx="150" ry="78" fill="url(#fur)"/>
+    <!-- head: big boxy capybara head with a blunt snout -->
+    <path d="M166 214c6-40 52-62 112-60 64 2 112 26 122 74 6 30-2 62-24 80-30 24-92 30-148 22-50-8-72-40-66-80 1-12 2-24 4-36z"
+          fill="url(#fur)"/>
+    <!-- snout -->
+    <path d="M326 214c40-4 74 18 76 50 2 30-24 50-62 52-36 2-60-18-60-48 0-28 18-52 46-54z" fill="#a8734d"/>
+    <!-- ears -->
+    <ellipse cx="200" cy="170" rx="22" ry="18" fill="#8a5a3a"/>
+    <ellipse cx="200" cy="172" rx="11" ry="8" fill="#6e452c"/>
+    <ellipse cx="262" cy="156" rx="20" ry="16" fill="#8a5a3a"/>
+    <ellipse cx="262" cy="158" rx="10" ry="7" fill="#6e452c"/>
+    <!-- sleepy closed eyes -->
+    <g fill="none" stroke="#3a281d" stroke-width="7" stroke-linecap="round">
+      <path d="M232 220q14 12 28 0"/>
+      <path d="M298 214q12 10 24 0"/>
+    </g>
+    <!-- nose and mouth -->
+    <rect x="364" y="236" width="24" height="16" rx="8" fill="#3a281d"/>
+    <path d="M376 256v10m0 0q-10 10-22 4m22-4q8 9 18 4" fill="none" stroke="#3a281d" stroke-width="5" stroke-linecap="round"/>
+    <!-- blush -->
+    <ellipse cx="268" cy="262" rx="20" ry="11" fill="#f2a7a0" opacity="0.7"/>
+  </g>
+
+  <!-- water surface, kept inside the stone rim -->
+  <g clip-path="url(#pool)">
+    <path d="M30 352c40-18 80 18 120 0s80 18 120 0 80 18 120 0 80 18 120 0v80H30z" fill="url(#water)"/>
+    <g fill="none" stroke="#e6f7fc" stroke-width="5" stroke-linecap="round" opacity="0.8">
+      <path d="M110 384q22 8 44 0"/>
+      <path d="M300 392q26 8 52 0"/>
+      <path d="M200 404q18 6 36 0"/>
+    </g>
+  </g>
+
+  <!-- yuzu on its head -->
+  <circle cx="258" cy="128" r="32" fill="url(#yuzu)"/>
+  <circle cx="258" cy="128" r="32" fill="none" stroke="#d98420" stroke-width="2" opacity="0.5"/>
+  <path d="M258 98c4-14 20-22 34-18-6 14-20 22-34 18z" fill="#5fae4f"/>
+  <circle cx="246" cy="116" r="5" fill="#fff6d0" opacity="0.8"/>
+
+  <!-- z z Z -->
+  <g fill="#5b6b7a" font-family="ui-rounded, 'Arial Rounded MT Bold', 'Helvetica Neue', Arial, sans-serif" font-weight="700">
+    <text x="330" y="140" font-size="30">z</text>
+    <text x="356" y="112" font-size="40">z</text>
+    <text x="390" y="78" font-size="54">Z</text>
+  </g>
+</svg>

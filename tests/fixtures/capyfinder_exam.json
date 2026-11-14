@@ -1,0 +1,95 @@
+{
+  "_note": "TEST FIXTURE for the Examiner's runner. Not the demo exam: in a real run Claude writes a fresh exam at seal time and it never leaves the Examiner's disk until reveal.",
+  "stages": [
+    {
+      "stage": 1,
+      "scenarios": [
+        {"id": "s1-01", "story": "A health check reports the service is up and how many spots it has.", "kind": "http",
+         "requests": [{"path": "/api/health", "checks": [
+           {"type": "status", "number": 200}, {"type": "field", "field": "ok", "op": "eq", "value": "true"},
+           {"type": "field", "field": "spots", "op": "gte", "value": "1"}]}]},
+        {"id": "s1-02", "story": "Every spot in the list has the contract's fields and a real source link.", "kind": "http",
+         "requests": [{"path": "/api/spots", "checks": [
+           {"type": "status", "number": 200}, {"type": "json_type", "value": "list"}, {"type": "min_items", "number": 3},
+           {"type": "has_fields", "value": "id,name,city,country,type,source_url,verified_on"},
+           {"type": "every_item", "field": "source_url", "op": "regex", "value": "^https?://"}]}]},
+        {"id": "s1-03", "story": "Filtering by a lowercase country code still returns only that country's spots.", "kind": "http",
+         "requests": [
+           {"path": "/api/spots", "capture": "c=[0].country", "checks": [{"type": "min_items", "number": 1}]},
+           {"path": "/api/spots?country={c|lower}", "checks": [
+             {"type": "status", "number": 200}, {"type": "min_items", "number": 1},
+             {"type": "every_item", "field": "country", "op": "eq", "value": "{c}"}]}]},
+        {"id": "s1-04", "story": "Asking for a spot that doesn't exist gives a clear 404.", "kind": "http",
+         "requests": [{"path": "/api/spots/definitely-not-a-capybara-spot", "checks": [
+           {"type": "status", "number": 404}, {"type": "field", "field": "error", "op": "exists"}]}]},
+        {"id": "s1-05", "story": "An unknown type filter is rejected instead of silently returning everything.", "kind": "http",
+         "requests": [{"path": "/api/spots?type=volcano", "checks": [
+           {"type": "status", "number": 400}, {"type": "field", "field": "error", "op": "exists"}]}]},
+        {"id": "s1-06", "story": "Searching for a city with stray spaces and different case still finds its spots.", "kind": "http",
+         "requests": [
+           {"path": "/api/spots", "capture": "city=[0].city", "checks": []},
+           {"path": "/api/spots?q=%20{city|upper|url}%20", "checks": [
+             {"type": "min_items", "number": 1}, {"type": "some_item", "field": "city", "op": "eq", "value": "{city}"}]}]},
+        {"id": "s1-07", "story": "A search with no matches returns an empty list, not an error.", "kind": "http",
+         "requests": [{"path": "/api/spots?q=zzzz-no-such-capybara", "checks": [
+           {"type": "status", "number": 200}, {"type": "max_items", "number": 0}]}]},
+        {"id": "s1-08", "story": "Opening a spot by its id returns that exact spot.", "kind": "http",
+         "requests": [
+           {"path": "/api/spots", "capture": "id=[0].id; name=[0].name", "checks": []},
+           {"path": "/api/spots/{id}", "checks": [
+             {"type": "status", "number": 200}, {"type": "field", "field": "id", "op": "eq", "value": "{id}"},
+             {"type": "field", "field": "name", "op": "eq", "value": "{name}"}]}]}
+      ]
+    },
+    {
+      "stage": 2,
+      "scenarios": [
+        {"id": "s2-01", "story": "The home page shows the CapyFinder heading and a list of spots.", "kind": "web",
+         "steps": [{"action": "goto", "path": "/"},
+                   {"action": "expect_visible", "role": "heading", "name": "CapyFinder"},
+                   {"action": "expect_count", "testid": "spot-card", "min": 1}]},
+        {"id": "s2-02", "story": "Searching for a spot by name finds it.", "kind": "web",
+         "requests": [{"path": "/api/spots", "capture": "name=[0].name", "checks": []}],
+         "steps": [{"action": "goto", "path": "/"},
+                   {"action": "fill", "label": "Search spots", "value": "{name}"},
+                   {"action": "press", "label": "Search spots", "value": "Enter"},
+                   {"action": "expect_count", "testid": "spot-card", "min": 1},
+                   {"action": "expect_text", "text": "{name}"}]},
+        {"id": "s2-03", "story": "A search with no matches says so instead of showing a blank page.", "kind": "web",
+         "steps": [{"action": "goto", "path": "/"},
+                   {"action": "fill", "label": "Search spots", "value": "zzzz-no-such-capybara"},
+                   {"action": "press", "label": "Search spots", "value": "Enter"},
+                   {"action": "expect_text", "text": "No capybaras here yet"},
+                   {"action": "expect_count", "testid": "spot-card", "max": 0}]},
+        {"id": "s2-04", "story": "Every spot card links to the page its facts came from.", "kind": "web",
+         "steps": [{"action": "goto", "path": "/"}, {"action": "expect_link", "name": "Source", "value": "http"}]},
+        {"id": "s2-05", "story": "An unknown spot page says the spot wasn't found.", "kind": "web",
+         "steps": [{"action": "goto", "path": "/spots/definitely-not-a-capybara-spot"},
+                   {"action": "expect_text", "text": "Spot not found"}]},
+        {"id": "s2-06", "story": "Picking a country in the Country menu narrows the list to that country.", "kind": "web",
+         "requests": [{"path": "/api/spots", "capture": "c=[0].country", "checks": []}],
+         "steps": [{"action": "goto", "path": "/"},
+                   {"action": "select", "label": "Country", "value": "{c}"},
+                   {"action": "expect_url_contains", "value": "country={c}"},
+                   {"action": "expect_count", "testid": "spot-card", "min": 1},
+                   {"action": "judge", "text": "Every spot listed on the page is in the country with code {c}"}]}
+      ]
+    },
+    {
+      "stage": 3,
+      "scenarios": [
+        {"id": "s3-01", "story": "The stats total matches the number of spots in the list.", "kind": "http",
+         "requests": [
+           {"path": "/api/spots", "capture": "n=length", "checks": []},
+           {"path": "/api/stats", "checks": [{"type": "status", "number": 200},
+                                             {"type": "field", "field": "total", "op": "eq", "value": "{n}"}]}]},
+        {"id": "s3-02", "story": "Ticking 'Hot spring spots only' still shows hot-spring spots.", "kind": "web",
+         "steps": [{"action": "goto", "path": "/"}, {"action": "check", "label": "Hot spring spots only"},
+                   {"action": "expect_url_contains", "value": "onsen=1"},
+                   {"action": "expect_count", "testid": "spot-card", "min": 1}]},
+        {"id": "s3-03", "story": "The footer says when the data was last verified.", "kind": "web",
+         "steps": [{"action": "goto", "path": "/"}, {"action": "expect_text", "text": "Data verified 20"}]}
+      ]
+    }
+  ]
+}
