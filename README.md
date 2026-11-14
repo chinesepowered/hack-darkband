@@ -66,6 +66,7 @@ Each failure taught the factory something, and the fix went into the factory its
 You need:
 - Python 3.11+ and [uv](https://docs.astral.sh/uv/)
 - Node 20+ for OpenCode (`npm i -g opencode-ai`)
+- a Chromium for the Examiner's Playwright: `uv run playwright install chromium` (or point `ONSEN_CHROMIUM_PATH` at one)
 - three keys in `.env`: `BAND_USER_KEY`, `NIMBLE_API_KEY` and `WANDB_API_KEY`
 
 Everything runs headless; no desktop is required.

@@ -133,4 +133,4 @@ agents, their tool calls and the Work tab live.
 
 - [x] Demo video (`demo/onsen-demo.mp4`, built from run 4)
 - [x] Run 4 transcript, receipt and revealed exam in `runs/run4/`
-- [ ] README quickstart verified from a clean checkout
+- [x] README quickstart: a fresh clone runs `uv sync` and passes all 29 tests; the factory itself ran live in runs 1–4
