@@ -96,7 +96,11 @@ KV_RE = re.compile(r"""(\w[\w.-]*)=("[^"]*"|'[^']*'|\S+)""")
 
 
 def parse_kv(text: str) -> dict[str, str]:
-    """Parse ``key=value`` pairs (values may be quoted) from free text."""
+    """Parse ``key=value`` pairs (values may be quoted) from free text.
+
+    The first occurrence of a key wins: the header line is authoritative, and the prose under it may quote other
+    commands (run 4: a `[ready]` that promised "I will post `[dispute] stage=2`" parsed as stage "2`").
+    """
     out: dict[str, str] = {}
     for key, raw in KV_RE.findall(text):
         value = raw
@@ -105,7 +109,9 @@ def parse_kv(text: str) -> dict[str, str]:
                 value = shlex.split(raw)[0]
             except ValueError:
                 value = raw.strip("\"'")
-        out[key.lower()] = value
+        else:
+            value = raw.rstrip("`'\".,;:)]}") or raw
+        out.setdefault(key.lower(), value)
     return out
 
 

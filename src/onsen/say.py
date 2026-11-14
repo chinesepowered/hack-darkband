@@ -24,24 +24,26 @@ def main(argv: list[str] | None = None) -> int:
     load_env()
     ap = argparse.ArgumentParser()
     ap.add_argument("text", nargs="+")
-    ap.add_argument("--to", default=NAMES["napguard"])
+    ap.add_argument("--to", default=NAMES["napguard"], help="agent name, or several separated by commas")
     ap.add_argument("--room")
     args = ap.parse_args(argv)
     room = args.room or (onsen_home() / "last-room").read_text().strip()
-    key = KEY_BY_NAME.get(args.to.lower(), args.to.lower())
     cfg = yaml.safe_load(agent_config_path().read_text()) or {}
-    if key not in cfg:
-        print(f"Unknown agent {args.to!r}", file=sys.stderr)
+    keys = [KEY_BY_NAME.get(t.strip().lower(), t.strip().lower()) for t in args.to.split(",") if t.strip()]
+    unknown = [k for k in keys if k not in cfg]
+    if unknown:
+        print(f"Unknown agent(s) {unknown!r}", file=sys.stderr)
         return 2
     text = " ".join(args.text)
-    body = {"message": {"content": f"@{NAMES.get(key, args.to)} {text}",
-                        "mentions": [{"id": cfg[key]["agent_id"], "name": NAMES.get(key, args.to)}]}}
+    names = [NAMES.get(k, k) for k in keys]
+    body = {"message": {"content": " ".join(f"@{n}" for n in names) + f" {text}",
+                        "mentions": [{"id": cfg[k]["agent_id"], "name": n} for k, n in zip(keys, names)]}}
     with httpx.Client(base_url=API, headers={"X-API-Key": os.environ["BAND_USER_KEY"]}, timeout=30) as c:
         r = c.post(f"/api/v1/me/chats/{room}/messages", json=body)
         if r.status_code >= 400:
             print(f"HTTP {r.status_code} {r.text[:300]}", file=sys.stderr)
             return 1
-    print(f"said to {NAMES.get(key, args.to)}: {text}")
+    print(f"said to {', '.join(names)}: {text}")
     return 0
 
 

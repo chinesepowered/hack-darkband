@@ -147,3 +147,26 @@ async def test_dispute_voids_a_wrong_check_and_regrades(app, monkeypatch, tmp_pa
     assert "verdict=PASS" in regraded and "voided" in regraded
     await deliver(adapter, "@examiner reveal", "Nap Guard", tools)
     assert "VOIDED on appeal" in tools.messages_sent[-1]["content"]
+
+
+async def test_role_checks_honor_aria_subclass_roles(app):
+    # The spec says `input type=search` (role searchbox); an exam that says "textbox" must still find it.
+    from onsen.examiner.models import StageExam
+    from onsen.examiner.seal import fill_defaults
+
+    url = app()
+    stage = fill_defaults({"stage": 2, "scenarios": [{"id": "s2-01", "story": "The search box is there.", "kind": "web",
+                                                      "steps": [
+        {"action": "goto", "path": "/"},
+        {"action": "expect_visible", "role": "textbox", "name": "Search spots"},
+        {"action": "fill", "role": "textbox", "name": "Search spots", "value": "izu"},
+    ]}]})
+    sc = StageExam.model_validate(stage).scenarios[0]
+    [result] = await run_scenarios(url, [sc])
+    assert result.passed, result.observed
+
+
+def test_rerun_requests_are_not_notes():
+    assert split_command("@Examiner — please retry the run against 75d2f77")[0] == "rerun"
+    assert split_command("Please re-send the full round-4 failure description")[0] == "rerun"
+    assert split_command("acknowledged, thanks")[0] == "note"

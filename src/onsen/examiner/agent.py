@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import shutil
 from pathlib import Path
 from typing import Any
@@ -83,7 +84,13 @@ def split_command(text: str) -> tuple[str, str]:
     word = word.lower().rstrip(":")
     if word in ("seal", "exam", "reveal", "tally", "status", "help"):
         return word, remainder.strip()
+    if RERUN_RE.search(text):  # run 4: "please retry the run against 75d2f77" sat unanswered as a note
+        return "rerun", text
     return "note", text  # acks and notes need no answer
+
+
+RERUN_RE = re.compile(r"\b(re-?run|retry|re-?grade|re-?send|re-?exam(ine)?|run (it|the exam|the scenarios) again)\b", re.I)
+SHA_RE = re.compile(r"\b[0-9a-f]{7,40}\b")
 
 
 class ExaminerAdapter(SimpleAdapter[Any]):
@@ -112,6 +119,8 @@ class ExaminerAdapter(SimpleAdapter[Any]):
                 await self._reveal(msg, tools, reply_to, room_id)
             elif cmd == "appeal":
                 await self._appeal(arg, msg, tools, reply_to, room_id)
+            elif cmd == "rerun":
+                await self._rerun(arg, msg, tools, reply_to, room_id)
             elif cmd in ("tally", "status"):
                 await tools.send_message(self._tally(room_id), mentions=reply_to)
             elif cmd == "note":
@@ -195,6 +204,31 @@ class ExaminerAdapter(SimpleAdapter[Any]):
             raise RuntimeError(f"The sealed exam changed on disk (expected {recorded[:12]}…, found {digest[:12]}…). Refusing to grade.")
         return run_id, exam, digest
 
+    async def _rerun(self, text: str, msg: PlatformMessage, tools: Any, reply_to: list[str], room_id: str) -> None:
+        """A builder asking for a re-run (or the full failure text) gets a fresh grading of its latest submission."""
+        run_id, _, _ = self._load_run(room_id)
+        hist = load_history(run_id)
+        kv = parse_kv(text)
+        stage = int(kv.get("stage") or 0) or max((int(k) for k, v in hist.items() if v), default=0)
+        last = (hist.get(str(stage)) or [{}])[-1]
+        url = kv.get("url") or last.get("url")
+        if not stage or not url:
+            await tools.no_reply("a re-run request, but nothing has been graded yet")
+            return
+        shas = SHA_RE.findall(text)
+        commit = kv.get("commit") or (shas[0] if shas else None) or last.get("commit")
+        _, exam, _ = self._load_run(room_id)
+        stage_exam = exam.stage(stage)
+        if stage_exam is None:
+            raise ValueError(f"The sealed exam has no stage {stage}")
+        # The grade belongs to whoever submitted the stage, and they hear the result even if someone else asked.
+        by = last.get("by") or msg.sender_name or "unknown"
+        if by not in reply_to and by != msg.sender_name:
+            reply_to = [*reply_to, by]
+        await tools.send_event(content=f"Re-running {len(stage_exam.scenarios)} hidden scenarios for stage {stage}…",
+                               message_type="tool_call", metadata={"stage": stage, "url": url})
+        await self._grade(run_id, stage_exam, stage, url, commit, by, tools, reply_to, note=None)
+
     async def _exam(self, arg: str, msg: PlatformMessage, tools: Any, reply_to: list[str], room_id: str) -> None:
         kv = parse_kv(arg)
         stage = int(kv.get("stage") or 0)
@@ -238,7 +272,7 @@ class ExaminerAdapter(SimpleAdapter[Any]):
                 if r.id in seen:
                     continue
                 seen.add(r.id)
-                lines.append(f"{len(seen)}. {r.story} — {clip(r.observed or 'failed', 220)}")
+                lines.append(f"{len(seen)}. {r.story} — {clip(r.observed or 'failed', 600)}")
                 if len(seen) >= 8:
                     break
             lines.append("Fix the behavior, then post `[ready]` again.")

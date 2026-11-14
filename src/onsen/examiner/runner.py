@@ -225,12 +225,46 @@ async def run_http_request(client: httpx.AsyncClient, req: HttpRequest, env: dic
 
 # ---------- Web ----------
 
+# WAI-ARIA subclass roles: a searchbox *is* a textbox and a switch *is* a checkbox. Playwright's get_by_role matches
+# the exact role only, so a check written with the superclass role would miss an element the spec got right
+# (run 4: the spec said `input type=search`, the exam said "textbox").
+ARIA_SUBCLASS_ROLES: dict[str, tuple[str, ...]] = {
+    "textbox": ("searchbox",),
+    "checkbox": ("switch", "menuitemcheckbox"),
+    "radio": ("menuitemradio",),
+    "menuitem": ("menuitemcheckbox", "menuitemradio"),
+    "dialog": ("alertdialog",),
+    "alert": ("alertdialog",),
+    "status": ("timer",),
+}
+
+
+FORM_STATE_JS = """() => [...document.querySelectorAll('input:not([type=hidden]), select, textarea')].map(el => {
+  let label = '';
+  if (el.id) { const l = document.querySelector(`label[for="${CSS.escape(el.id)}"]`); if (l) label = l.innerText.trim(); }
+  if (!label) label = el.getAttribute('aria-label') || (el.closest('label') ? el.closest('label').innerText.trim() : '')
+                      || el.getAttribute('placeholder') || el.name || el.tagName.toLowerCase();
+  let value;
+  if (el.tagName === 'SELECT') value = el.selectedOptions.length ? el.selectedOptions[0].text : '';
+  else if (el.type === 'checkbox' || el.type === 'radio') value = el.checked ? 'checked' : 'not checked';
+  else value = el.value ? JSON.stringify(el.value) : '(empty)';
+  return `${label}: ${value}`;
+})"""
+
+
+def _by_role(page: Any, role: str, name: str | None) -> Any:
+    kw = {"name": name} if name else {}
+    loc = page.get_by_role(role, **kw)
+    for sub in ARIA_SUBCLASS_ROLES.get(role, ()):
+        loc = loc.or_(page.get_by_role(sub, **kw))
+    return loc
+
+
 def _locator(page: Any, st: WebStep, env: dict[str, Any]) -> Any:
     if st.testid:
         return page.get_by_test_id(substitute(st.testid, env))
     if st.role:
-        name = substitute(st.name, env)
-        return page.get_by_role(st.role, name=name) if name else page.get_by_role(st.role)
+        return _by_role(page, st.role, substitute(st.name, env))
     if st.label:
         return page.get_by_label(substitute(st.label, env) or "", exact=False)
     if st.text:
@@ -336,9 +370,17 @@ async def run_web_step(page: Any, base_url: str, st: WebStep, env: dict[str, Any
                 pass
             await page.wait_for_timeout(int(os.environ.get("ONSEN_JUDGE_SETTLE_MS", "1200")))
             body = await page.inner_text("body")
+            # inner_text lists every <option> of a select, not the chosen one; a user sees the chosen one.
+            controls = await page.evaluate(FORM_STATE_JS)
+            if controls:
+                body = body[:10000] + "\n\n[Form controls as the user sees them]\n" + "\n".join(controls)
+            # One read can be wrong (run 4: the same page passed in round 3 and failed in round 4), so a "no"
+            # has to be confirmed by a majority of three independent reads before it fails the builder.
             ok, reason = await judge(claim, body[:12000])
             if not ok:
-                raise ScenarioFailure(f"a careful user would not agree that {claim!r}: {reason}")
+                votes = [await judge(claim, body[:12000]) for _ in range(2)]
+                if sum(1 for v_ok, _ in votes if not v_ok) >= 1:
+                    raise ScenarioFailure(f"a careful user would not agree that {claim!r}: {reason}")
         else:
             raise ScenarioFailure(f"unknown step {a}")
     except PWError as exc:
