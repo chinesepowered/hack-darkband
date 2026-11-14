@@ -159,7 +159,7 @@ Write scenarios in this executable language (the JSON schema is enforced):
   ops: eq ne contains icontains not_icontains gte lte exists regex. Comparisons are case-insensitive for eq/ne.
 - kind=web: optional setup `requests` (only to capture values), then `steps`:
   goto(path) | fill(label or testid, value) | click(role+name, text, or testid) | press(value=key, optional target) |
-  select(label or testid, value) | check(label or testid) | expect_text(text) | expect_no_text(text) |
+  select(label or testid, value) | check / uncheck(label or testid) | expect_text(text) | expect_no_text(text) |
   expect_count(role(+name) or testid, min, max) | expect_visible(role+name, testid, or text) |
   expect_url_contains(value) | expect_link(name, value=href substring) | wait_ms(value) |
   judge(text = a claim a careful user would verify by looking at the page).
@@ -216,6 +216,18 @@ def repair_stage(exam: StageExam) -> StageExam:
 
     for sc in exam.scenarios:
         for req in sc.requests:
+            if req.capture:
+                # Models sometimes write captures backwards ("length=n" instead of "n=length").
+                parts = []
+                for part in req.capture.split(";"):
+                    if "=" not in part:
+                        continue
+                    name, path = (x.strip() for x in part.split("=", 1))
+                    looks_like_path = name == "length" or "[" in name or "." in name
+                    if looks_like_path and re.fullmatch(r"[A-Za-z_]\w*", path):
+                        name, path = path, name
+                    parts.append(f"{name}={path}")
+                req.capture = "; ".join(parts) or None
             fixed = []
             for chk in req.checks:
                 if chk.type == "status" and chk.number is None:
@@ -237,6 +249,10 @@ def repair_stage(exam: StageExam) -> StageExam:
         for i, st in enumerate(sc.steps):
             if st.action == "expect_visible" and st.text and not (st.role or st.testid or st.label):
                 st.action = "expect_text"
+            if st.action in ("judge", "expect_text", "expect_no_text") and not st.text and st.value:
+                st.text, st.value = st.value, None  # the claim/text went into the wrong field
+            if st.action == "judge" and not st.text:
+                continue  # a judge step with no claim can only fail
             steps.append(st)
             nxt = sc.steps[i + 1] if i + 1 < len(sc.steps) else None
             if st.action == "fill" and (nxt is None or nxt.action != "press"):

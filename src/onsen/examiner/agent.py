@@ -204,7 +204,8 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         verdict = "PASS" if total and sat >= threshold() else "FAIL"
         rounds = append_history(run_id, stage, {"passed": passed, "total": total, "satisfaction": round(sat, 4),
                                                 "verdict": verdict, "by": msg.sender_name})
-        failures = [r for r in results if not r.passed]
+        invalid = [r for r in results if r.invalid]
+        failures = [r for r in results if not r.passed and not r.invalid]
         lines = [
             f"[exam] stage={stage} verdict={verdict} passed={passed}/{total} satisfaction={sat:.0%} "
             f"threshold={threshold():.0%} round={len(rounds)} by={(msg.sender_name or 'unknown').replace(' ', '_')} run={run_id}"
@@ -223,6 +224,9 @@ class ExaminerAdapter(SimpleAdapter[Any]):
             lines.append("Fix the behavior, then post `[ready]` again.")
         else:
             lines.append("Every hidden scenario for this stage passed. 🍊")
+        if invalid:
+            lines.append(f"({len({r.id for r in invalid})} scenario(s) broke in their own setup — an exam bug, not yours — "
+                         f"and were left out of the score.)")
         await self._mention_with_napguard(tools, "\n".join(lines), reply_to)
 
     async def _reveal(self, msg: PlatformMessage, tools: Any, reply_to: list[str], room_id: str) -> None:

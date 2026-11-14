@@ -35,6 +35,7 @@ WebAction = Literal[
     "press",  # key=value (e.g. Enter), optional label | testid target
     "select",  # label | testid, value = option label or value
     "check",  # label | testid
+    "uncheck",  # label | testid
     "expect_text",  # text visible somewhere on the page (case-insensitive)
     "expect_no_text",  # text absent
     "expect_count",  # role(+name) | testid; min / max
@@ -116,6 +117,7 @@ class ScenarioResult(BaseModel):
     story: str
     passed: bool
     skipped: bool = False
+    invalid: bool = False  # the scenario broke in its own setup (an exam bug), so it doesn't count
     observed: str | None = None  # behavioral description of the failure
     seconds: float = 0.0
 

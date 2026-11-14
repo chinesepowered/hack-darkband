@@ -38,6 +38,10 @@ class ScenarioFailure(Exception):
     """Raised with a short, behavioral description of what a user would notice."""
 
 
+class ExamError(ScenarioFailure):
+    """The scenario itself is broken (a capture or variable that can't resolve): an exam bug, not a product bug."""
+
+
 # ---------- helpers ----------
 
 def substitute(text: str | None, env: dict[str, Any]) -> str | None:
@@ -48,7 +52,7 @@ def substitute(text: str | None, env: dict[str, Any]) -> str | None:
     def repl(m: re.Match[str]) -> str:
         key, filters = m.group(1), [f for f in m.group(2).split("|") if f]
         if key not in env:
-            raise ScenarioFailure(f"needed a value ({key}) from an earlier response, but it never appeared")
+            raise ExamError(f"needed a value ({key}) from an earlier response, but it never appeared")
         value = str(env[key])
         for f in filters:
             value = FILTERS.get(f, lambda s: s)(value)
@@ -133,7 +137,7 @@ def apply_captures(spec: str | None, payload: Any, env: dict[str, Any]) -> None:
         name, path = (s.strip() for s in part.split("=", 1))
         value = get_path(payload, path)
         if value is _MISSING or value is None:
-            raise ScenarioFailure(f"the response had no value at {path}")
+            raise ExamError(f"the response had no value at {path}")
         env[name] = value
 
 
@@ -272,6 +276,8 @@ async def run_web_step(page: Any, base_url: str, st: WebStep, env: dict[str, Any
                 await loc.select_option(value=value)
         elif a == "check":
             await _locator(page, st, env).first.check()
+        elif a == "uncheck":
+            await _locator(page, st, env).first.uncheck()
         elif a == "expect_text":
             text = substitute(st.text, env) or value or ""
             try:
@@ -387,6 +393,9 @@ async def _run_one(sc: Scenario, client: httpx.AsyncClient, browser: Any, base_u
                 await context.close()
         return ScenarioResult(id=sc.id, stage=sc.stage, story=sc.story, passed=True, skipped=skipped,
                               seconds=time.monotonic() - t0)
+    except ExamError as exc:
+        return ScenarioResult(id=sc.id, stage=sc.stage, story=sc.story, passed=False, invalid=True,
+                              observed=f"exam error: {exc}", seconds=time.monotonic() - t0)
     except ScenarioFailure as exc:
         return ScenarioResult(id=sc.id, stage=sc.stage, story=sc.story, passed=False, observed=str(exc),
                               seconds=time.monotonic() - t0)
@@ -397,7 +406,9 @@ async def _run_one(sc: Scenario, client: httpx.AsyncClient, browser: Any, base_u
 
 
 def satisfaction(results: list[ScenarioResult]) -> tuple[int, int, float]:
-    counted = [r for r in results if not (r.passed and r.skipped)]
+    """Share of valid scenarios passed. Scenarios that broke in their own setup (exam bugs) and judge-only
+    passes without a judge don't count either way."""
+    counted = [r for r in results if not (r.passed and r.skipped) and not r.invalid]
     passed = sum(1 for r in counted if r.passed)
     total = len(counted)
     return passed, total, (passed / total if total else 0.0)

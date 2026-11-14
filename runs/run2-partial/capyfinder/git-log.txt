@@ -1,0 +1,5 @@
+bc1d48f 03:28 Tolerate trailing slashes on all routes and filter params, accept filter form via POST
+2f395a6 03:14 Stage 3: GET /api/stats (total/by_country/by_type from data), Hot spring spots only checkbox (onsen type or hot-spring/onsen in experience, AND-combined, live), footer Data verified 2026-11-14
+ef2ffd9 03:01 Stage 2: Web UI — / (CapyFinder home with Search spots/Country/Type controls, spot cards, result count, empty state, live search) and /spots/{id} detail (all fields, Source + back links, 404 Spot not found)
+1548f05 02:44 Stage 1: stdlib API server — /api/health, /api/spots (country/type/q AND filters), /api/spots/{id}; README start command; Scout data
+384e850 02:37 Spec for capyfinder

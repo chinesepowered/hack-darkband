@@ -34,6 +34,7 @@ def main() -> int:
     ap.add_argument("--workspace", required=True)
     ap.add_argument("--transcript", required=True)
     ap.add_argument("--revealed")
+    ap.add_argument("--note", help="a paragraph to put under the title")
     args = ap.parse_args()
     out = ROOT / "runs" / args.name
     out.mkdir(parents=True, exist_ok=True)
@@ -70,7 +71,7 @@ def main() -> int:
     end = texts[-1]["at"][11:19] if texts else "?"
     tagged = []
     for m in texts:
-        body = re.sub(r"^(?:@\S+\s+)+", "", m["content"])
+        body = re.sub(r"^(?:@(?:Nap Guard|[\w-]+)\s+)+", "", m["content"])
         tag = re.match(r"\[([a-z-]+)\][^\n]*", body)
         if tag or m["from"].startswith("You"):
             line = (tag.group(0) if tag else body.splitlines()[0])[:160]
@@ -78,7 +79,8 @@ def main() -> int:
     tools = sum(1 for m in clean if m["type"] == "tool_call")
     md = [f"# Run `{args.name}`", "",
           f"One BAND room, six agents, {start}–{end} UTC. {len(texts)} messages, {tools} tool calls.", "",
-          "## Receipt", "", "```", re.sub(r"^(?:@\S+\s+)+", "", receipt).strip(), "```", "",
+          *([args.note, ""] if args.note else []),
+          "## Receipt", "", "```", re.sub(r"^(?:@(?:Nap Guard|[\w-]+)\s+)+", "", receipt).strip(), "```", "",
           "## Evidence", "",
           "- Room transcript: [room.json](room.json) (display names and local paths removed)",
           "- What it built: [capyfinder/](capyfinder/) · commit history in [git-log.txt](capyfinder/git-log.txt)",

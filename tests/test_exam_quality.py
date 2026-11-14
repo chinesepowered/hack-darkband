@@ -79,3 +79,16 @@ def test_lint_catches_hard_coded_ids_bad_captures_and_wrong_sources():
     ])
     kept, dropped = lint_stage(SPEC, exam)
     assert [s.id for s in kept.scenarios] == ["literal-404", "good"], dropped
+
+
+def test_repair_swaps_backwards_captures_and_fixes_judge_text():
+    exam = StageExam(stage=3, scenarios=[
+        Scenario(id="x", stage=3, story="x", kind="web",
+                 requests=[req("/api/spots", capture="length=n; [0].id=first")],
+                 steps=[step("goto", path="/"), step("judge", value="every card is a hot-spring spot"),
+                        step("judge")]),
+    ])
+    repair_stage(exam)
+    sc = exam.scenarios[0]
+    assert sc.requests[0].capture == "n=length; first=[0].id"
+    assert [s.action for s in sc.steps] == ["goto", "judge"] and sc.steps[1].text == "every card is a hot-spring spot"
