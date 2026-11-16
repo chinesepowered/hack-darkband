@@ -4,7 +4,7 @@
 
 **A dark software factory on BAND that has one rule: don't wake the capybara.**
 
-▶ **Demo video:** [demo/onsen-demo.mp4](demo/onsen-demo.mp4) (3 minutes, built from the real run in [runs/run4](runs/run4/))
+▶ **Demo video:** [demo/onsen-demo.mp4](demo/onsen-demo.mp4) (2½ minutes, built from the real run in [runs/run7](runs/run7/), with the crew in BAND Desktop)
 
 The human is a capybara napping in a hot spring. Six agents in one BAND room turn a written spec into working
 software. Two ideas make it a *dark* factory you can trust:
@@ -56,7 +56,10 @@ Every run happened in a real BAND room. Cleaned transcripts, receipts and the co
 
 | Run | What it shows |
 |---|---|
-| [run4](runs/run4/) | the recorded run: the exam caught a browser-only bug the Reviewer had approved; four factory bugs surfaced, caused a chill break, and were fixed live; `ship`, an honest receipt (4 touches, 2 wake-ups), exam revealed with a matching hash |
+| [run7](runs/run7/) | the recorded run, with the crew in BAND Desktop: one kickoff, one wake-up, `ship`. Every stage passed its hidden exam on round 1, and the revealed exam matches the seal |
+| [run6-desktop-shakedown](runs/run6-desktop-shakedown/) | BAND Desktop posts every closing remark, and Qwen can't end a turn silently: led to the closing-remark filter, plus a Scout retry for empty datasets |
+| [run5-desktop-shakedown](runs/run5-desktop-shakedown/) | the first BAND Desktop run: an agent's remark re-sealed the exam, and stage 1 was examined on stage 2's page. Led to stricter command parsing and stage-scoped exams |
+| [run4](runs/run4/) | the band-sdk crew: the exam caught a browser-only bug the Reviewer had approved; four factory bugs surfaced, caused a chill break, and were fixed live; `ship`, an honest receipt (4 touches, 2 wake-ups), exam revealed with a matching hash |
 | [run3-dispute](runs/run3-dispute/) | the hidden exam caught a real race; the per-commit gate held; the Builder disputed a bad check with evidence, which led to appeals |
 | [run2-partial](runs/run2-partial/) | stages 1–2 passed on the first try with commit-bound approvals; stage 3's exam slips led to automatic repairs |
 | [run1-rehearsal](runs/run1-rehearsal/) | the Reviewer caught the Builder editing data to pass a bad check, which led to per-commit gates, reopening, and disputes |
@@ -148,7 +151,7 @@ opencode/       opencode.json: Qwen 3.8 on W&B + one permission profile per role
 src/onsen/      scout.py · napguard.py · examiner/ · crew.py · llm.py · register/kickoff/watch/smoke
 scripts/        run-factory.sh · stop-factory.sh · new-run.sh · voiceover.py
 runs/           transcripts and receipts from real runs
-demo/           the 3-minute demo video (onsen-demo.mp4), its narration script and scene list
+demo/           the 2½-minute demo video (onsen-demo.mp4), its narration script and scene list
 docs/           submission.md (the write-up BAND asks for)
 tests/          reference app + fixture exam + unit tests
 ```

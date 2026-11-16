@@ -1,0 +1,62 @@
+[
+  {
+    "id": "izu-shaboten-zoo-ito-shizuoka",
+    "city": "Ito, Shizuoka",
+    "name": "Izu Shaboten Zoo",
+    "type": "onsen",
+    "country": "JP",
+    "source_url": "https://izushaboten.com/en/kapiroten/",
+    "capybara_experience": "Watch capybaras soak in an outdoor hot-spring bath, the original capybara onsen since 1982; winter season runs Nov 21–Apr 4 with fragrant yuzu citrus added to the baths (yuzu bath at the winter solstice); baths prepared daily on weekdays",
+    "verified_on": "2026-11-16",
+    "hours": "",
+    "adult_price": ""
+  },
+  {
+    "id": "little-rock-zoo-little-rock-arkansas",
+    "city": "Little Rock, Arkansas",
+    "name": "Little Rock Zoo",
+    "type": "zoo",
+    "country": "US",
+    "source_url": "https://www.littlerockzoo.com/zoo-blog/blog-posts/2026/04/capybaras-are-coming-back-to-the-little-rock-zoo/",
+    "capybara_experience": "See capybaras in the zoo's exhibit — capybaras are returning to the Little Rock Zoo per its April 2026 announcement",
+    "verified_on": "2026-11-16",
+    "hours": "",
+    "adult_price": ""
+  },
+  {
+    "id": "buffalo-zoo-buffalo-new-york",
+    "city": "Buffalo, New York",
+    "name": "Buffalo Zoo",
+    "type": "zoo",
+    "country": "US",
+    "source_url": "https://buffalozoo.org/buffalo-zoo-welcomes-male-capybara/",
+    "capybara_experience": "See the zoo's capybara, including male capybara Mozzarella, in the zoo's exhibit",
+    "verified_on": "2026-11-16",
+    "hours": "",
+    "adult_price": ""
+  },
+  {
+    "id": "nashville-zoo-nashville-tennessee",
+    "city": "Nashville, Tennessee",
+    "name": "Nashville Zoo",
+    "type": "zoo",
+    "country": "US",
+    "source_url": "https://www.nashvillezoo.org/our-blog/posts/nashville-zoo-welcomes-capybaras",
+    "capybara_experience": "See capybaras at the zoo after Nashville Zoo welcomed capybaras to its collection",
+    "verified_on": "2026-11-16",
+    "hours": "",
+    "adult_price": ""
+  },
+  {
+    "id": "capybara-cafe-fort-lauderdale-florida",
+    "city": "Fort Lauderdale, Florida",
+    "name": "Capybara Cafe",
+    "type": "cafe",
+    "country": "US",
+    "source_url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+    "adult_price": "$59",
+    "capybara_experience": "Pet giant rodents — visitors can pet capybaras at this new café in Fort Lauderdale's Thrive District",
+    "verified_on": "2026-11-16",
+    "hours": ""
+  }
+]

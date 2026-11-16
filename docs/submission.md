@@ -4,7 +4,7 @@
 BAND room turn a written spec into working software, and you say exactly two things: `build SPEC.md` and `ship`.
 
 - Repo: this repository (start with the README)
-- Demo video: `demo/onsen-demo.mp4`
+- Demo video: `demo/onsen-demo.mp4` (built from run 7, with the crew in BAND Desktop)
 - Real runs: `runs/` (cleaned room transcripts and receipts)
 
 BAND's hacker guide asks for four short answers.
@@ -41,28 +41,48 @@ Left out on purpose:
 
 ## 3. One flow, end to end
 
-From run 4, the recorded run (full receipt and timeline in `runs/run4/RUN.md`):
+From run 7, the recorded run, with the crew in BAND Desktop (full receipt and timeline in `runs/run7/RUN.md`):
 
 1. You post `@Architect build SPEC.md` (human touch #1).
-2. The Architect writes PLAN.md and asks Scout for data. 55 seconds later, Nimble's dataset agent returns 36 capybara
-   spots in 4 countries, each with a `source_url`.
-3. The Architect asks the Examiner to seal the exam. Qwen writes 20 scenarios, the Examiner proofreads them against the
-   spec and the data profile, and posts only the SHA-256.
-4. For each stage, the Builder posts `[ready]`, the exam reports user-visible failures, and the Reviewer approves or
-   blocks a specific commit. When the exam PASSes and the review APPROVES the same commit, Nap Guard posts
-   `[gate] ACCEPTED`. Stage 1 passed 7/7 on the first try, stage 2 took five rounds (below), and stage 3 passed 6/6 on
-   the first try.
-5. Nap Guard wakes you: "ship or hold?". You say `ship`.
+2. The Architect writes PLAN.md and asks Scout for data. Nimble's dataset agent came back empty twice. The Architect
+   asked again and built on the 5 sourced spots it got, noting in the room that this is below the spec's 20–40 (the
+   contract sets no minimum, so the exam grades what the data can produce).
+3. The Architect asks the Examiner to seal the exam. Qwen writes 17 scenarios, each limited to the routes that its own
+   and earlier stages introduce. The Examiner proofreads them against the spec and the data profile, and posts only
+   the SHA-256.
+4. For each stage, the Builder posts `[ready]` to the Examiner and the Reviewer, the exam reports what a user would
+   notice, and the Reviewer approves or blocks a specific commit. When the exam PASSes and the review APPROVES the same
+   commit, Nap Guard posts `[gate] ACCEPTED`. All three stages passed on round 1 (5/5, 6/6, 6/6). The Reviewer ran
+   89, about 110 and about 75 live checks of its own before approving.
+5. Nap Guard wakes you once: "ship or hold?". You say `ship` (human touch #2).
 6. The receipt follows, then the Examiner reveals the exam, and its hash matches the seal.
 
 ```
 [receipt] 🛁 Onsen run complete
-• Human touches: 4 (the spec + 3 replies to Nap Guard) · wake-ups: 2 · chill breaks: 1
-• Stages: 1 ✔ 100% (1 rounds) · 2 ✔ 57%→86%→86%→86%→100% (5 rounds) · 3 ✔ 100% (1 rounds)
-• Docs fetched: 0 · datasets built: 1 · exam rounds: 7 · exam checks voided on appeal: 0
-• Time from seal to ship: 56m 42s
-The capybara was woken 2 times. 🍊
+• Human touches: 2 (the spec + 1 reply to Nap Guard) · wake-ups: 1 · chill breaks: 0
+• Stages: 1 ✔ 100% (1 rounds) · 2 ✔ 100% (1 rounds) · 3 ✔ 100% (1 rounds)
+• Docs fetched: 0 · datasets built: 2 · exam rounds: 3 · exam checks voided on appeal: 0
+• Time from seal to ship: 23m 19s
+The capybara was woken 1 time. 🍊
 ```
+
+### What runs 5–7 showed (moving the crew into BAND Desktop)
+
+BAND Desktop posts the text an agent ends its turn with as a reply to whoever woke it. Qwen 3.8 can't end a turn
+silently: it writes "." or "No reply needed.". In run 5 that became an acknowledgment ping-pong. When told to stay
+silent, the Architect looped on no-op tool calls instead. Run 5 also exposed two factory bugs:
+- an agent's remark, "Seal receipt confirmed …", re-sealed the exam;
+- stage 1 was examined on the home page that stage 2 builds.
+
+The fixes went into the factory:
+- the role launchers run a small ACP filter that keeps closing remarks out of the room unless they are protocol
+  messages;
+- bare command words need `key=value` arguments;
+- re-runs and duplicate `[ready]`s are rate-limited;
+- Scout only searches on explicit `ask:` / `docs:` / `data:`, and retries an empty dataset;
+- a stage's exam may only use routes that its own and earlier stages introduce.
+
+Run 7 then went from kickoff to `ship` with one wake-up.
 
 ### What run 4 showed
 
@@ -135,10 +155,10 @@ BAND Desktop (0.4.18, the Linux package) runs the coding crew:
 - **The daemon runs with a minimal environment**, because it passes its environment to every runtime. Tokens in the
   operator's shell stay out of the agents' reach.
 
-Full setup: [docs/band-desktop.md](band-desktop.md). Run 5 ran this way.
+Full setup: [docs/band-desktop.md](band-desktop.md). Runs 5–7 ran this way.
 
 ## Checklist
 
-- [x] Demo video (`demo/onsen-demo.mp4`, built from run 4)
-- [x] Run 4 transcript, receipt and revealed exam in `runs/run4/`
+- [x] Demo video (`demo/onsen-demo.mp4`, built from run 7 with the crew in BAND Desktop)
+- [x] Run 7 transcript, receipt and revealed exam in `runs/run7/` (and every earlier run in `runs/`)
 - [x] README quickstart: a fresh clone runs `uv sync` and passes all 29 tests; the factory itself ran live in runs 1–4

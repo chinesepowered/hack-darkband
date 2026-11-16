@@ -45,9 +45,9 @@ CARDS = {
     "title": """<div class="wrap"><img src="capybara.svg" width="260"><h1>Onsen</h1>
       <div class="tag">A dark software factory on BAND</div><p>One rule: don't wake the capybara.</p></div>""",
     "crew": """<div class="wrap"><div class="tag">Six agents · one BAND room · one human message</div><div class="grid">
-      <div class="cell"><b>Architect</b><div>plans, hands out stages</div><i>OpenCode · Qwen 3.8</i></div>
-      <div class="cell"><b>Builder</b><div>builds each stage</div><i>OpenCode · Qwen 3.8</i></div>
-      <div class="cell"><b>Reviewer</b><div>reads every diff, says no</div><i>OpenCode · read-only</i></div>
+      <div class="cell"><b>Architect</b><div>plans, hands out stages</div><i>BAND Desktop · OpenCode · Qwen 3.8</i></div>
+      <div class="cell"><b>Builder</b><div>builds each stage</div><i>BAND Desktop · OpenCode · Qwen 3.8</i></div>
+      <div class="cell"><b>Reviewer</b><div>reads every diff, says no</div><i>BAND Desktop · read-only</i></div>
       <div class="cell"><b>Scout</b><div>asks the live web, not the human</div><i>Nimble web agents</i></div>
       <div class="cell"><b>Examiner</b><div>sealed, hidden exam</div><i>Qwen 3.8 + Playwright</i></div>
       <div class="cell"><b>Nap Guard</b><div>the only one who wakes you</div><i>deterministic</i></div>
@@ -70,6 +70,21 @@ CARDS = {
         <span style="color:#7ee787">It sees form state, and failing you takes 2 of 3 reads.</span></div>
       <div style="color:#e6edf3;font-size:20px">4 · "Please re-run" was filed as a note.
         <span style="color:#7ee787">A re-run request now gets a re-run.</span></div>
+      </div></div>""",
+    "desktop": """<div class="wrap" style="max-width:1180px"><div class="tag">BAND Desktop runs the coding crew</div>
+      <p style="color:#e6edf3">Its daemon owns each agent's OpenCode runtime (Qwen 3.8 on W&amp;B) and starts it when a message arrives.</p>
+      <img src="desktop-agents.png" style="width:1120px;border-radius:12px;border:1px solid #2a3440">
+      <img src="desktop-runtime.png" style="width:1120px;border-radius:12px;border:1px solid #2a3440;margin-top:14px">
+      </div>""",
+    "lessons": """<div class="wrap" style="text-align:left;max-width:1060px"><div class="tag">It took seven runs to get here</div>
+      <div class="cell" style="font-size:20px;line-height:1.7;color:#e6edf3;margin-top:18px">
+      <div><b style="color:#f7b733">Run 1</b> · The Builder edited the data to pass a bad check. The Reviewer said no.
+        <span style="color:#7ee787">Approvals now bind to the exact commit that passed.</span></div>
+      <div><b style="color:#f7b733">Run 4</b> · The exam caught a bug the Reviewer had approved, and four bugs in the factory.
+        <span style="color:#7ee787">Each fix went into the factory.</span></div>
+      <div><b style="color:#f7b733">Runs 5–6</b> · BAND Desktop posts every closing remark, so agents pinged each other.
+        <span style="color:#7ee787">The launcher now keeps them out of the room.</span></div>
+      <div><b style="color:#f7b733">Run 7</b> · One kickoff, one wake-up, <code>ship</code>.</div>
       </div></div>""",
     "outro": """<div class="wrap"><img src="capybara.svg" width="220"><h1>Onsen</h1>
       <p>Specs go in. Software comes out. The capybara keeps napping.</p>
@@ -94,6 +109,10 @@ async def render_card(name: str, out_png: Path) -> Path:
     html.parent.mkdir(parents=True, exist_ok=True)
     html.write_text(f"<!doctype html><meta charset=utf-8><style>{CARD_CSS}</style>{CARDS[name]}")
     shutil.copyfile(ROOT / "assets" / "capybara.svg", html.parent / "capybara.svg")
+    assets = os.environ.get("ONSEN_CARD_ASSETS")  # e.g. BAND Desktop screenshots for the "desktop" card
+    if assets:
+        for f in Path(assets).glob("*.png"):
+            shutil.copyfile(f, html.parent / f.name)
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path=os.environ.get("ONSEN_CHROMIUM_PATH") or None, args=["--no-sandbox"])
         page = await b.new_page(viewport={"width": W, "height": H})
@@ -211,6 +230,18 @@ def main() -> int:
                                           sc.get("events", 2), sc.get("note", "Replay of the real BAND room transcript."),
                                           start=start, end=end, target_s=max(4.0, seconds - 2.0))
             video = asyncio.run(make_replay.record(html, out_dir / "replay.mp4", 1800))
+            mux(video, audio, part, seconds, still=False)
+        elif sc["kind"] == "clip":
+            # {"kind": "clip", "file": "rec.mkv", "start": 760, "end": 1000, "crop": "1180:900:0:0"}: a stretch of a
+            # screen recording (e.g. BAND Desktop during the run), sped up to fill the narration.
+            src = Path(os.path.expandvars(sc["file"]))
+            span = float(sc["end"]) - float(sc["start"])
+            speed = max(1.0, span / seconds)
+            crop = f"crop={sc['crop']}," if sc.get("crop") else ""
+            video = work / f"clip-{n:02d}.mp4"
+            ffmpeg("-ss", str(sc["start"]), "-t", f"{span:.2f}", "-i", str(src),
+                   "-vf", f"{crop}scale=-2:{H},pad={W}:{H}:(ow-iw)/2:0:color=0x0f1419,setpts=PTS/{speed:.4f},fps=30,format=yuv420p",
+                   "-an", "-c:v", "libx264", str(video))
             mux(video, audio, part, seconds, still=False)
         elif sc["kind"] == "app":
             video = asyncio.run(record_app(args.app_url, work / f"app-{n:02d}.mp4", seconds))

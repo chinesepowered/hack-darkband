@@ -1,0 +1,4 @@
+76bfa74 19:36 Stage 3: /api/stats, hot-spring checkbox, data-verified footer
+bf1f479 19:28 Stage 2: web UI (home with search/country/type, detail pages, 404)
+25fd6c2 19:16 Stage 1: data + API (health, spots with filters, spot by id)
+283f03f 19:04 Spec for capyfinder

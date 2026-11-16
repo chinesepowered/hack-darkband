@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import make_replay  # noqa: E402
 
-SKIP = {".git", "__pycache__", "node_modules", ".venv", "app.log", ".band-workspaces"}
+SKIP = {".git", "__pycache__", "node_modules", ".venv", "app.log", ".band-workspaces", ".band"}  # .band: message bodies for `band send`
 
 
 def main() -> int:

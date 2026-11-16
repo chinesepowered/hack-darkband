@@ -1,45 +1,43 @@
-# Demo video: "Don't wake the capybara" (about 3 minutes)
+# Demo video: "Don't wake the capybara" (about 2½ minutes)
 
-The video is built from run 4, a real run. `scripts/make_video.py` turns each `> VO:` line into narration with
-ElevenLabs (voice: Jessica, young and warm). It then replays the real BAND room transcript for the scenes in
-`demo/scenes.json`, records the app the factory built, and joins everything with ffmpeg. Every message in the replay
-is the agents' own words.
+The video is built from run 7, a real run with the coding crew in BAND Desktop. `scripts/make_video.py` turns each
+`> VO:` line into narration with ElevenLabs (voice: Jessica, young and warm). It replays the real BAND room transcript
+for the scenes in `demo/scenes.json`, shows a sped-up stretch of the BAND Desktop window recorded during the run
+(`ONSEN_DESKTOP_RECORDING`), records the app the factory built, and joins everything with ffmpeg. Every message in the
+replay is the agents' own words.
 
 ### 1. Cold open
 > VO: This capybara is the only human on our engineering team. Our software factory has exactly one rule: don't wake the capybara.
 
 ### 2. The crew
-> VO: Six agents share one BAND room. An Architect, a Builder and a read-only Reviewer run OpenCode on Qwen three point eight. Scout reads the live web with Nimble. The Examiner keeps a sealed exam. And Nap Guard is the only one allowed to wake me. I send one message, and go back to my bath.
+> VO: Six agents share one BAND room. BAND Desktop runs the coding crew: an Architect, a Builder and a read-only Reviewer, on OpenCode with Qwen three point eight. Scout reads the live web with Nimble. The Examiner keeps a sealed exam. And Nap Guard is the only one allowed to wake me.
 
-### 3. Ask the web, not the human
-> VO: The Architect plans the build and asks Scout for data. Nimble's agents come back with thirty-six real capybara spots, and every row carries the page it came from.
+### 3. BAND Desktop
+> VO: BAND Desktop's daemon owns each crew agent's runtime. When a message mentions one, it starts OpenCode in the run's workspace and posts what the agent sends back to the room.
 
-### 4. The sealed exam
-> VO: The Examiner writes a hidden exam from the spec: twenty scenarios, checked against that data. It posts only a fingerprint. BAND delivers a message only to the agents it mentions, so the builders never see the exam.
+### 4. Ask the web, not the human
+> VO: I send one message and go back to my bath. The Architect plans and asks Scout for data. Nimble comes back empty twice, so the Architect asks again and builds on the five sourced spots it gets, noting that the spec asked for more.
 
-### 5. Stage one
-> VO: Stage one, the API, passes seven out of seven. The Reviewer approves that exact commit, and Nap Guard accepts the stage.
+### 5. The sealed exam
+> VO: The Examiner writes a hidden exam from the spec and that data, seventeen scenarios, and posts only its fingerprint. The builders never see it.
 
-### 6. Stage two
-> VO: Stage two is the web page, and the exam fails it. A syntax error left live search dead in a real browser. The Reviewer had approved it by reading the HTML. The exam caught it by using the page. The Builder fixes it, and the Reviewer starts testing in a real browser too. Then the exam itself stumbles. After four rounds without progress, Nap Guard calls a chill break and wakes me.
+### 6. Live in BAND Desktop
+> VO: In BAND Desktop you can watch every agent work, and interrupt any of them. Stage one passes its hidden exam five out of five, and the Reviewer approves that exact commit after eighty-nine checks of its own.
 
-### 7. Our bugs
-> VO: The bugs were ours, not the Builder's: a check that asked for the wrong kind of text box, a parser that crashed Nap Guard, a judge that changed its mind, and a re-run request filed as a note. Every fix went into the factory itself.
+### 7. Stage two
+> VO: Stage two, the web page, passes six out of six on the first try.
 
-### 8. Stage two passes
-> VO: I say resume, and pass along the Builder's request for a re-run. Stage two passes seven out of seven, on the same commit the Reviewer approved.
+### 8. Stage three
+> VO: So does stage three, the hot-spring mode. Nobody asks me anything.
 
-### 9. Stage three
-> VO: Stage three, stats and a hot-spring toggle, passes six out of six on the first try. The Reviewer recomputes every count from the data and approves. Only then does Nap Guard wake me again.
+### 9. Getting here
+> VO: It took seven runs to get here. The Reviewer caught a Builder bending data. The exam caught a bug the Reviewer missed. And when BAND Desktop turned every closing remark into a message, the launcher learned to keep them out.
 
-### 10. The rehearsal
-> VO: Every run teaches the factory something. In our rehearsal, the Builder edited the dataset to pass a bad check. The Reviewer blocked it, and now every approval is bound to the exact commit that passed.
+### 10. Ship
+> VO: Then I get one message: ship, or hold? I say ship. The receipt: two human touches, one wake-up. The Examiner reveals the exam, and its fingerprint matches the one from the start.
 
-### 11. Ship
-> VO: Every stage passed, so I get one question: ship, or hold? I say ship. The receipt is honest: four human touches, two wake-ups, one chill break. Then the Examiner reveals the exam, and its fingerprint matches the one from the start.
-
-### 12. What it built
+### 11. What it built
 > VO: Here's what the factory built: CapyFinder. Search, filters, a hot-spring toggle, and a source link on every spot.
 
-### 13. Outro
+### 12. Outro
 > VO: Onsen. Specs go in, software comes out, and the capybara keeps napping. Built on BAND, with Nimble.

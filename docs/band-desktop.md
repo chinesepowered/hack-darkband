@@ -84,11 +84,26 @@ everything else.
 
 ## What changes for the agents
 
-BAND Desktop posts an agent's final answer as a reply to whoever woke it. In Onsen, every protocol message goes to
-specific agents (a `[ready]` goes to both the Examiner and the Reviewer). So the generated instructions tell the crew to:
-- send every message with `band send <room> "@owner/handle … [tag] …"`;
-- end the turn with no final answer.
+BAND Desktop posts an agent's final answer as a reply to whoever woke it. In Onsen every protocol message goes to
+specific agents (a `[ready]` goes to both the Examiner and the Reviewer), so the crew sends every message itself with
+`band send <room> "@owner/handle … [tag] …"`. `onsen-desktop prepare` writes a roster of handles into each agent's
+instructions.
 
-Qwen 3.8 doesn't always manage a truly empty answer and sometimes ends with "." instead. That reply wakes the agent
-it answers, which can start a short acknowledgment ping-pong. In run 5 these ping-pongs died out on their own within a
-minute.
+That leaves the text a turn ends with. Qwen 3.8 can't end a turn without some ("." or "No reply needed."), and BAND
+Desktop posts it to whoever woke the agent:
+- **Run 5:** the crew traded acknowledgments, and the Architect's "Seal receipt confirmed …" re-sealed the exam.
+- **Run 6:** told to stay silent, the Architect looped on no-op tool calls instead.
+
+The fix is in the launcher. In ACP mode, `opencode/bin/onsen-opencode` runs `src/onsen/acp_filter.py`, a small
+standard-library proxy between BAND Desktop and `opencode acp`. It holds the agent's message text while a turn is in
+flight and passes it on at the end only if it starts with a crew protocol tag (`[ready]`, `[review]`, `[task]`, …).
+Tool calls, reasoning and permission requests pass straight through, so BAND Desktop still shows every step. With
+that in place, run 7 went from kickoff to `ship` with no stray messages.
+
+## Notes
+
+- `stop-factory.sh` leaves the crew's workers running; their OpenCode runtimes stop by themselves after 10 idle
+  minutes. If a worker shows as stopped, `band restart --session onsen-<role>` brings it back.
+- Our build machine had no display, so the BAND Desktop window ran on a virtual one (Xvfb). There its web view
+  stopped repainting after about 25 minutes. The daemon and the agents were unaffected; restarting `band-desktop`
+  brings the window back.

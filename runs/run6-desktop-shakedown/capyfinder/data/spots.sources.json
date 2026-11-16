@@ -1,0 +1,9 @@
+{
+  "trust": {
+    "claims": [],
+    "confidence": "low",
+    "reasoning": "Low confidence - cells fill rate is 0% and trust per claim ratio is 0%",
+    "sources": []
+  },
+  "sources": []
+}

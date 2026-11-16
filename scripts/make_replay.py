@@ -96,18 +96,30 @@ def clean_copy(msgs: list[dict]) -> list[dict]:
 
 
 def event_line(m: dict) -> str | None:
-    if m.get("message_type") != "tool_call":
+    kind = m.get("message_type")
+    if kind not in ("tool_call", "tool_result"):
         return None
     try:
         j = json.loads(m.get("content") or "{}")
     except json.JSONDecodeError:
         return None
+    if kind == "tool_result":
+        # BAND Desktop's OpenCode runtime names a result after what it did: the shell command or the file it touched.
+        # band-sdk transcripts name results after the tool ("bash", "edit"), which the tool_call already showed.
+        title = str(j.get("name") or "").strip()
+        if (not title or title == "true" or title.startswith(("band ", "band_", "jam ", "jam_"))
+                or not re.search(r"[ /.]", title)):
+            return None
+        return ("bash: " + title.splitlines()[0][:110]) if " " in title else f"file: {Path(title).name}"
     name, args = j.get("name", ""), j.get("args") or {}
     if name.startswith("band_") or name in ("todowrite", "todoread", "invalid", ""):
         return None
     if name == "bash":
-        return "bash: " + (args.get("command") or "").splitlines()[0][:110]
+        command = (args.get("command") or "").strip()
+        return ("bash: " + command.splitlines()[0][:110]) if command else None  # BAND Desktop: see its result
     target = args.get("filePath") or args.get("path") or args.get("pattern") or args.get("url") or ""
+    if not target:  # BAND Desktop sends only the cwd here; its tool_result names the file
+        return None
     return f"{name}: {Path(str(target)).name if '/' in str(target) else target}"[:120]
 
 

@@ -18,6 +18,7 @@ the human now.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -229,9 +230,10 @@ class ScoutAdapter(SimpleAdapter[Any]):
         schema = json.loads(schema_path.read_text())
         await tools.send_event(content=f"Building a dataset with Nimble: {clip(request, 200)}", message_type="tool_call",
                                metadata={"tool": "nimble.agents.run", "use_case": "dataset_building", "schema": schema_path.name})
-        # Nimble's dataset agent occasionally comes back nearly empty (run 6: one row, with no source); one retry
-        # costs a minute and saves the run.
-        attempts, min_rows = int(os.environ.get("ONSEN_DATA_ATTEMPTS", "2")), int(os.environ.get("ONSEN_DATA_MIN_ROWS", "5"))
+        # Nimble's dataset agent occasionally comes back empty for a few minutes at a time (runs 6 and 7: 0% of cells
+        # filled, no sources), so retry with a growing pause; each attempt is about a minute.
+        attempts, min_rows = int(os.environ.get("ONSEN_DATA_ATTEMPTS", "3")), int(os.environ.get("ONSEN_DATA_MIN_ROWS", "5"))
+        pause = float(os.environ.get("ONSEN_DATA_RETRY_PAUSE_S", "30"))
         for attempt in range(1, attempts + 1):
             result: DatasetResult = await self.nimble.dataset(request, schema, effort=kv.get("effort"))
             rows = normalize_rows(result.rows)
@@ -239,6 +241,7 @@ class ScoutAdapter(SimpleAdapter[Any]):
                 break
             await tools.send_event(content=f"Nimble returned {len(rows)} sourced rows; asking again",
                                    message_type="tool_call", metadata={"tool": "nimble.agents.run", "attempt": attempt + 1})
+            await asyncio.sleep(pause * attempt)
         # Every row carries every field the schema defines ("" when the web had nothing), so the data is uniform.
         item_props = (((schema.get("properties") or {}).get(next(iter(schema.get("properties") or {"": 0})), {})
                        .get("items") or {}).get("properties") or {})

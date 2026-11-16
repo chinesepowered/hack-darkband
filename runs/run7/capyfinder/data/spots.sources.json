@@ -1,0 +1,650 @@
+{
+  "trust": {
+    "claims": [
+      {
+        "citations": [
+          {
+            "url": "https://izushaboten.com/en/kapiroten/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Outdoor Bath｜IZU SHABOTEN ZOO"
+          },
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[0].city",
+        "reasoning": "Supported by 2 independent sources"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://izushaboten.com/en/kapiroten/",
+            "excerpts": [
+              "Capybara Outdoor Bath｜IZU SHABOTEN ZOO news document; source…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Outdoor Bath｜IZU SHABOTEN ZOO"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://izushaboten.com/en/kapiroten/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Outdoor Bath｜IZU SHABOTEN ZOO"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://izushaboten.com/en/kapiroten/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Outdoor Bath｜IZU SHABOTEN ZOO"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://izushaboten.com/en/kapiroten/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Outdoor Bath｜IZU SHABOTEN ZOO"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://izushaboten.com/en/kapiroten/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Outdoor Bath｜IZU SHABOTEN ZOO"
+          },
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          },
+          {
+            "url": "https://locally.matcha-jp.com/en/25787",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "[2025 Update] Let's go see capybaras in Japan! A thorough explanation of the \"original capybara onsen\" | Locally - Official Japan Travel Guides"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[0].capybara_experience",
+        "reasoning": "Supported by 3 independent sources"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.littlerockzoo.com/zoo-blog/blog-posts/2026/04/capybaras-are-coming-back-to-the-little-rock-zoo/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybaras Are Coming Back to the Little Rock Zoo – Little Rock Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.littlerockzoo.com/zoo-blog/blog-posts/2026/04/capybaras-are-coming-back-to-the-little-rock-zoo/",
+            "excerpts": [
+              "Capybaras Are Coming Back to the Little Rock Zoo – Little Rock Zoo news document; source…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybaras Are Coming Back to the Little Rock Zoo – Little Rock Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.littlerockzoo.com/zoo-blog/blog-posts/2026/04/capybaras-are-coming-back-to-the-little-rock-zoo/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybaras Are Coming Back to the Little Rock Zoo – Little Rock Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.littlerockzoo.com/zoo-blog/blog-posts/2026/04/capybaras-are-coming-back-to-the-little-rock-zoo/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybaras Are Coming Back to the Little Rock Zoo – Little Rock Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.littlerockzoo.com/zoo-blog/blog-posts/2026/04/capybaras-are-coming-back-to-the-little-rock-zoo/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybaras Are Coming Back to the Little Rock Zoo – Little Rock Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.littlerockzoo.com/zoo-blog/blog-posts/2026/04/capybaras-are-coming-back-to-the-little-rock-zoo/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybaras Are Coming Back to the Little Rock Zoo – Little Rock Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://buffalozoo.org/buffalo-zoo-welcomes-male-capybara/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Buffalo Zoo welcomes male capybara named Mozzarella - Buffalo Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://buffalozoo.org/buffalo-zoo-welcomes-male-capybara/",
+            "excerpts": [
+              "Buffalo Zoo welcomes male capybara named Mozzarella - Buffalo…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Buffalo Zoo welcomes male capybara named Mozzarella - Buffalo Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://buffalozoo.org/buffalo-zoo-welcomes-male-capybara/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Buffalo Zoo welcomes male capybara named Mozzarella - Buffalo Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://buffalozoo.org/buffalo-zoo-welcomes-male-capybara/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Buffalo Zoo welcomes male capybara named Mozzarella - Buffalo Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://buffalozoo.org/buffalo-zoo-welcomes-male-capybara/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Buffalo Zoo welcomes male capybara named Mozzarella - Buffalo Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://buffalozoo.org/buffalo-zoo-welcomes-male-capybara/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Buffalo Zoo welcomes male capybara named Mozzarella - Buffalo Zoo"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.nashvillezoo.org/our-blog/posts/nashville-zoo-welcomes-capybaras",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Nashville Zoo Welcomes Capybaras"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.nashvillezoo.org/our-blog/posts/nashville-zoo-welcomes-capybaras",
+            "excerpts": [
+              "Nashville Zoo Welcomes Capybaras news document; source…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Nashville Zoo Welcomes Capybaras"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.nashvillezoo.org/our-blog/posts/nashville-zoo-welcomes-capybaras",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Nashville Zoo Welcomes Capybaras"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.nashvillezoo.org/our-blog/posts/nashville-zoo-welcomes-capybaras",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Nashville Zoo Welcomes Capybaras"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.nashvillezoo.org/our-blog/posts/nashville-zoo-welcomes-capybaras",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Nashville Zoo Welcomes Capybaras"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.nashvillezoo.org/our-blog/posts/nashville-zoo-welcomes-capybaras",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Nashville Zoo Welcomes Capybaras"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Cafe Opens in Fort Lauderdale's Thrive District"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+            "excerpts": [
+              "Capybara Cafe Opens in Fort Lauderdale's Thrive District news…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Cafe Opens in Fort Lauderdale's Thrive District"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Cafe Opens in Fort Lauderdale's Thrive District"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Cafe Opens in Fort Lauderdale's Thrive District"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Cafe Opens in Fort Lauderdale's Thrive District"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Cafe Opens in Fort Lauderdale's Thrive District"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].adult_price",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "Capybara Cafe Opens in Fort Lauderdale's Thrive District"
+          },
+          {
+            "url": "https://www.miaminewtimes.com/food-drink/you-can-pet-capybaras-at-this-new-fort-lauderdale-cafe-40587151/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "other",
+            "source_type": "secondary",
+            "title": "You can pet capybaras at this new Fort Lauderdale café"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[4].capybara_experience",
+        "reasoning": "Supported by 2 independent sources"
+      }
+    ],
+    "confidence": "medium",
+    "reasoning": "Medium confidence - cells fill rate is 78% and trust per claim ratio is 100%",
+    "sources": [
+      {
+        "type": "secondary",
+        "url": "https://izushaboten.com/en/kapiroten/",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "Capybara Outdoor Bath｜IZU SHABOTEN ZOO"
+      },
+      {
+        "type": "secondary",
+        "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+      },
+      {
+        "type": "secondary",
+        "url": "https://locally.matcha-jp.com/en/25787",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "[2025 Update] Let's go see capybaras in Japan! A thorough explanation of the \"original capybara onsen\" | Locally - Official Japan Travel Guides"
+      },
+      {
+        "type": "secondary",
+        "url": "https://www.littlerockzoo.com/zoo-blog/blog-posts/2026/04/capybaras-are-coming-back-to-the-little-rock-zoo/",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "Capybaras Are Coming Back to the Little Rock Zoo – Little Rock Zoo"
+      },
+      {
+        "type": "secondary",
+        "url": "https://buffalozoo.org/buffalo-zoo-welcomes-male-capybara/",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "Buffalo Zoo welcomes male capybara named Mozzarella - Buffalo Zoo"
+      },
+      {
+        "type": "secondary",
+        "url": "https://www.nashvillezoo.org/our-blog/posts/nashville-zoo-welcomes-capybaras",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "Nashville Zoo Welcomes Capybaras"
+      },
+      {
+        "type": "secondary",
+        "url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "Capybara Cafe Opens in Fort Lauderdale's Thrive District"
+      },
+      {
+        "type": "secondary",
+        "url": "https://www.miaminewtimes.com/food-drink/you-can-pet-capybaras-at-this-new-fort-lauderdale-cafe-40587151/",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "You can pet capybaras at this new Fort Lauderdale café"
+      }
+    ]
+  },
+  "sources": [
+    {
+      "url": "https://izushaboten.com/en/kapiroten/",
+      "title": "Capybara Outdoor Bath｜IZU SHABOTEN ZOO"
+    },
+    {
+      "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+      "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+    },
+    {
+      "url": "https://locally.matcha-jp.com/en/25787",
+      "title": "[2025 Update] Let's go see capybaras in Japan! A thorough explanation of the \"original capybara onsen\" | Locally - Official Japan Travel Guides"
+    },
+    {
+      "url": "https://www.littlerockzoo.com/zoo-blog/blog-posts/2026/04/capybaras-are-coming-back-to-the-little-rock-zoo/",
+      "title": "Capybaras Are Coming Back to the Little Rock Zoo – Little Rock Zoo"
+    },
+    {
+      "url": "https://buffalozoo.org/buffalo-zoo-welcomes-male-capybara/",
+      "title": "Buffalo Zoo welcomes male capybara named Mozzarella - Buffalo Zoo"
+    },
+    {
+      "url": "https://www.nashvillezoo.org/our-blog/posts/nashville-zoo-welcomes-capybaras",
+      "title": "Nashville Zoo Welcomes Capybaras"
+    },
+    {
+      "url": "https://hoodline.com/2026/09/fort-lauderdale-s-new-capybara-cafe-lets-visitors-pet-giant-rodents-for-59/",
+      "title": "Capybara Cafe Opens in Fort Lauderdale's Thrive District"
+    },
+    {
+      "url": "https://www.miaminewtimes.com/food-drink/you-can-pet-capybaras-at-this-new-fort-lauderdale-cafe-40587151/",
+      "title": "You can pet capybaras at this new Fort Lauderdale café"
+    }
+  ]
+}
