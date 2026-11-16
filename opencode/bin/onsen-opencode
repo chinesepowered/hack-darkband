@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+# BAND Desktop starts each Onsen crew agent's OpenCode runtime through a per-role launcher
+# (onsen-opencode-architect, -builder, -reviewer), which calls this with the role first:
+#   onsen-opencode <role> acp
+# It loads Onsen's OpenCode config (Qwen 3.8 on W&B), picks the role's agent profile, which sets its
+# permissions (the Reviewer can't edit), and keeps out skills and prompts that other tools on the machine
+# may have installed.
+role="$1"; shift
+here="$(cd "$(dirname "$0")/.." && pwd)"
+export OPENCODE_CONFIG="$here/opencode.json"
+export OPENCODE_CONFIG_CONTENT="{\"default_agent\": \"onsen-$role\"}"
+export OPENCODE_DISABLE_CLAUDE_CODE=1 OPENCODE_DISABLE_EXTERNAL_SKILLS=1
+exec "${ONSEN_OPENCODE_BIN:-opencode}" "$@"

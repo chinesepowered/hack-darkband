@@ -59,19 +59,26 @@ HELP = (
 )
 
 
-def split_command(text: str) -> tuple[str, str]:
-    """Commands are explicit. An untagged message is only researched if it is actually a question;
-    notes, acks and instructions addressed to Scout get no web search (and no reply)."""
+def split_command(text: str, *, from_human: bool = False) -> tuple[str, str]:
+    """Commands are explicit: `ask:`, `docs:`, `data:` or a [question] tag. Other text is a note (no web search,
+    no reply), except a human's question. In BAND Desktop every agent's closing remark reaches Scout as a reply, so
+    an agent's "Data verified …" must not start a dataset build."""
     tag, rest = parse_tagged(text)
     if tag in ("question", "blocking-question"):
         return "ask", rest
     if tag == "tally-request":
         return "tally", rest
-    m = re.match(r"^\s*(ask|docs|data|tally|help)\s*[:\-]?\s*(.*)$", rest if tag else text, re.I | re.S)
+    body = (rest if tag else text).strip()
+    m = re.match(r"^(ask|docs|data)\s*:\s*(.*)$", body, re.I | re.S)
     if m:
         return m.group(1).lower(), m.group(2).strip()
-    body = (rest if tag else text).strip()
-    return ("ask", body) if "?" in body else ("note", body)
+    if from_human:
+        m = re.match(r"^(ask|docs|data)\s+(.*)$", body, re.I | re.S)
+        if m:
+            return m.group(1).lower(), m.group(2).strip()
+    if re.fullmatch(r"(tally|help)[.!]?", body, re.I):
+        return body.lower().rstrip(".!"), ""
+    return ("ask", body) if from_human and "?" in body else ("note", body)
 
 
 def workspace() -> Path:
@@ -126,7 +133,7 @@ class ScoutAdapter(SimpleAdapter[Any]):
     async def on_message(self, msg: PlatformMessage, tools: Any, history: Any, participants_msg: str | None,
                          contacts_msg: str | None, *, is_session_bootstrap: bool, room_id: str) -> None:
         text = command_text(msg.content)
-        cmd, arg = split_command(text)
+        cmd, arg = split_command(text, from_human=str(msg.sender_type or "").lower() == "user")
         asker = msg.sender_name or "teammate"
         reply_to = [msg.sender_id]
         state = JsonState("scout", room_id, {"answered": 0, "escalated": 0, "docs": 0, "data": 0, "failed": 0})

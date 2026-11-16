@@ -13,15 +13,16 @@ BAND's hacker guide asks for four short answers.
 
 | Agent | Runs as | Its one job |
 |---|---|---|
-| **Architect** | OpenCode · Qwen 3.8 27B (W&B Inference) | plans, hands out one stage at a time, recruits specialists if a peer exists |
-| **Builder** | OpenCode · Qwen 3.8 27B | builds each stage; answers the exam's and the Reviewer's findings |
-| **Reviewer** | OpenCode · Qwen 3.8 27B, read-only profile | reads every diff against the spec; blocks with the missing evidence |
+| **Architect** | BAND Desktop · OpenCode · Qwen 3.8 27B (W&B Inference) | plans, hands out one stage at a time, recruits specialists if a peer exists |
+| **Builder** | BAND Desktop · OpenCode · Qwen 3.8 27B | builds each stage; answers the exam's and the Reviewer's findings |
+| **Reviewer** | BAND Desktop · OpenCode · Qwen 3.8 27B, read-only profile | reads every diff against the spec; blocks with the missing evidence |
 | **Scout** | band-sdk agent · Nimble | answers from the live web with sources and confidence; fetches docs; builds datasets |
 | **Examiner** | band-sdk agent · Qwen 3.8 writes the exam, Playwright runs it | seals a hidden acceptance exam and grades every stage |
 | **Nap Guard** | band-sdk agent · deterministic | gates stages, batches questions, calls chill breaks, wakes the human once, posts the receipt |
 
-Each agent is its own BAND identity. The three coding agents use band-sdk's `OpencodeAdapter` (one OpenCode session per room
-per agent). Everything runs headless on one cloud machine.
+Each agent is its own BAND identity. BAND Desktop runs the three coding agents: its daemon owns each one's OpenCode
+runtime, one per agent per room. Scout, the Examiner and Nap Guard are band-sdk agents. Runs 1–4 ran the crew through
+band-sdk's `OpencodeAdapter` instead; that mode still works without the desktop app (`ONSEN_CREW=sdk`).
 
 ## 2. Who talks to whom
 
@@ -124,10 +125,17 @@ Measured:
 
 ## BAND Desktop
 
-BAND Desktop's installer couldn't run in our cloud build environment. Its permission system blocked installing the
-package. So the crew runs on the same OpenCode runtime BAND Desktop launches, connected through band-sdk's
-`OpencodeAdapter`. The rooms are ordinary BAND rooms: open the run's room in BAND Desktop (or app.band.ai) to watch the
-agents, their tool calls and the Work tab live.
+BAND Desktop (0.4.18, the Linux package) runs the coding crew:
+- **The Architect, the Builder and the Reviewer were adopted into BAND Desktop** (`band adopt`) with their existing
+  BAND identities. Each got an OpenCode runtime in its Runtime tab: Qwen 3.8 on W&B, approvals allowed automatically,
+  and a per-role launcher that picks the role's OpenCode permission profile, so the Reviewer can't edit files.
+- **BAND Desktop's daemon starts each agent's runtime** in the run's workspace when a message mentions it. It shows
+  their reasoning, tool calls and live status in the room, each with an Interrupt button. `onsen-desktop prepare`
+  points the crew at each new workspace and writes their instructions, including a roster of handles.
+- **The daemon runs with a minimal environment**, because it passes its environment to every runtime. Tokens in the
+  operator's shell stay out of the agents' reach.
+
+Full setup: [docs/band-desktop.md](band-desktop.md). Run 5 ran this way.
 
 ## Checklist
 

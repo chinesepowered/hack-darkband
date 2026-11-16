@@ -24,17 +24,19 @@ if work starts thrashing). The run ends with a receipt that counts how many time
 
 | Agent | Runs as | Job | BAND collaboration signal |
 |---|---|---|---|
-| Architect | OpenCode · Qwen 3.8 27B | plan, hand out stages, recruit specialists at runtime | roster decided at runtime |
-| Builder | OpenCode · Qwen 3.8 27B | build each stage; fix what the exam and the review report | dependent handoff |
-| Reviewer | OpenCode · Qwen 3.8 27B · read-only profile | read the diff and say no when needed | verdict that can be blocked |
+| Architect | BAND Desktop · OpenCode · Qwen 3.8 27B | plan, hand out stages, recruit specialists at runtime | roster decided at runtime |
+| Builder | BAND Desktop · OpenCode · Qwen 3.8 27B | build each stage; fix what the exam and the review report | dependent handoff |
+| Reviewer | BAND Desktop · OpenCode · Qwen 3.8 27B · read-only profile | read the diff and say no when needed | verdict that can be blocked |
 | Scout | `onsen-scout` · Nimble | cited answers, current docs, datasets with a source on every row | dependent handoff |
 | Examiner | `onsen-examiner` · Qwen 3.8 writes the exam, Playwright runs it | seal the hidden exam, grade each stage | boundary BAND enforces |
 | Nap Guard | `onsen-nap-guard` (deterministic) | stage gate, batched questions, chill breaks, the one wake-up, the receipt | one human gate + hard stop |
 
-Every agent is its own BAND identity. The three coding agents use BAND's `OpencodeAdapter`: each room gets its own
-OpenCode session per agent, and the model is Qwen 3.8 27B on W&B Inference. The Reviewer's OpenCode profile can't
-edit files, and no profile can fetch the web, so web questions have to go through Scout. Agent instructions are in
-[crew/](crew/), and the message protocol is in [crew/PROTOCOL.md](crew/PROTOCOL.md).
+Every agent is its own BAND identity. **BAND Desktop runs the three coding agents.** Its daemon owns each one's
+OpenCode runtime and starts it in the run's workspace when a message arrives, with Qwen 3.8 27B on W&B Inference as the
+model. Setup is in [docs/band-desktop.md](docs/band-desktop.md). Each role's OpenCode profile sets its permissions:
+the Reviewer can't edit files, and no profile can fetch the web, so web questions have to go through Scout. Scout, the
+Examiner and Nap Guard are small band-sdk agents. Agent instructions are in [crew/](crew/), and the message protocol is
+in [crew/PROTOCOL.md](crew/PROTOCOL.md).
 
 ## One run
 
@@ -69,7 +71,11 @@ You need:
 - a Chromium for the Examiner's Playwright: `uv run playwright install chromium` (or point `ONSEN_CHROMIUM_PATH` at one)
 - three keys in `.env`: `BAND_USER_KEY`, `NIMBLE_API_KEY` and `WANDB_API_KEY`
 
-Everything runs headless; no desktop is required.
+There are two ways to run the coding crew:
+- `ONSEN_CREW=desktop`: BAND Desktop runs it. This needs the one-time setup in [docs/band-desktop.md](docs/band-desktop.md).
+  Runs 5 and later used this mode.
+- `ONSEN_CREW=sdk` (the default): `run-factory.sh` runs it headless with band-sdk's `OpencodeAdapter`, with no desktop
+  app. Runs 1–4 used this mode.
 
 ```bash
 cp .env.example .env
@@ -84,12 +90,12 @@ uv run onsen-register
 ```
 
 ```bash
-scripts/run-factory.sh capyfinder
+ONSEN_CREW=desktop scripts/run-factory.sh capyfinder
 ```
 
 - `onsen-register` registers the six agents and saves their keys to `~/.onsen/`, outside the repo.
-- `run-factory.sh` creates a fresh workspace, starts OpenCode and the six agents, posts your one kickoff message, and
-  follows the room until the receipt. When Nap Guard wakes you, reply in the room with `@Nap Guard ship`, or use
+- `run-factory.sh` creates a fresh workspace, points the crew at it, starts Scout, the Examiner and Nap Guard, posts
+  your one kickoff message, and follows the room until the receipt. When Nap Guard wakes you, reply in the room with `@Nap Guard ship`, or use
   `uv run onsen-say ship`.
 
 To watch the room live, open it at app.band.ai or in BAND Desktop; the room is the same either way. Stop everything

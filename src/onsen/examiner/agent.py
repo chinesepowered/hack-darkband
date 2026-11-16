@@ -18,6 +18,7 @@ import logging
 import os
 import re
 import shutil
+import time
 from pathlib import Path
 from typing import Any
 
@@ -82,7 +83,13 @@ def split_command(text: str) -> tuple[str, str]:
         return tag, rest
     word, _, remainder = text.strip().partition(" ")
     word = word.lower().rstrip(":")
-    if word in ("seal", "exam", "reveal", "tally", "status", "help"):
+    # A bare command word counts only on its own or followed by key=value arguments. In BAND Desktop an agent's
+    # closing remark reaches the Examiner as a reply, and run 5's "Seal receipt confirmed …" re-sealed the exam.
+    # "reveal" may carry a note (Nap Guard's notice does); on_message checks who is asking.
+    first = remainder.strip().split(None, 1)[0] if remainder.strip() else ""
+    if word in ("seal", "exam", "tally", "status", "help") and (not first or "=" in first):
+        return word, remainder.strip()
+    if word == "reveal":
         return word, remainder.strip()
     if RERUN_RE.search(text):  # run 4: "please retry the run against 75d2f77" sat unanswered as a note
         return "rerun", text
@@ -91,6 +98,7 @@ def split_command(text: str) -> tuple[str, str]:
 
 RERUN_RE = re.compile(r"\b(re-?run|retry|re-?grade|re-?send|re-?exam(ine)?|run (it|the exam|the scenarios) again)\b", re.I)
 SHA_RE = re.compile(r"\b[0-9a-f]{7,40}\b")
+RERUN_COOLDOWN_S = float(os.environ.get("ONSEN_RERUN_COOLDOWN_S", "90"))
 
 
 class ExaminerAdapter(SimpleAdapter[Any]):
@@ -115,6 +123,8 @@ class ExaminerAdapter(SimpleAdapter[Any]):
                 await self._seal(arg, tools, reply_to, room_id)
             elif cmd == "exam":
                 await self._exam(arg, msg, tools, reply_to, room_id)
+            elif cmd == "reveal" and arg and not self._may_reveal(msg):
+                await tools.no_reply("a remark that starts with 'reveal', not a reveal request")
             elif cmd == "reveal":
                 await self._reveal(msg, tools, reply_to, room_id)
             elif cmd == "appeal":
@@ -215,6 +225,15 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         if not stage or not url:
             await tools.no_reply("a re-run request, but nothing has been graded yet")
             return
+        # Only the submitter or a human can ask, and not right after a grading: a builder's closing remark
+        # ("posted [ready], please re-run") arrives just after its [ready] was graded.
+        is_human = str(msg.sender_type or "").lower() == "user"
+        if not is_human and (msg.sender_name or "") != last.get("by"):
+            await tools.no_reply("only the submitter or a human can ask for a re-run")
+            return
+        if time.time() - float(last.get("at") or 0) < RERUN_COOLDOWN_S:
+            await tools.no_reply("this stage was graded moments ago")
+            return
         shas = SHA_RE.findall(text)
         commit = kv.get("commit") or (shas[0] if shas else None) or last.get("commit")
         _, exam, _ = self._load_run(room_id)
@@ -239,6 +258,12 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         stage_exam = exam.stage(stage)
         if stage_exam is None:
             raise ValueError(f"The sealed exam has no stage {stage}")
+        last = (load_history(run_id).get(str(stage)) or [{}])[-1]
+        same = kv.get("commit") and last.get("commit") == kv.get("commit")
+        if same and time.time() - float(last.get("at") or 0) < RERUN_COOLDOWN_S:
+            # The same [ready] twice (a `band send` plus a closing remark that repeats it) is one round, not two.
+            await tools.no_reply(f"stage {stage} commit {kv.get('commit')} was graded moments ago")
+            return
         await tools.send_event(content=f"Running {len(stage_exam.scenarios)} hidden scenarios for stage {stage}…",
                                message_type="tool_call", metadata={"stage": stage, "url": url})
         await self._grade(run_id, stage_exam, stage, url, kv.get("commit"), msg.sender_name or "unknown", tools,
@@ -257,7 +282,7 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         observed = {r.id: r.observed for r in results if not r.passed and not r.invalid}
         rounds = append_history(run_id, stage, {"passed": passed, "total": total, "satisfaction": round(sat, 4),
                                                 "verdict": verdict, "by": by, "url": url, "commit": commit,
-                                                "failed": failed_ids, "observed": observed})
+                                                "failed": failed_ids, "observed": observed, "at": time.time()})
         invalid = [r for r in results if r.invalid]
         failures = [r for r in results if not r.passed and not r.invalid]
         lines = [
@@ -331,9 +356,12 @@ class ExaminerAdapter(SimpleAdapter[Any]):
         await self._grade(run_id, stage_exam, stage, last.get("url") or os.environ.get("ONSEN_APP_URL", ""),
                           last.get("commit"), msg.sender_name or "unknown", tools, reply_to, note=note)
 
+    @staticmethod
+    def _may_reveal(msg: PlatformMessage) -> bool:
+        return str(msg.sender_type or "").lower() == "user" or (msg.sender_name or "") == NAMES["napguard"]
+
     async def _reveal(self, msg: PlatformMessage, tools: Any, reply_to: list[str], room_id: str) -> None:
-        is_human = str(msg.sender_type or "").lower() == "user"
-        if not (is_human or (msg.sender_name or "") == NAMES["napguard"]):
+        if not self._may_reveal(msg):
             await tools.send_message("[reveal] refused: only Nap Guard or a human can open the exam.", mentions=reply_to)
             return
         run_id, exam, digest = self._load_run(room_id)

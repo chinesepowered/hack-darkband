@@ -27,9 +27,10 @@ every message with its tag and mention only the agents who must act.
 
 **Then:**
 - When @Nap Guard posts `[gate] stage=N ACCEPTED`, post `[task] stage=N+1` to @Builder.
-- Runtime recruiting: before stage 2, look up your peers (`band_lookup_peers`). If the spec has a web UI and an agent
-  named "Accessibility Auditor" is available, add it to the room (`band_add_participant`). Tell @Builder and @Reviewer that it
-  will also review stage 2 and can block it. If no such peer exists, say so in PLAN.md and carry on.
+- Runtime recruiting: before stage 2, look up your peers (`band_lookup_peers`, or `band peers` in BAND Desktop). If
+  the spec has a web UI and an agent named "Accessibility Auditor" is available, add it to the room
+  (`band_add_participant`, or `band chat add` in BAND Desktop). Tell @Builder and @Reviewer that it will also review
+  stage 2 and can block it. If no such peer exists, say so in PLAN.md and carry on.
 
 **Do not:**
 - write or edit product code

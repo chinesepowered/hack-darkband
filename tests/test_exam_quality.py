@@ -102,3 +102,19 @@ def test_repair_wraps_bare_captured_names():
     ])
     repair_stage(exam)
     assert exam.scenarios[0].requests[1].checks[0].value == "{list_count}"
+
+
+def test_lint_drops_scenarios_from_a_later_stage():
+    # Run 5: stage 1 (the API) was examined on the home page that stage 2 builds.
+    from onsen.examiner.models import StageExam
+    from onsen.examiner.seal import fill_defaults, lint_stage, stage_scope
+
+    spec = SPEC
+    web = {"id": "x", "story": "Home page shows spots.", "kind": "web",
+           "steps": [{"action": "goto", "path": "/"}, {"action": "expect_visible", "testid": "spot-card"}]}
+    api = {"id": "y", "story": "Health is up.", "kind": "http",
+           "requests": [{"path": "/api/health", "checks": [{"type": "status", "number": 200}]}]}
+    for stage, kept_ids in ((1, {"y"}), (2, {"x", "y"})):
+        exam = StageExam.model_validate(fill_defaults({"stage": stage, "scenarios": [dict(web), dict(api)]}))
+        linted, dropped = lint_stage(spec, exam, stage_scope(spec, stage))
+        assert {sc.id for sc in linted.scenarios} == kept_ids, dropped

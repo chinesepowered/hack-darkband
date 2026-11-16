@@ -9,6 +9,10 @@
 #
 # Needs in the environment (or .env): BAND_USER_KEY, NIMBLE_API_KEY, WANDB_API_KEY, and agents
 # registered with `uv run onsen-register`.
+#
+# ONSEN_CREW picks who runs the coding crew (Architect, Builder, Reviewer):
+#   desktop  BAND Desktop owns their OpenCode runtimes (one-time setup: docs/band-desktop.md)
+#   sdk      (default) this script runs `opencode serve` and band-sdk's OpencodeAdapter, no desktop app needed
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")/.." && pwd)"
@@ -36,9 +40,16 @@ start() {  # start <name> <command...>
   echo "$! $name" >> "$ONSEN_HOME/factory.pids"
 }
 
-# OpenCode works inside the workspace; agent keys and the sealed exam live under $ONSEN_HOME, outside it.
-( cd "$ONSEN_WORKSPACE" && start opencode "$opencode_bin" serve --hostname=127.0.0.1 --port="$port" )
-for _ in $(seq 1 60); do curl -fsS -m 5 "$ONSEN_OPENCODE_URL/config" >/dev/null 2>&1 && break; sleep 1; done
+crew="${ONSEN_CREW:-sdk}"
+echo "crew:      $crew"
+if [ "$crew" = desktop ]; then
+  command -v band >/dev/null || { echo "ONSEN_CREW=desktop needs BAND Desktop's band CLI (docs/band-desktop.md)"; exit 1; }
+  band daemon status 2>/dev/null | grep -q "daemon running" || scripts/band-desktop-daemon.sh
+else
+  # OpenCode works inside the workspace; agent keys and the sealed exam live under $ONSEN_HOME, outside it.
+  ( cd "$ONSEN_WORKSPACE" && start opencode "$opencode_bin" serve --hostname=127.0.0.1 --port="$port" )
+  for _ in $(seq 1 60); do curl -fsS -m 5 "$ONSEN_OPENCODE_URL/config" >/dev/null 2>&1 && break; sleep 1; done
+fi
 
 # Agents rejoin every room they're in when they start: take them out of old runs' rooms first.
 uv run onsen-cleanup --all >/dev/null || true
@@ -46,11 +57,17 @@ uv run onsen-cleanup --all >/dev/null || true
 start scout     uv run onsen-scout
 start examiner  uv run onsen-examiner
 start napguard  uv run onsen-nap-guard
-start architect uv run onsen-crew architect
-start builder   uv run onsen-crew builder
-start reviewer  uv run onsen-crew reviewer
+if [ "$crew" = desktop ]; then
+  uv run onsen-desktop prepare --workspace "$ONSEN_WORKSPACE"   # instructions + this run's workspace, then restart
+  local_agents="scout examiner napguard"
+else
+  start architect uv run onsen-crew architect
+  start builder   uv run onsen-crew builder
+  start reviewer  uv run onsen-crew reviewer
+  local_agents="scout examiner napguard architect builder reviewer"
+fi
 
-for name in scout examiner napguard architect builder reviewer; do
+for name in $local_agents; do
   for _ in $(seq 1 90); do grep -q "Agent started" "$logs/$name.log" 2>/dev/null && break; sleep 1; done
   if grep -q "Agent started" "$logs/$name.log"; then echo "✔ $name online"; else echo "✘ $name not online — see $logs/$name.log"; fi
 done

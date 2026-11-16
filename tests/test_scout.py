@@ -9,10 +9,17 @@ from onsen.scout import ScoutAdapter, format_answer, normalize_rows, split_comma
 
 def test_split_command_variants():
     assert split_command("ask: is it open?") == ("ask", "is it open?")
-    assert split_command("docs FastAPI static files site:fastapi.tiangolo.com")[0] == "docs"
+    assert split_command("docs: FastAPI static files site:fastapi.tiangolo.com")[0] == "docs"
     assert split_command("[question] what currency does Japan use?") == ("ask", "what currency does Japan use?")
     assert split_command("[tally-request] for the receipt")[0] == "tally"
-    assert split_command("where do capybaras live?") == ("ask", "where do capybaras live?")
+    assert split_command("where do capybaras live?", from_human=True) == ("ask", "where do capybaras live?")
+    assert split_command("docs FastAPI static files", from_human=True)[0] == "docs"
+
+
+def test_agent_remarks_are_notes():
+    # BAND Desktop posts an agent's closing remark as a reply to whoever woke it, Scout included.
+    assert split_command("Data verified — 24 rows, nothing new to post?")[0] == "note"
+    assert split_command("State verified. Should I wait?")[0] == "note"
 
 
 def test_rows_need_a_source_and_get_ids():
@@ -51,7 +58,7 @@ async def test_confident_answer_goes_only_to_the_asker():
 
 async def test_low_confidence_answer_is_copied_to_nap_guard():
     tools = FakeAgentTools(participants=CREW)
-    await deliver(ScoutAdapter(FakeNimble(False)), "@scout Is Ueno Zoo open on Mondays?", "Builder", tools)
+    await deliver(ScoutAdapter(FakeNimble(False)), "@scout ask: Is Ueno Zoo open on Mondays?", "Builder", tools)
     msg = tools.messages_sent[-1]
     assert "confidence=low" in msg["content"]
     assert "Nap Guard" in msg["mentions"]
@@ -69,5 +76,6 @@ async def test_notes_to_scout_are_not_researched():
 
 
 def test_split_command_question_vs_note():
-    assert split_command("is the zoo open on mondays?")[0] == "ask"
+    assert split_command("is the zoo open on mondays?", from_human=True)[0] == "ask"
+    assert split_command("is the zoo open on mondays?")[0] == "note"  # agents ask with `ask:`
     assert split_command("thanks, noted")[0] == "note"

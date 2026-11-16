@@ -170,3 +170,12 @@ def test_rerun_requests_are_not_notes():
     assert split_command("@Examiner — please retry the run against 75d2f77")[0] == "rerun"
     assert split_command("Please re-send the full round-4 failure description")[0] == "rerun"
     assert split_command("acknowledged, thanks")[0] == "note"
+
+
+def test_remarks_that_start_with_a_command_word_are_not_commands():
+    # Run 5: an auto-posted "Seal receipt confirmed …" re-sealed the exam.
+    assert split_command("Seal receipt confirmed — matches my plan (spec=capyfinder, stages=3).")[0] == "note"
+    assert split_command("Status: all good")[0] == "note"
+    assert split_command("seal spec=capyfinder data=data/spots.json")[0] == "seal"
+    assert split_command("status")[0] == "status"
+    assert split_command("reveal — the human shipped. Please publish the sealed exam.")[0] == "reveal"

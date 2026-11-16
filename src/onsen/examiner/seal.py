@@ -292,12 +292,27 @@ def repair_stage(exam: StageExam) -> StageExam:
     return exam
 
 
-def lint_stage(spec_text: str, exam: StageExam) -> tuple[StageExam, list[str]]:
+def stage_scope(spec_text: str, stage: int) -> str:
+    """The spec sections of stages 1..N: what a stage-N exam is allowed to test."""
+    return "\n\n".join(text for n, text in parse_stages(spec_text) if n <= stage)
+
+
+def lint_stage(spec_text: str, exam: StageExam, scope_text: str | None = None) -> tuple[StageExam, list[str]]:
     """Drop scenarios that use anything the spec's contract doesn't define: unknown routes, query
     parameters, labels or test ids, or literal UI text the spec never promises. Model-written exams
-    otherwise fail correct apps for invented reasons."""
+    otherwise fail correct apps for invented reasons.
+
+    With ``scope_text`` (the stage sections up to this stage), also drop scenarios that use a route a later stage
+    introduces (run 5: stage 1, the API, was examined on the home page that stage 2 builds)."""
     spec_lower = spec_text.lower()
     routes = _route_patterns(spec_text)
+    scope_routes = _route_patterns(scope_text) if scope_text else []
+
+    def in_scope(path: str) -> bool:
+        if not scope_routes:
+            return True
+        bare = re.sub(r"\{[^}]*\}", "x", path.split("?", 1)[0])
+        return any(p.match(bare) for p in scope_routes)
 
     def known(text: str | None) -> bool:
         return text is None or VAR_HINT in text or text.lower() in spec_lower
@@ -325,6 +340,8 @@ def lint_stage(spec_text: str, exam: StageExam) -> tuple[StageExam, list[str]]:
         for req in sc.requests:
             if not route_ok(req.path):
                 problems.append(f"route {req.path}")
+            elif not in_scope(req.path):
+                problems.append(f"route {req.path} comes in a later stage")
             bare = req.path.split("?", 1)[0]
             expects_ok = any(c.type == "status" and (c.number or 200) < 300 for c in req.checks)
             for rx, _route in param_routes:
@@ -348,6 +365,8 @@ def lint_stage(spec_text: str, exam: StageExam) -> tuple[StageExam, list[str]]:
         for st in sc.steps:
             if st.action == "goto" and st.path and not route_ok(st.path):
                 problems.append(f"page {st.path}")
+            elif st.action == "goto" and st.path and not in_scope(st.path):
+                problems.append(f"page {st.path} comes in a later stage")
             for attr in ("label", "testid"):
                 if not known(getattr(st, attr)):
                     problems.append(f"{attr} {getattr(st, attr)!r}")
@@ -427,15 +446,19 @@ class ScenarioWriter:
                        if stories else "")
             feedback = ("\nThese earlier scenarios were dropped because they used something the spec doesn't define:\n"
                         + "\n".join(dropped[-6:])) if dropped else ""
+            in_reach = sorted(set(ROUTE_RE.findall(stage_scope(spec_text, stage))))
+            reach = (f" By stage {stage} the app has only these routes, so use no others: {', '.join(in_reach)}."
+                     if in_reach else "")
             prompt = (
                 f"Write exactly {want} hidden scenarios for Stage {stage}. Earlier stages must keep working, so at most "
-                f"one scenario in the whole stage may re-check an earlier stage. Return stage={stage}. Every field in "
-                f"the schema must be present; use null for fields a check or step doesn't use.{covered}{feedback}"
+                f"one scenario in the whole stage may re-check an earlier stage.{reach} Return stage={stage}. Every "
+                f"field in the schema must be present; use null for fields a check or step doesn't use.{covered}"
+                f"{feedback}"
             )
             # Guided JSON decoding can occasionally loop; short outputs and a tight cap fail fast and retry.
             part = await self.llm.structured(system=system, prompt=prompt, output=StageExam, reasoning=reasoning,
                                              max_tokens=6000)
-            part, part_dropped = lint_stage(spec_text, repair_stage(part))
+            part, part_dropped = lint_stage(spec_text, repair_stage(part), stage_scope(spec_text, stage))
             dropped += part_dropped
             for sc in part.scenarios:
                 sc.id = f"s{stage}-{len(exam.scenarios) + 1:02d}"
