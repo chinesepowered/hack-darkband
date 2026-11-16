@@ -229,8 +229,16 @@ class ScoutAdapter(SimpleAdapter[Any]):
         schema = json.loads(schema_path.read_text())
         await tools.send_event(content=f"Building a dataset with Nimble: {clip(request, 200)}", message_type="tool_call",
                                metadata={"tool": "nimble.agents.run", "use_case": "dataset_building", "schema": schema_path.name})
-        result: DatasetResult = await self.nimble.dataset(request, schema, effort=kv.get("effort"))
-        rows = normalize_rows(result.rows)
+        # Nimble's dataset agent occasionally comes back nearly empty (run 6: one row, with no source); one retry
+        # costs a minute and saves the run.
+        attempts, min_rows = int(os.environ.get("ONSEN_DATA_ATTEMPTS", "2")), int(os.environ.get("ONSEN_DATA_MIN_ROWS", "5"))
+        for attempt in range(1, attempts + 1):
+            result: DatasetResult = await self.nimble.dataset(request, schema, effort=kv.get("effort"))
+            rows = normalize_rows(result.rows)
+            if len(rows) >= min_rows or attempt == attempts:
+                break
+            await tools.send_event(content=f"Nimble returned {len(rows)} sourced rows; asking again",
+                                   message_type="tool_call", metadata={"tool": "nimble.agents.run", "attempt": attempt + 1})
         # Every row carries every field the schema defines ("" when the web had nothing), so the data is uniform.
         item_props = (((schema.get("properties") or {}).get(next(iter(schema.get("properties") or {"": 0})), {})
                        .get("items") or {}).get("properties") or {})
@@ -246,7 +254,8 @@ class ScoutAdapter(SimpleAdapter[Any]):
         state.data["data"] += 1
         from datetime import datetime, timezone
 
-        done[out_rel] = {"rows": len(rows), "at": datetime.now(timezone.utc).strftime("%H:%M UTC")}
+        if len(rows) >= min_rows:  # a dataset too thin to build on can be asked for again
+            done[out_rel] = {"rows": len(rows), "at": datetime.now(timezone.utc).strftime("%H:%M UTC")}
         sample = "\n".join(
             f"• {r.get('name')} — {r.get('city')}, {r.get('country')} ({r.get('type', '?')}) · {r.get('source_url')}"
             for r in rows[:5]

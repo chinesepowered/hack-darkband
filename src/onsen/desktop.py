@@ -62,10 +62,10 @@ How to talk in the room:
 - Send every protocol message yourself with BAND's send command (your BAND briefing shows it with this room's id):
   `band ... send <room> "@handle @handle [tag] key=value … free text"`. Put the handles first, then the tag line.
   "Post X to @Examiner and @Reviewer" in these instructions means one `band send` that starts with both handles.
-- Then end your turn without a final answer. BAND posts a final answer as a reply to whoever woke you, which would
-  wake them (or the human) again for nothing.
-- If the message that woke you needs nothing from you (an acknowledgment, ".", "noted"), end your turn right away.
-  Don't call any tools.
+- Only `band send` speaks for you. Onsen's launcher keeps the text you end a turn with out of the room, so you never
+  need to stay silent. Finish each turn normally; a one-line note is fine. Don't put protocol messages in that
+  closing text; send them.
+- If the message that woke you needs nothing from you, just finish the turn.
 - Never mention the human. Only Nap Guard wakes the capybara.
 - For multi-line messages, write the body to a file in the workspace and use `--body-file`.
 """
@@ -102,6 +102,9 @@ def prepare(workspace: Path) -> None:
         band("agent", "instructions", "set", "--session", scope(role), "--instructions-file", str(f))
         band("runtime", "template", "set", "--session", scope(role), "--spawn-cwd", str(workspace),
              "--apply-and-restart")
+        # --apply-and-restart leaves a stopped worker stopped (stop-factory.sh stops them), so start it here.
+        # It can report stale rooms from older runs; the worker still starts.
+        band("restart", "--session", scope(role), check=False)
         print(f"✔ {NAMES[role]} ({hs.get(role, '?')}): instructions {f.name}, working directory {workspace}")
 
 

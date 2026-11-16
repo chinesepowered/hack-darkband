@@ -1,0 +1,862 @@
+{
+  "trust": {
+    "claims": [
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[0].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[0].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[0].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[0].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[0].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[0].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[1].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[1].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[1].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[1].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[1].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[1].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[2].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[2].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[2].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[2].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[2].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[2].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[3].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[3].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[3].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[3].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[3].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[3].capybara_experience",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[4].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[4].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[4].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[4].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[4].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[4].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[5].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[5].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[5].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[5].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[5].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[6].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[6].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[6].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[6].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[6].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[6].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[7].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[7].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[7].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[7].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[7].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[7].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[8].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[8].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[8].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[8].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[8].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[8].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[9].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[9].name",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[9].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[9].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[9].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[9].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[10].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[10].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[10].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[10].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[10].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[11].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[11].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[11].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[11].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[11].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[11].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[12].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[12].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[12].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[12].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[12].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[12].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[13].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[13].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[13].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[13].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[13].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[13].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[14].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[14].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[14].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[14].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[14].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[14].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[15].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[15].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[15].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[15].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[15].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[16].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[16].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[16].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[16].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[16].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[16].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[17].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[17].name",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[17].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[17].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[17].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[17].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[18].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[18].name",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[18].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[18].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[18].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[18].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[19].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[19].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[19].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[19].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[19].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[19].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[20].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[20].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[20].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[20].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[20].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[20].adult_price",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[20].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[21].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[21].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[21].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[21].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[21].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[21].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[22].city",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[22].name",
+        "reasoning": "No usable citation resolved for this value. The exact words appear on the cited page"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[22].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[22].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[22].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[22].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[23].city",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[23].name",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[23].type",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[23].country",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[23].source_url",
+        "reasoning": "No usable citation resolved for this value"
+      },
+      {
+        "citations": [],
+        "confidence": "low",
+        "path": "$.spots[23].capybara_experience",
+        "reasoning": "No usable citation resolved for this value"
+      }
+    ],
+    "confidence": "low",
+    "reasoning": "Low confidence - trust per claim ratio is 0%",
+    "sources": []
+  },
+  "sources": []
+}

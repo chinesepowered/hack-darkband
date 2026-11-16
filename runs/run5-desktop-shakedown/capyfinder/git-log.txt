@@ -1,0 +1,3 @@
+09f8217 18:42 Stage 1: add Web UI per acceptance contract (home search/country/type, spot cards, detail pages, 404)
+2d69257 18:34 Stage 1: data + API (health, spots with country/type/q filters, spot by id)
+2a96e18 18:24 Spec for capyfinder
