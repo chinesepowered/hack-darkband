@@ -79,3 +79,15 @@ def test_split_command_question_vs_note():
     assert split_command("is the zoo open on mondays?", from_human=True)[0] == "ask"
     assert split_command("is the zoo open on mondays?")[0] == "note"  # agents ask with `ask:`
     assert split_command("thanks, noted")[0] == "note"
+
+
+def test_docs_rank_prefers_official_docs():
+    from onsen.nimble_tools import _docs_rank
+
+    results = [{"url": "https://gist.github.com/someone/abc", "metadata": {"position": 1}},
+               {"url": "https://github.com/python/cpython", "metadata": {"position": 2}},
+               {"url": "https://docs.python.org/3/library/http.server.html", "metadata": {"position": 3}},
+               {"url": "https://example.com/blog/http-server", "metadata": {"position": 4}}]
+    ranked = [r["url"] for r in sorted(results, key=_docs_rank)]
+    assert ranked[0].startswith("https://docs.python.org") and ranked[1].startswith("https://github.com/python")
+    assert ranked[-1].startswith("https://gist.github.com")

@@ -1,0 +1,4196 @@
+{
+  "trust": {
+    "claims": [
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].city",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": [
+              "…trace back to a chilly winter day in 1982 at Izu Shaboten Zoo in Shizuoka. A zookeeper noticed that the…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].name",
+        "reasoning": "Backed by a secondary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].type",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].country",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].source_url",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[0].capybara_experience",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": [
+              "…Contents: Izu Shaboten Zoo, Shizuoka Prefecture Nagasaki Bio Park, Nagasaki Prefecture Nasu Animal…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].city",
+        "reasoning": "Backed by a secondary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": [
+              "…Contents: Izu Shaboten Zoo, Shizuoka Prefecture Nagasaki Bio Park, Nagasaki Prefecture Nasu Animal Kingdom, Tochigi…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].name",
+        "reasoning": "Backed by a secondary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].type",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].country",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].source_url",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[1].capybara_experience",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].city",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": [
+              "…Prefecture Nagasaki Bio Park, Nagasaki Prefecture Nasu Animal Kingdom, Tochigi Prefecture Saitama Children’s Zoo,…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].name",
+        "reasoning": "Backed by a secondary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].type",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].country",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].source_url",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[2].capybara_experience",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": [
+              "…Nasu Animal Kingdom, Tochigi Prefecture Saitama Children’s Zoo, Saitama Prefecture Ishikawa Zoo,…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].city",
+        "reasoning": "Backed by a secondary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].name",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].type",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].country",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].source_url",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[3].capybara_experience",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].city",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": [
+              "…Saitama Children’s Zoo, Saitama Prefecture Ishikawa Zoo, Ishikawa Prefecture Related Posts Izu shaboten…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].name",
+        "reasoning": "Backed by a secondary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].type",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].country",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].source_url",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "official",
+            "source_type": "secondary",
+            "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[4].capybara_experience",
+        "reasoning": "Backed by a secondary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": [
+              "…small cafe room. Sources we checked * Cafe Capyba Tokyo: English Home * Cafe Capyba Tokyo: Reservations *…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[5].city",
+        "reasoning": "Backed by a primary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": [
+              "…“cozy.” The Short Answer For Japan Capybara Fans Cafe Capyba in Tokyo advertises a cozy cafe where capybaras…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[5].name",
+        "reasoning": "Backed by a primary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[5].type",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[5].country",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[5].source_url",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[5].capybara_experience",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[6].city",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": [
+              "…The one that dominates by every measurable is Capybara Onsen Moffu in Harajuku: an indoor capybara hot spring with…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[6].name",
+        "reasoning": "Backed by a primary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[6].type",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[6].country",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[6].source_url",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[6].capybara_experience",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[7].city",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": [
+              "…Tiếng Việt * Bahasa Indonesia Book Now Our cafes CAPPINESS Shinjuku Shinjuku Book CAPPINESS Oshiage Oshiage, Tokyo…"
+            ],
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[7].name",
+        "reasoning": "Backed by a primary source (official). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[7].type",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[7].country",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[7].source_url",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": [
+              "…Cute & Cozy Atmosphere - Capybaras - 3 - Price - 4,000 yen · 40 min Book More Info our first cafe, a gentle…"
+            ],
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[7].adult_price",
+        "reasoning": "Backed by a primary source (official). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[7].capybara_experience",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": [
+              "…Shinjuku Shinjuku Book CAPPINESS Oshiage Oshiage, Tokyo Skytree, Asakusa Book Before you visit Capybara…"
+            ],
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[8].city",
+        "reasoning": "Backed by a primary source (official). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": [
+              "…Now Our cafes CAPPINESS Shinjuku Shinjuku Book CAPPINESS Oshiage Oshiage, Tokyo Skytree, Asakusa Book Before you…"
+            ],
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[8].name",
+        "reasoning": "Backed by a primary source (official). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[8].type",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[8].country",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[8].source_url",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": [
+              "…Cute & Cozy Atmosphere - Capybaras - 3 - Price - 4,000 yen · 40 min Book More Info our first cafe, a gentle…"
+            ],
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[8].adult_price",
+        "reasoning": "Backed by a primary source (official). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://cappiness.jp/capybara-guide",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[8].capybara_experience",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[9].city",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": [
+              "…and the capybara food rather than upselling them. Capy Neko Cafe pairs capybaras with cats across two rooms and is…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[9].name",
+        "reasoning": "Backed by a primary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[9].type",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[9].country",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[9].source_url",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[9].adult_price",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[9].capybara_experience",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyvillage.com/en/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[10].city",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyvillage.com/en/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[10].name",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyvillage.com/en/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[10].type",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyvillage.com/en/",
+            "excerpts": [
+              "…STORE DETAILS Capyvillage カピヴィレッジ - Open - 11:00am - 5:00pm (Break 1:30pm - 2:30pm) - Tel - 03-5990-2786 - Address - 1F, Gran class…"
+            ],
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[10].hours",
+        "reasoning": "Backed by a primary source (official). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyvillage.com/en/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[10].country",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyvillage.com/en/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[10].source_url",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyvillage.com/en/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[10].adult_price",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyvillage.com/en/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "official",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[10].capybara_experience",
+        "reasoning": "Backed by a primary source (official)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": [
+              "…for this, Mother Farm across the bay in Chiba is the shortest trip that gives you both halves —…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[11].city",
+        "reasoning": "Backed by a primary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": [
+              "…Winter only, and viewing rather than hands-on Mother Farm Petting plus a winter onsen, closest to Tokyo 250…"
+            ],
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[11].name",
+        "reasoning": "Backed by a primary source (news). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[11].type",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[11].country",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[11].source_url",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "news",
+            "source_intent": "news",
+            "source_type": "primary",
+            "title": "Capybara Cafes in Japan | Grumpy Capy"
+          }
+        ],
+        "confidence": "high",
+        "path": "$.spots[11].capybara_experience",
+        "reasoning": "Backed by a primary source (news)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…at a good number of UK collections, including London Zoo, Hertfordshire Zoo, Drusillas Park, Twycross,…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[12].city",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…at a good number of UK collections, including London Zoo, Hertfordshire Zoo, Drusillas Park, Twycross,…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[12].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[12].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[12].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[12].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…Region What you get London Zoo Central London General viewing, plus a bookable meet-the-capybara experience Hertfordshire Zoo Hertfordshire Keeper-led…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[12].capybara_experience",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[13].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…number of UK collections, including London Zoo, Hertfordshire Zoo, Drusillas Park, Twycross, Blackpool, Hoo Zoo,…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[13].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[13].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[13].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[13].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[13].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…hand-feeding and scratching Hobbledown Heath Hounslow, west London One of the few explicit hand-feeding sessions…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[14].city",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…smaller subset offers a bookable close encounter. Hobbledown Heath in west London and Hertfordshire Zoo are the two…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[14].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[14].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[14].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[14].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[14].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[15].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…including London Zoo, Hertfordshire Zoo, Drusillas Park, Twycross, Blackpool, Hoo Zoo, Longleat and…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[15].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[15].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[15].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[15].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…hand-feeding sessions Drusillas Park East Sussex General viewing, strong for younger children Hoo Zoo and Dinosaur World Shropshire Encounters,…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[15].capybara_experience",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…for younger children Hoo Zoo and Dinosaur World Shropshire Encounters, smaller site Twycross Zoo…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[16].city",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…General viewing, strong for younger children Hoo Zoo and Dinosaur World Shropshire Encounters, smaller site Twycross Zoo…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[16].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[16].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[16].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[16].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[16].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…Shropshire Encounters, smaller site Twycross Zoo Leicestershire General viewing Blackpool Zoo Lancashire General…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[17].city",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…World Shropshire Encounters, smaller site Twycross Zoo Leicestershire General viewing Blackpool Zoo…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[17].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[17].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[17].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[17].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…smaller site Twycross Zoo Leicestershire General viewing Blackpool Zoo Lancashire General viewing Longleat…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[17].capybara_experience",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…Zoo Leicestershire General viewing Blackpool Zoo Lancashire General viewing Longleat Wiltshire Drive-through…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[18].city",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…site Twycross Zoo Leicestershire General viewing Blackpool Zoo Lancashire General viewing Longleat Wiltshire…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[18].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[18].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[18].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[18].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…smaller site Twycross Zoo Leicestershire General viewing Blackpool Zoo Lancashire General viewing Longleat…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[18].capybara_experience",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…Blackpool Zoo Lancashire General viewing Longleat Wiltshire Drive-through safari, African Village section…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[19].city",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…Drusillas Park, Twycross, Blackpool, Hoo Zoo, Longleat and Jersey Zoo. * A smaller subset offers a…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[19].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[19].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[19].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[19].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[19].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…Drive-through safari, African Village section Jersey Zoo (Durrell) Jersey General viewing, repeat…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[20].city",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[20].name",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[20].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[20].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[20].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[20].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…number of UK collections, including London Zoo, Hertfordshire Zoo, Drusillas Park, Twycross, Blackpool, Hoo…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[21].city",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[21].name",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[21].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[21].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[21].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[21].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[22].city",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[22].name",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[22].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[22].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[22].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[22].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[23].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": [
+              "…viewing, repeat breeding That is not exhaustive. Northumberland Zoo, Noah’s Ark Zoo Farm, Lotherton and others have…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[23].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[23].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[23].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[23].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[23].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[24].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[24].name",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[24].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[24].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[24].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[24].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": [
+              "…are! Table of Contents Toggle * Lotherton Hall – West Yorkshire * Hertfordshire Zoo – Hertfordshire * Hobbledown…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[25].city",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": [
+              "…by how many there are! Table of Contents Toggle * Lotherton Hall – West Yorkshire * Hertfordshire Zoo –…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[25].name",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[25].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[25].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[25].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[25].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": [
+              "…years or older. Hoo Zoo Chew Valley Animal Park – Bristol At Chew Valley Animal Park, you can enjoy a…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[26].city",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": [
+              "…Zoo – Leicestershire * Hoo Zoo – Shropshire * Chew Valley Animal Park – Bristol * Exploris Aquarium – Northern Ireland…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[26].name",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[26].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[26].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[26].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[26].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": [
+              "…– Northern Ireland * Wolds Wildlife Park – Lincolnshire * London Zoo – London * Jimmy’s Farm and Wildlife…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[27].city",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": [
+              "…Bristol * Exploris Aquarium – Northern Ireland * Wolds Wildlife Park – Lincolnshire * London Zoo – London * Jimmy’s…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[27].name",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[27].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[27].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[27].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[27].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": [
+              "…Zoo – London * Jimmy’s Farm and Wildlife Park – Suffolk * All Things Wild – Worcestershire * Noah’s Ark…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[28].city",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[28].name",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[28].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[28].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[28].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[28].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": [
+              "…and Wildlife Park – Suffolk * All Things Wild – Worcestershire * Noah’s Ark Zoo Farm – Somerset * Northumberland…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[29].city",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": [
+              "…* Jimmy’s Farm and Wildlife Park – Suffolk * All Things Wild – Worcestershire * Noah’s Ark Zoo Farm – Somerset…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[29].name",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[29].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[29].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[29].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[29].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[30].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": [
+              "…authority. Facility Region Why it earns the visit San Diego Zoo Wildlife Alliance Southern California Strong official capybara…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[30].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[30].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[30].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[30].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[30].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[31].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": [
+              "…a habitat with Baird’s tapirs, AZA accredited Houston Zoo Texas Multiple capybaras plus recent pups in the…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[31].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[31].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[31].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[31].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[31].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[32].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": [
+              "…South America Pantanal exhibit, AZA accredited Cincinnati Zoo and Botanical Garden Ohio Strong Midwest option with an official…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[32].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[32].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[32].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[32].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": [
+              "…Cincinnati Zoo and Botanical Garden Ohio Strong Midwest option with an official capybara page Sacramento Zoo California Active breeding group…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[32].capybara_experience",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[33].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": [
+              "…Midwest option with an official capybara page Sacramento Zoo California Active breeding group with pups, best…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[33].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[33].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[33].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[33].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[33].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[34].city",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": [
+              "…best viewing midday; Northern California pick Nashville Zoo Tennessee Added its first capybaras in 2026 in a…"
+            ],
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[34].name",
+        "reasoning": "Backed by a secondary source (other). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[34].type",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[34].country",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[34].source_url",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "other",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[34].capybara_experience",
+        "reasoning": "Backed by a secondary source (other)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…States — 🌿 Safari Out of Africa Wildlife Park Camp Verde, AZ · United States — 🦓 Exhibit Palm Beach Zoo West…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[35].city",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…Valley Center, CA · United States — 🌿 Safari Out of Africa Wildlife Park Camp Verde, AZ · United States — 🦓 Exhibit Palm…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[35].name",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[35].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[35].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[35].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[35].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…United States — 🌿 Safari Tanganyika Wildlife Park Goddard, KS · United States — ☕ Cafe The Capybara Café (St.…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[36].city",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…Zoo Santa Barbara, CA · United States — 🌿 Safari Tanganyika Wildlife Park Goddard, KS · United States — ☕ Cafe The Capybara…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[36].name",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[36].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[36].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[36].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[36].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[37].city",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…St. Petersburg, FL · United States — 🤚 Park The Learning Zoo Conroe · United States A small children's zoo…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[37].name",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[37].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…offers hands-on capybara encounters and feedings. Thu-Sun 10am-2pm $80/1hour 💚 Sanctuary Tigers for Tomorrow…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[37].hours",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[37].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[37].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…encounters and feedings. Thu-Sun 10am-2pm $80/1hour 💚 Sanctuary Tigers for Tomorrow Attalla, AL ·…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[37].adult_price",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…— 🤚 Park The Learning Zoo Conroe · United States A small children's zoo that offers hands-on capybara encounters and feedings. Thu-Sun 10am-2pm $80/1hour 💚 Sanctuary Tigers…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[37].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…States — ☕ Cafe The Capybara Café (St. Augustine) St. Augustine, FL · United States — ☕ Cafe The Capybara Café (St.…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[38].city",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…Park Goddard, KS · United States — ☕ Cafe The Capybara Café (St. Augustine) St. Augustine, FL · United States — ☕ Cafe The…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[38].name",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[38].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[38].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[38].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…Country All countries United States Clear ☕ Capybara Cafe 3 🤚 Petting Park 3 🚜 Capybara Farm 4 🦓 Zoo…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[38].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…— ☕ Cafe The Capybara Café (St. Petersburg) St. Petersburg, FL · United States — 🤚 Park The Learning Zoo Conroe…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[39].city",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…St. Augustine, FL · United States — ☕ Cafe The Capybara Café (St. Petersburg) St. Petersburg, FL · United States — 🤚 Park The…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[39].name",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[39].type",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[39].country",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": null,
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[39].source_url",
+        "reasoning": "Backed by a secondary source (aggregator)"
+      },
+      {
+        "citations": [
+          {
+            "url": "https://capyfinder.com/locations?country=United+States",
+            "excerpts": [
+              "…Country All countries United States Clear ☕ Capybara Cafe 3 🤚 Petting Park 3 🚜 Capybara Farm 4 🦓 Zoo…"
+            ],
+            "extract_template_name": null,
+            "source_category": "aggregator",
+            "source_intent": "news",
+            "source_type": "secondary",
+            "title": "Capybara locations in United States — 51 places to see capybaras ..."
+          }
+        ],
+        "confidence": "medium",
+        "path": "$.spots[39].capybara_experience",
+        "reasoning": "Backed by a secondary source (aggregator). The exact words appear on the cited page"
+      }
+    ],
+    "confidence": "medium",
+    "reasoning": "Medium confidence - cells fill rate is 77% and trust per claim ratio is 100%",
+    "sources": [
+      {
+        "type": "secondary",
+        "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+        "extract_template_name": null,
+        "source_category": "news",
+        "source_intent": null,
+        "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+      },
+      {
+        "type": "primary",
+        "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+        "extract_template_name": null,
+        "source_category": "news",
+        "source_intent": null,
+        "title": "Capybara Cafes in Japan | Grumpy Capy"
+      },
+      {
+        "type": "primary",
+        "url": "https://cappiness.jp/capybara-guide",
+        "extract_template_name": null,
+        "source_category": "official",
+        "source_intent": null,
+        "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+      },
+      {
+        "type": "primary",
+        "url": "https://capyvillage.com/en/",
+        "extract_template_name": null,
+        "source_category": "official",
+        "source_intent": null,
+        "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+      },
+      {
+        "type": "secondary",
+        "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+      },
+      {
+        "type": "secondary",
+        "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+        "extract_template_name": null,
+        "source_category": "aggregator",
+        "source_intent": null,
+        "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+      },
+      {
+        "type": "secondary",
+        "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+        "extract_template_name": null,
+        "source_category": "other",
+        "source_intent": null,
+        "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+      },
+      {
+        "type": "secondary",
+        "url": "https://capyfinder.com/locations?country=United+States",
+        "extract_template_name": null,
+        "source_category": "aggregator",
+        "source_intent": null,
+        "title": "Capybara locations in United States — 51 places to see capybaras ..."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "url": "https://www.tokyoweekender.com/travel/capybara-onsen-baths-in-japan/",
+      "title": "Capybara Onsen Baths: Where To See These Cute Rodents in Japan"
+    },
+    {
+      "url": "https://grumpycapy.com/guides/capybara-cafes-japan",
+      "title": "Capybara Cafes in Japan | Grumpy Capy"
+    },
+    {
+      "url": "https://cappiness.jp/capybara-guide",
+      "title": "Capybara Cafe Guide: What to Expect, Petting & Tips | CAPPINESS"
+    },
+    {
+      "url": "https://capyvillage.com/en/",
+      "title": "Capybara Bath, Hamsters & Hedgehogs at a Capybara Café - CapyVillage"
+    },
+    {
+      "url": "https://grumpycapy.com/guides/see-capybaras-uk",
+      "title": "Where to See Capybaras in the UK: Zoos, Parks and Feeding Experiences ..."
+    },
+    {
+      "url": "https://wheretogowithkids.co.uk/the-best-capybara-experiences-in-the-uk/",
+      "title": "The Best Capybara Experiences in the UK - Where To Go With Kids"
+    },
+    {
+      "url": "https://grumpycapy.com/guides/where-can-you-see-capybaras-in-the-us",
+      "title": "Where Can You See Capybaras in the U.S.? 2026 Guide | Grumpy Capy"
+    },
+    {
+      "url": "https://capyfinder.com/locations?country=United+States",
+      "title": "Capybara locations in United States — 51 places to see capybaras ..."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+0561807 02:29 Stage 1 (round 3): revert Worcester city to source casing per review; delete data-mutation pre-authorization; record concession and adjudication point in PLAN
+bc843e5 02:16 Stage 2: web UI (home with labelled search/country/type controls, spot cards, count, empty state; detail pages; 404) — controls call the API so they agree by construction
+0cda0cf 02:06 PLAN: record reviewer onsen-data note for stage 3
+bc123aa 02:05 Stage 1 (round 2): normalize data file to all ten contract fields; lowercase Worcester city for literal city-search match
+57e80da 01:57 Stage 1: data + API (health, spots with filters, spot by id) on :8000
+ebe1825 01:53 Spec for capyfinder

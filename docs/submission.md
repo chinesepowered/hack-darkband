@@ -141,7 +141,9 @@ Nimble is how the factory runs without waking the human. It replaces the human a
 Measured:
 - dataset (run 4): 36 sourced capybara spots across Brazil, Japan, the UK and the US in 55 seconds, with nothing
   dropped for a missing source
-- research (smoke-test room): a cited, high-confidence answer in about 45 seconds, live in a BAND room
+- research (test room): a cited, high-confidence answer in about 45 seconds, live in a BAND room
+- docs (live): docs.python.org's `http.server` page in 4.5 seconds and playwright.dev's locators page in 11, picked over
+  gists and Q&A pages
 
 ## BAND Desktop
 

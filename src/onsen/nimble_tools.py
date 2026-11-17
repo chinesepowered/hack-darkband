@@ -125,13 +125,18 @@ class NimbleScout:
     async def docs(self, query: str, *, url: str | None = None, domain: str | None = None) -> DocsResult:
         alternatives: list[dict[str, str]] = []
         if not url:
-            kwargs: dict[str, Any] = {"query": query, "max_results": 5, "search_depth": "lite"}
+            base: dict[str, Any] = {"query": query, "max_results": 5, "search_depth": "lite"}
             if domain:
-                kwargs["include_domains"] = [domain]
+                found = await self.client.search(**base, include_domains=[domain])
+                results = [r.model_dump() for r in (found.results or [])]
             else:
-                kwargs["focus"] = "coding"
-            found = await self.client.search(**kwargs)
-            results = [r.model_dump() for r in (found.results or [])]
+                found = await self.client.search(**base, focus="coding")
+                results = [r.model_dump() for r in (found.results or [])]
+                if not results or min(_docs_rank(r)[0] for r in results) > 0:
+                    # The coding focus favors snippets (gists, Q&A); a general search usually finds the official docs.
+                    general = await self.client.search(**base)
+                    seen = {r.get("url") for r in results}
+                    results += [r for r in (x.model_dump() for x in (general.results or [])) if r.get("url") not in seen]
             if not results:
                 raise LookupError(f"No docs found for {query!r}")
             ranked = sorted(results, key=_docs_rank)
@@ -159,15 +164,23 @@ class NimbleScout:
         )
 
 
-OFFICIAL_HINTS = ("docs.", "developer.", "readthedocs", "/docs", "/reference", "/api/", "github.com")
-LOW_SIGNAL = ("medium.com", "dev.to", "geeksforgeeks", "w3schools", "quora")
+DOC_HINTS = ("docs.", "developer.", "developers.", "readthedocs", "/docs", "/reference", "/api/", "/library/")
+LOW_SIGNAL = ("medium.com", "dev.to", "geeksforgeeks", "w3schools", "quora", "gist.github.com", "stackoverflow.com")
 
 
 def _docs_rank(result: dict[str, Any]) -> tuple[int, int]:
+    """Official documentation first, then source repositories, then everything else, then low-signal pages
+    (a gist outranked docs.python.org before this ordering)."""
     url = (result.get("url") or "").lower()
-    official = 0 if any(h in url for h in OFFICIAL_HINTS) else 1
-    low = 1 if any(h in url for h in LOW_SIGNAL) else 0
-    return (official + low, int((result.get("metadata") or {}).get("position") or 99))
+    if any(h in url for h in LOW_SIGNAL):
+        tier = 3
+    elif any(h in url for h in DOC_HINTS):
+        tier = 0
+    elif "github.com" in url:
+        tier = 1
+    else:
+        tier = 2
+    return (tier, int((result.get("metadata") or {}).get("position") or 99))
 
 
 def _first_heading(markdown: str) -> str | None:
