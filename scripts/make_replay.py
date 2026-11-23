@@ -23,12 +23,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 HUMAN = "You (the capybara)"
 ROLES = {
-    "Architect": ("OpenCode · Qwen 3.8", "#f2cc60"),
-    "Builder": ("OpenCode · Qwen 3.8", "#d2a8ff"),
-    "Reviewer": ("OpenCode · Qwen 3.8 · read-only", "#79c0ff"),
+    "Architect": ("BAND Desktop", "#f2cc60"),
+    "Builder": ("BAND Desktop", "#d2a8ff"),
+    "Reviewer": ("BAND Desktop · read-only", "#79c0ff"),
     "Scout": ("Nimble web agents", "#56d364"),
-    "Examiner": ("sealed exam · Qwen + Playwright", "#ff7b72"),
-    "Nap Guard": ("the only one who wakes you", "#ffa657"),
+    "Examiner": ("keeps the sealed exam", "#ff7b72"),
+    "Nap Guard": ("guards your nap", "#ffa657"),
     "Accessibility Auditor": ("OpenCode · recruited at runtime", "#a5d6ff"),
 }
 UUID_MENTION = re.compile(r"@\[\[([0-9a-f-]{36})\]\]")
@@ -175,7 +175,7 @@ def people(msgs: list[dict]) -> list[dict]:
         role, color = ROLES.get(name, ("the human", "#f7b733") if name == HUMAN else ("agent", "#8b98a5"))
         initials = "".join(w[0] for w in name.replace("(", "").split()[:2]).upper()
         seen[pid] = {"id": pid, "name": name, "role": role, "color": color, "initials": initials,
-                     "img": "capybara.svg" if name == HUMAN else None}
+                     "img": "capybara-badge.svg" if name == HUMAN else None}
     order = [*ROLES, HUMAN]
     return sorted(seen.values(), key=lambda p: order.index(p["name"]) if p["name"] in order else 99)
 
@@ -198,12 +198,13 @@ def write_html(transcript: Path, out: Path, title: str, speed: float, events_per
     msgs.sort(key=lambda m: m.get("inserted_at") or "")
     items = build_items(msgs, speed, events_per_gap, start, end, target_s)
     data = {"title": title, "people": people(msgs), "items": items,
-            "note": note, "speedLabel": f"replay · real transcript · {speed:g}× compressed"}
+            "note": note, "speedLabel": "replay · real transcript" + (" · sped up" if target_s or speed > 1 else "")}
     out.mkdir(parents=True, exist_ok=True)
     html = (ROOT / "demo" / "replay" / "replay.html").read_text().replace(
         "__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/"))
     (out / "index.html").write_text(html)
     shutil.copyfile(ROOT / "assets" / "capybara.svg", out / "capybara.svg")
+    shutil.copyfile(ROOT / "assets" / "capybara-badge.svg", out / "capybara-badge.svg")
     return out / "index.html"
 
 
@@ -226,6 +227,21 @@ async def record(html: Path, video: Path, timeout_s: float) -> Path:
     return video.with_suffix(".mp4")
 
 
+async def screenshot(html: Path, png: Path) -> Path:
+    """Play the replay to its last message and save that frame at 2x (for the README)."""
+    from playwright.async_api import async_playwright
+
+    async with async_playwright() as p:
+        b = await p.chromium.launch(executable_path=os.environ.get("ONSEN_CHROMIUM_PATH") or None, args=["--no-sandbox"])
+        page = await b.new_page(viewport={"width": 1280, "height": 720}, device_scale_factor=2)
+        await page.goto(html.resolve().as_uri())
+        await page.wait_for_function("window.__done === true", timeout=120_000, polling=250)
+        await page.wait_for_timeout(1500)  # the capybara settles back to napping after `ship`
+        await page.screenshot(path=str(png))
+        await b.close()
+    return png
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("transcript")
@@ -234,11 +250,15 @@ def main() -> int:
     ap.add_argument("--speed", type=float, default=1.0)
     ap.add_argument("--events", type=int, default=3, help="tool-call lines shown before each message")
     ap.add_argument("--record", help="write an .mp4 recording here")
+    ap.add_argument("--screenshot", help="write a PNG of the room at the end of the replay (or at --to) here")
+    ap.add_argument("--to", help="end the replay at the first message containing this text")
     ap.add_argument("--clean-copy", help="also write a commit-safe transcript here")
     ap.add_argument("--note", default="Replay of the real BAND room transcript. Agents' messages are unedited; mentions are shown by name.")
     args = ap.parse_args()
     transcript = Path(args.transcript)
-    html = write_html(transcript, Path(args.out), args.title, args.speed, args.events, args.note)
+    end = text_index(json.loads(transcript.read_text()), args.to) if args.to else None
+    html = write_html(transcript, Path(args.out), args.title, args.speed, args.events, args.note, end=end,
+                      target_s=4 if args.screenshot else None)
     print(f"replay: {html}")
     if args.clean_copy:
         Path(args.clean_copy).parent.mkdir(parents=True, exist_ok=True)
@@ -247,6 +267,8 @@ def main() -> int:
         print(f"clean transcript: {args.clean_copy}")
     if args.record:
         print(f"video: {asyncio.run(record(html, Path(args.record), 1800))}")
+    if args.screenshot:
+        print(f"screenshot: {asyncio.run(screenshot(html, Path(args.screenshot)))}")
     return 0
 
 

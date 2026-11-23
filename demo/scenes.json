@@ -4,7 +4,7 @@
   {"n": 3, "kind": "card", "card": "desktop"},
   {"n": 4, "kind": "replay", "from": null, "to": "[data] rows=5"},
   {"n": 5, "kind": "replay", "from": null, "to": "[seal] run="},
-  {"n": 6, "kind": "clip", "file": "$ONSEN_DESKTOP_RECORDING", "start": 760, "end": 1000, "crop": "1180:900:0:0"},
+  {"n": 6, "kind": "clip", "file": "$ONSEN_DESKTOP_RECORDING", "start": 760, "end": 1000, "crop": "1180:900:0:0", "label": "BAND Desktop · the run 7 room, live"},
   {"n": 7, "kind": "replay", "from": null, "to": "[gate] stage=2 ACCEPTED"},
   {"n": 8, "kind": "replay", "from": null, "to": "[wake] #1"},
   {"n": 9, "kind": "card", "card": "lessons"},

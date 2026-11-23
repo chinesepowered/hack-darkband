@@ -1,8 +1,4 @@
-<p align="center"><img src="assets/capybara.svg" width="160" alt="A sleepy capybara soaking in a hot spring with a yuzu on its head"></p>
-
-<h1 align="center">Onsen 🛁</h1>
-
-<p align="center"><b>A dark software factory on BAND with one rule: don't wake the capybara.</b></p>
+<p align="center"><img src="assets/social-preview.png" width="100%" alt="Onsen: a dark software factory on BAND. One rule: don't wake the capybara. A sleepy capybara with a yuzu on its head soaks in a wooden hot-spring tub."></p>
 
 <p align="center">
 ▶ <a href="demo/onsen-demo.mp4"><b>Demo video (2:18)</b></a> ·
@@ -25,6 +21,10 @@ In the recorded run ([runs/run7](runs/run7/RUN.md)), BAND Desktop ran the coding
 | Human messages | Wake-ups | Stages passing the hidden exam on the first try | Seal → ship | Revealed exam |
 |---|---|---|---|---|
 | 2: the kickoff and `ship` | 1 | 3 of 3 (5/5, 6/6, 6/6) | 23 min | its hash matches the one sealed at the start |
+
+<p align="center"><img src="assets/room.png" width="100%" alt="The end of run 7, replayed from the BAND room's transcript. The six agents are listed on the left. In the middle, the human replies ship, Nap Guard posts the run's receipt, and the Examiner reveals the exam. On the right: the capybara, back to napping after one wake-up; the sealed exam's hash; and three stages at 100 percent."></p>
+<p align="center"><sub>The end of run 7, replayed from the room's real transcript: <code>ship</code>, the receipt, and the revealed exam.
+The capybara was woken once, and it's back to napping.</sub></p>
 
 ## Why you can leave it running
 
@@ -133,6 +133,10 @@ that asked.** You'd be back to one agent grading its own homework and asking the
 The Architect, the Builder and the Reviewer are BAND Desktop agents. Its daemon owns each one's OpenCode runtime.
 When a message mentions an agent, BAND Desktop starts the agent in the run's workspace. The window shows every agent's
 reasoning and tool calls live, with an **Interrupt** button for each one.
+
+<p align="center"><img src="assets/band-desktop.png" width="100%" alt="BAND Desktop during run 7. In the room, the Examiner seals the exam and passes stage 1, the Reviewer approves the same commit, and Nap Guard accepts the stage. Below the messages, the Builder and the Architect are both reasoning, each with an Interrupt button."></p>
+<p align="center"><sub>Run 7 in BAND Desktop: the Examiner seals the exam and passes stage 1, the Reviewer approves the same commit,
+and Nap Guard accepts the stage. Below, the Builder and the Architect are both at work.</sub></p>
 
 ```mermaid
 flowchart LR

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+  <title id="t">Onsen: a sleepy capybara with a yuzu on its head</title>
+  <defs>
+    <radialGradient id="bg" cx="0.5" cy="0.38" r="0.7">
+      <stop offset="0" stop-color="#9fe6f1"/>
+      <stop offset="1" stop-color="#3aaecb"/>
+    </radialGradient>
+    <linearGradient id="fur" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cf9563"/>
+      <stop offset="1" stop-color="#b8784a"/>
+    </linearGradient>
+    <radialGradient id="yuzu" cx="0.38" cy="0.34" r="0.7">
+      <stop offset="0" stop-color="#ffe27a"/>
+      <stop offset="0.55" stop-color="#ffc13b"/>
+      <stop offset="1" stop-color="#f59a16"/>
+    </radialGradient>
+    <clipPath id="disc"><circle cx="256" cy="256" r="240"/></clipPath>
+  </defs>
+  <circle cx="256" cy="256" r="240" fill="url(#bg)"/>
+  <g clip-path="url(#disc)">
+    <!-- steam -->
+    <g fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity="0.55">
+      <path d="M96 300c-18-24 18-42 0-68s18-42 0-68"/>
+      <path d="M418 300c-18-24 18-42 0-68s18-42 0-68"/>
+    </g>
+    <!-- the capybara, larger: same shapes as the mascot -->
+    <g transform="translate(256 292) scale(1.32) translate(-256 -212)" stroke="#4e2f1d" stroke-linejoin="round">
+      <path d="M128 400c0-70 50-112 128-112s128 42 128 112z" fill="url(#fur)" stroke-width="6"/>
+      <ellipse cx="186" cy="112" rx="17" ry="15" fill="#b8784a" stroke-width="6"/>
+      <ellipse cx="326" cy="112" rx="17" ry="15" fill="#b8784a" stroke-width="6"/>
+      <path d="M168 150c0-30 24-48 58-48h60c34 0 58 18 58 48v100c0 44-30 70-88 70s-88-26-88-70z" fill="url(#fur)" stroke-width="6"/>
+      <ellipse cx="256" cy="262" rx="66" ry="44" fill="#dba878" stroke="none" opacity="0.75"/>
+      <g fill="none" stroke-linecap="round">
+        <path d="M194 170q14 11 28 0" stroke-width="7"/>
+        <path d="M290 170q14 11 28 0" stroke-width="7"/>
+        <path d="M256 274v10M244 288q6 6 12 0q6 6 12 0" stroke-width="4.5"/>
+      </g>
+      <rect x="218" y="238" width="76" height="36" rx="18" fill="#5c3825" stroke-width="5"/>
+      <ellipse cx="240" cy="248" rx="13" ry="5" fill="#ffffff" stroke="none" opacity="0.35"/>
+      <ellipse cx="190" cy="214" rx="16" ry="9" fill="#f28f8f" stroke="none" opacity="0.7"/>
+      <ellipse cx="322" cy="214" rx="16" ry="9" fill="#f28f8f" stroke="none" opacity="0.7"/>
+      <path d="M260 50c4-14 14-22 30-24c-2 16-12 24-30 24z" fill="#6cc24a" stroke="#3f7a2a" stroke-width="5"/>
+      <circle cx="256" cy="80" r="30" fill="url(#yuzu)" stroke="#a0570f" stroke-width="6"/>
+      <path d="M256 52v-8" stroke="#6b4426" stroke-width="5" stroke-linecap="round"/>
+      <ellipse cx="245" cy="69" rx="9" ry="6" fill="#ffffff" stroke="none" opacity="0.55"/>
+    </g>
+    <!-- water line -->
+    <path d="M0 418c42 16 84 16 128 0s86-16 128 0s86 16 128 0s86-16 128 0V512H0z" fill="#2f9fbd" opacity="0.9"/>
+    <path d="M60 436q24 8 48 0M220 446q36 10 72 0M404 436q24 8 48 0" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.8"/>
+  </g>
+  <circle cx="256" cy="256" r="240" fill="none" stroke="#4e2f1d" stroke-width="10"/>
+</svg>

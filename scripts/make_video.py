@@ -7,7 +7,9 @@
 - Visuals per scene (demo/scenes.json):
     {"n": 1, "kind": "card", "card": "title"}
     {"n": 3, "kind": "replay", "from": null, "to": "[task] stage=1"}   # transcript window, by message text
-    {"n": 6, "kind": "app"}                                            # a recording of the app the factory built
+    {"n": 6, "kind": "clip", "file": "rec.mkv", "start": 760, "end": 1000, "crop": "1180:900:0:0", "label": "…"}
+                                                                       # a screen recording, sped up, in a window
+    {"n": 7, "kind": "app"}                                            # a recording of the app the factory built
 - Each scene's visuals are timed to its narration, then everything is joined with ffmpeg.
 """
 
@@ -30,66 +32,111 @@ import make_replay  # noqa: E402
 import voiceover  # noqa: E402
 
 W, H = 1280, 720
+# One look for every card: a night onsen (deep teal-navy), cream type, yuzu-orange accents, faint steam.
 CARD_CSS = """
-body{margin:0;width:1280px;height:720px;display:grid;place-items:center;background:#0f1419;color:#e6edf3;
-font-family:Inter,ui-sans-serif,system-ui,sans-serif}
-.wrap{text-align:center;max-width:1040px} h1{font-size:72px;margin:8px 0 4px;letter-spacing:-.02em}
-.tag{font-size:28px;color:#f7b733;font-weight:700} p{font-size:22px;color:#9fb0c0;margin:14px 0}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px;text-align:left}
-.cell{background:#161c23;border:1px solid #2a3440;border-radius:14px;padding:16px}
-.cell b{font-size:22px} .cell div{color:#9fb0c0;font-size:16px;margin-top:6px} .cell i{font-style:normal;font-size:13px;color:#f7b733}
-.foot{margin-top:26px;font-size:18px;color:#8b98a5}
-code{font-family:ui-monospace,Menlo,monospace;background:#0b0f14;padding:0 6px;border-radius:6px}
+*{box-sizing:border-box}
+body{margin:0;width:1280px;height:720px;display:grid;place-items:center;overflow:hidden;position:relative;color:#fff6e8;
+  font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  background:radial-gradient(1100px 620px at 50% 118%,#1d4a5e 0%,#122a3a 48%,#0b1620 100%)}
+.steam{position:absolute;inset:0;pointer-events:none;opacity:.055}
+.wrap{position:relative;text-align:center;max-width:1100px}
+.wide{max-width:1180px;width:1180px}
+h1{font-family:'Inter Display',Inter,sans-serif;font-size:112px;font-weight:800;letter-spacing:-.035em;margin:6px 0 2px;color:#fff6e8}
+.tag{font-family:'Inter Display',Inter,sans-serif;font-size:36px;font-weight:700;color:#ffb84d;letter-spacing:-.01em}
+.sub{font-size:26px;color:#a9c0cf;margin:14px 0 0}
+.halo{display:inline-block;padding:18px;border-radius:50%;
+  background:radial-gradient(circle,rgba(155,231,242,.22) 0%,rgba(155,231,242,.06) 55%,rgba(155,231,242,0) 70%)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px;text-align:left}
+.cell{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:20px 22px;
+  display:grid;grid-template-columns:56px 1fr;column-gap:16px;align-items:center}
+.av{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:22px;color:#1a1a1a;grid-row:span 3}
+.cell b{font-size:28px;font-weight:700;letter-spacing:-.01em}
+.cell .what{font-size:19px;color:#c6d4de;margin-top:2px}
+.chip{display:inline-block;margin-top:8px;font-size:15px;font-weight:600;color:#ffcf85;background:rgba(255,184,77,.12);
+  border:1px solid rgba(255,184,77,.28);border-radius:999px;padding:3px 11px;width:max-content}
+.foot{margin-top:26px;font-size:20px;color:#8fa6b6}
+.corner{position:absolute;right:34px;bottom:30px;width:78px;height:78px}
+.shot{border-radius:16px;border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.chips{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.chips span{font-size:18px;font-weight:600;color:#fff6e8;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;padding:8px 18px}
+.rows{margin-top:26px;display:grid;gap:14px;text-align:left}
+.row{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center;background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:16px 22px}
+.pill{font-family:'Inter Display',Inter,sans-serif;font-weight:800;font-size:22px;color:#1a1208;background:#ffb84d;border-radius:999px;
+  padding:6px 0;text-align:center}
+.row div{font-size:22px;line-height:1.35;color:#e9eef2}
+.row em{font-style:normal;color:#7ee2b8}
+code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.9em;background:rgba(0,0,0,.35);padding:1px 8px;border-radius:7px;color:#ffcf85}
+.url{margin-top:22px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:22px;color:#9be7f2}
 """
+STEAM = """<svg class="steam" viewBox="0 0 1280 720" preserveAspectRatio="none"><g fill="none" stroke="#ffffff" stroke-width="16"
+  stroke-linecap="round"><path d="M120 720c-40-60 40-110 0-170s40-110 0-170"/><path d="M1160 720c-40-60 40-110 0-170s40-110 0-170"/>
+  <path d="M300 720c-30-50 30-90 0-140"/><path d="M980 720c-30-50 30-90 0-140"/></g></svg>"""
+
+
+def _agent(initials: str, color: str, name: str, what: str, chip: str) -> str:
+    return (f'<div class="cell"><div class="av" style="background:{color}">{initials}</div><b>{name}</b>'
+            f'<div class="what">{what}</div><span class="chip">{chip}</span></div>')
+
+
 CARDS = {
-    "title": """<div class="wrap"><img src="capybara.svg" width="260"><h1>Onsen</h1>
-      <div class="tag">A dark software factory on BAND</div><p>One rule: don't wake the capybara.</p></div>""",
-    "crew": """<div class="wrap"><div class="tag">Six agents · one BAND room · one human message</div><div class="grid">
-      <div class="cell"><b>Architect</b><div>plans, hands out stages</div><i>BAND Desktop · OpenCode · Qwen 3.8</i></div>
-      <div class="cell"><b>Builder</b><div>builds each stage</div><i>BAND Desktop · OpenCode · Qwen 3.8</i></div>
-      <div class="cell"><b>Reviewer</b><div>reads every diff, says no</div><i>BAND Desktop · read-only</i></div>
-      <div class="cell"><b>Scout</b><div>asks the live web, not the human</div><i>Nimble web agents</i></div>
-      <div class="cell"><b>Examiner</b><div>sealed, hidden exam</div><i>Qwen 3.8 + Playwright</i></div>
-      <div class="cell"><b>Nap Guard</b><div>the only one who wakes you</div><i>deterministic</i></div>
-      </div><div class="foot">Qwen 3.8 27B on W&amp;B Inference · BAND rooms · Nimble · ElevenLabs</div></div>""",
-    "rehearsal": """<div class="wrap" style="text-align:left;max-width:980px"><div class="tag">From the rehearsal run</div>
-      <p style="color:#e6edf3;font-size:24px">To pass a bad check, the Builder edited the dataset. The Reviewer said no:</p>
-      <div class="cell" style="font-size:21px;line-height:1.5;color:#ffb3ad"><b style="color:#ff7b72">[review] stage=1 BLOCKED</b>:
-      data/spots.json:352 — <code>city</code> was mutated from Scout's <span style="color:#f7b733;font-weight:700">Worcestershire</span> to
-      <span style="color:#f7b733;font-weight:700">worcestershire</span> … That is special-casing data to a test-looking input, and it is not a contract fix.</div>
-      <p>The Builder reverted it. Then we fixed the factory: approvals now bind to the commit that passed, a late block reopens
-      the stage, and builders get a <code>[dispute]</code> channel instead of a reason to bend data.</p></div>""",
-    "run4": """<div class="wrap" style="text-align:left;max-width:1040px"><div class="tag">Run 4 · the bugs were in the factory</div>
-      <p style="color:#e6edf3;font-size:24px">Stage 2 stalled on our mistakes, not the Builder's. Each fix went into the factory:</p>
-      <div class="cell" style="font-size:20px;line-height:1.6;color:#e6edf3">
-      <div style="color:#e6edf3;font-size:20px">1 · The exam asked for a <code>textbox</code>; the spec said <code>input type=search</code>.
-        <span style="color:#7ee787">Role checks now follow ARIA: a searchbox is a textbox.</span></div>
-      <div style="color:#e6edf3;font-size:20px">2 · A parser read <code>stage=N</code> from a hint line and crashed Nap Guard.
-        <span style="color:#7ee787">The header line wins.</span></div>
-      <div style="color:#e6edf3;font-size:20px">3 · An LLM judge passed a page, then failed it unchanged.
-        <span style="color:#7ee787">It sees form state, and failing you takes 2 of 3 reads.</span></div>
-      <div style="color:#e6edf3;font-size:20px">4 · "Please re-run" was filed as a note.
-        <span style="color:#7ee787">A re-run request now gets a re-run.</span></div>
-      </div></div>""",
-    "desktop": """<div class="wrap" style="max-width:1180px"><div class="tag">BAND Desktop runs the coding crew</div>
-      <p style="color:#e6edf3">Its daemon owns each agent's OpenCode runtime (Qwen 3.8 on W&amp;B) and starts it when a message arrives.</p>
-      <img src="desktop-agents.png" style="width:1120px;border-radius:12px;border:1px solid #2a3440">
-      <img src="desktop-runtime.png" style="width:1120px;border-radius:12px;border:1px solid #2a3440;margin-top:14px">
-      </div>""",
-    "lessons": """<div class="wrap" style="text-align:left;max-width:1060px"><div class="tag">It took seven runs to get here</div>
-      <div class="cell" style="font-size:20px;line-height:1.7;color:#e6edf3;margin-top:18px">
-      <div><b style="color:#f7b733">Run 1</b> · The Builder edited the data to pass a bad check. The Reviewer said no.
-        <span style="color:#7ee787">Approvals now bind to the exact commit that passed.</span></div>
-      <div><b style="color:#f7b733">Run 4</b> · The exam caught a bug the Reviewer had approved, and four bugs in the factory.
-        <span style="color:#7ee787">Each fix went into the factory.</span></div>
-      <div><b style="color:#f7b733">Runs 5–6</b> · BAND Desktop posts every closing remark, so agents pinged each other.
-        <span style="color:#7ee787">The launcher now keeps them out of the room.</span></div>
-      <div><b style="color:#f7b733">Run 7</b> · One kickoff, one wake-up, <code>ship</code>.</div>
-      </div></div>""",
-    "outro": """<div class="wrap"><img src="capybara.svg" width="220"><h1>Onsen</h1>
-      <p>Specs go in. Software comes out. The capybara keeps napping.</p>
-      <div class="foot">Built on BAND · with Nimble · Qwen 3.8 on W&amp;B</div></div>""",
+    "title": STEAM + """<div class="wrap"><div class="halo"><img src="capybara.svg" width="300"></div><h1>Onsen</h1>
+      <div class="tag">A dark software factory on BAND</div><div class="sub">One rule: don't wake the capybara.</div></div>""",
+    "crew": STEAM + '<div class="wrap wide"><div class="tag">Six agents · one BAND room · one human message</div><div class="grid">'
+      + _agent("A", "#f2cc60", "Architect", "plans, hands out stages", "BAND Desktop · OpenCode")
+      + _agent("B", "#d2a8ff", "Builder", "builds each stage", "BAND Desktop · OpenCode")
+      + _agent("R", "#79c0ff", "Reviewer", "reads every diff, can say no", "BAND Desktop · read-only")
+      + _agent("S", "#56d364", "Scout", "asks the live web, not you", "Nimble")
+      + _agent("E", "#ff7b72", "Examiner", "keeps the sealed exam", "Qwen 3.8 · Playwright")
+      + _agent("NG", "#ffa657", "Nap Guard", "the only one who wakes you", "deterministic")
+      + """</div><div class="foot">Every model call: Qwen 3.8 27B on W&amp;B Inference</div></div>
+      <img class="corner" src="capybara-badge.svg">""",
+    "desktop": STEAM + """<div class="wrap wide"><div class="tag">BAND Desktop runs the coding crew</div>
+      <div class="sub" style="margin-bottom:24px">Its daemon starts each agent's OpenCode runtime the moment a message mentions it.</div>
+      <img class="shot" src="desktop-agents.png" style="width:1120px">
+      <div class="chips"><span>🧑‍💻 OpenCode runtime per agent</span><span>🍊 Qwen 3.8 on W&amp;B</span>
+      <span>🔒 permissions per role</span><span>👀 live reasoning · Interrupt</span></div></div>
+      <img class="corner" src="capybara-badge.svg">""",
+    "lessons": STEAM + """<div class="wrap wide" style="max-width:1080px;width:1080px"><div class="tag">It took seven runs to get here</div>
+      <div class="rows">
+      <div class="row"><span class="pill">Run 1</span><div>The Builder edited the data to pass a check. The Reviewer said no.
+        <em>Approvals now bind to the exact commit that passed.</em></div></div>
+      <div class="row"><span class="pill">Run 4</span><div>The exam caught a bug the Reviewer had approved, and four in the factory.
+        <em>Each fix went into the factory.</em></div></div>
+      <div class="row"><span class="pill">Runs 5–6</span><div>BAND Desktop posted every closing remark, so agents pinged each other.
+        <em>The launcher keeps them out of the room now.</em></div></div>
+      <div class="row"><span class="pill">Run 7</span><div>One kickoff, one wake-up, <code>ship</code>. 🛁</div></div>
+      </div></div><img class="corner" src="capybara-badge.svg">""",
+    "outro": STEAM + """<div class="wrap"><div class="halo"><img src="capybara.svg" width="250"></div><h1>Onsen</h1>
+      <div class="sub" style="color:#fff6e8;font-size:30px">Specs go in. Software comes out. The capybara keeps napping.</div>
+      <div class="foot">Built on BAND · with Nimble · Qwen 3.8 on W&amp;B</div>
+      <div class="url">github.com/chinesepowered/hack-darkband</div></div>""",
 }
+# Recordings shown inside a window on the card background: the app as the factory built it, and BAND Desktop.
+APP_X, APP_Y, APP_W, APP_H = 90, 84, 1100, 600
+CLIP_Y, CLIP_H = 84, 600
+
+
+def window_frame(x: int, y: int, w: int, h: int, title: str) -> str:
+    """A window chrome whose content area sits exactly at (x, y, w, h); the recording is overlaid there."""
+    return STEAM + f"""<div style="position:absolute;left:{x - 10}px;top:{y - 46}px;width:{w + 20}px;height:{h + 56}px;
+  border-radius:16px;background:#e9edf1;box-shadow:0 24px 60px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25)">
+  <div style="height:46px;display:flex;align-items:center;gap:9px;padding:0 18px">
+    <i style="width:13px;height:13px;border-radius:50%;background:#ff5f57"></i><i style="width:13px;height:13px;border-radius:50%;background:#febc2e"></i>
+    <i style="width:13px;height:13px;border-radius:50%;background:#28c840"></i>
+    <div style="margin-left:18px;flex:1;height:28px;border-radius:9px;background:#fff;display:flex;align-items:center;gap:8px;padding:0 10px;
+      font:15px Inter,sans-serif;color:#3b4652;white-space:nowrap;overflow:hidden"><img src="capybara-badge.svg" width="18"> {title}</div>
+  </div></div>"""
+
+
+APP_FRAME = window_frame(APP_X, APP_Y, APP_W, APP_H, "localhost:8000 · CapyFinder, as the factory built it")
+
+
+def ffmpeg_probe_width(path: Path) -> int:
+    out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries", "stream=width", "-of", "csv=p=0",
+                          str(path)], capture_output=True, text=True, check=True)
+    return int(out.stdout.strip())
 
 
 def ffprobe_duration(path: Path) -> float:
@@ -107,8 +154,9 @@ async def render_card(name: str, out_png: Path) -> Path:
 
     html = out_png.with_suffix(".html")
     html.parent.mkdir(parents=True, exist_ok=True)
-    html.write_text(f"<!doctype html><meta charset=utf-8><style>{CARD_CSS}</style>{CARDS[name]}")
+    html.write_text(f"<!doctype html><meta charset=utf-8><style>{CARD_CSS}</style>{CARDS.get(name) or name}")
     shutil.copyfile(ROOT / "assets" / "capybara.svg", html.parent / "capybara.svg")
+    shutil.copyfile(ROOT / "assets" / "capybara-badge.svg", html.parent / "capybara-badge.svg")
     assets = os.environ.get("ONSEN_CARD_ASSETS")  # e.g. BAND Desktop screenshots for the "desktop" card
     if assets:
         for f in Path(assets).glob("*.png"):
@@ -131,7 +179,7 @@ async def record_app(url: str, out: Path, seconds: float) -> Path:
 
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path=os.environ.get("ONSEN_CHROMIUM_PATH") or None, args=["--no-sandbox"])
-        page = await b.new_page(viewport={"width": W, "height": H})
+        page = await b.new_page(viewport={"width": APP_W, "height": APP_H})
         pause = max(600, int(seconds * 1000 / 9))
 
         async def attempt(coro):
@@ -158,7 +206,7 @@ async def record_app(url: str, out: Path, seconds: float) -> Path:
             await attempt(page.get_by_role("link", name="Back to all spots").click())
             await page.wait_for_timeout(pause)
 
-        await screencast(page, tour, out.with_suffix(".mp4"))
+        await screencast(page, tour, out.with_suffix(".mp4"), width=APP_W, height=APP_H)
         await b.close()
     return out.with_suffix(".mp4")
 
@@ -238,13 +286,24 @@ def main() -> int:
             span = float(sc["end"]) - float(sc["start"])
             speed = max(1.0, span / seconds)
             crop = f"crop={sc['crop']}," if sc.get("crop") else ""
-            video = work / f"clip-{n:02d}.mp4"
+            raw = work / f"clip-raw-{n:02d}.mp4"
             ffmpeg("-ss", str(sc["start"]), "-t", f"{span:.2f}", "-i", str(src),
-                   "-vf", f"{crop}scale=-2:{H},pad={W}:{H}:(ow-iw)/2:0:color=0x0f1419,setpts=PTS/{speed:.4f},fps=30,format=yuv420p",
-                   "-an", "-c:v", "libx264", str(video))
+                   "-vf", f"{crop}scale=-2:{CLIP_H},setpts=PTS/{speed:.4f},fps=30,format=yuv420p",
+                   "-an", "-c:v", "libx264", str(raw))
+            cw = int(ffmpeg_probe_width(raw))
+            label = sc.get("label", "BAND Desktop · the room, live") + f" · {speed:.0f}× speed"
+            frame = asyncio.run(render_card(window_frame((W - cw) // 2, CLIP_Y, cw, CLIP_H, label), work / f"clip-frame-{n:02d}.png"))
+            video = work / f"clip-{n:02d}.mp4"
+            ffmpeg("-loop", "1", "-i", str(frame), "-i", str(raw), "-filter_complex",
+                   f"[0:v][1:v]overlay={(W - cw) // 2}:{CLIP_Y}:shortest=1,fps=30,format=yuv420p", "-c:v", "libx264", str(video))
             mux(video, audio, part, seconds, still=False)
         elif sc["kind"] == "app":
-            video = asyncio.run(record_app(args.app_url, work / f"app-{n:02d}.mp4", seconds))
+            raw = asyncio.run(record_app(args.app_url, work / f"app-{n:02d}.mp4", seconds))
+            frame = asyncio.run(render_card(APP_FRAME, work / f"app-frame-{n:02d}.png"))
+            video = work / f"app-framed-{n:02d}.mp4"
+            ffmpeg("-loop", "1", "-i", str(frame), "-i", str(raw), "-filter_complex",
+                   f"[1:v]scale={APP_W}:{APP_H}[app];[0:v][app]overlay={APP_X}:{APP_Y}:shortest=1,fps=30,format=yuv420p",
+                   "-c:v", "libx264", str(video))
             mux(video, audio, part, seconds, still=False)
         parts.append(part)
     listing = work / "parts.txt"
