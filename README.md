@@ -50,37 +50,9 @@ The capybara was woken once, and it's back to napping.</sub></p>
 ## Architecture
 
 Every model call goes to Qwen 3.8 27B on W&B Inference. The crew writes code in OpenCode, and the Examiner tests the
-app in a real browser with Playwright.
+app in a real browser with Playwright. The sealed exam stays on the Examiner's disk until `ship`.
 
-```mermaid
-flowchart LR
-    human(["🛁 You, the capybara"])
-    subgraph room["One BAND room: a message reaches only the agents it mentions"]
-        subgraph desktop["BAND Desktop · OpenCode runtimes"]
-            A["Architect"]
-            B["Builder"]
-            R["Reviewer<br/>read-only"]
-        end
-        subgraph sdk["band-sdk agents"]
-            S["Scout"]
-            E["Examiner"]
-            N["Nap Guard"]
-        end
-    end
-    qwen[("W&B Inference<br/>Qwen 3.8 27B")]
-    nimble[("Nimble<br/>agents · search · extract")]
-    vault[("sealed exam<br/>on the Examiner's disk")]
-    app["the app being built"]
-
-    human -- "build SPEC.md · ship" --> room
-    N -- "the one wake-up" --> human
-    desktop -- "every coding step" --> qwen
-    E -- "writes and proofreads the exam" --> qwen
-    S <-- "live web" --> nimble
-    E --- vault
-    B -- "builds" --> app
-    E -- "tests it in a real browser" --> app
-```
+<p align="center"><img src="assets/architecture.png" width="100%" alt="Architecture. You, the capybara, send build SPEC.md to the Architect. Nap Guard is the only agent that wakes you, once, and you reply ship. One BAND room, where a message reaches only the agents it mentions, holds six agents. The Architect, the Builder and the read-only Reviewer run in BAND Desktop's OpenCode runtimes. The Examiner, which keeps the sealed exam, Scout and Nap Guard are band-sdk agents. Every coding step goes to Qwen 3.8 27B on W&B Inference. The Builder builds the app, and the Examiner tests it in a real browser. Scout asks the live web through Nimble."></p>
 
 One run, message by message:
 
@@ -138,15 +110,9 @@ reasoning and tool calls live, with an **Interrupt** button for each one.
 <p align="center"><sub>Run 7 in BAND Desktop: the Examiner seals the exam and passes stage 1, the Reviewer approves the same commit,
 and Nap Guard accepts the stage. Below, the Builder and the Architect are both at work.</sub></p>
 
-```mermaid
-flowchart LR
-    room["BAND room"] -- "a message mentions @Builder" --> jamd["BAND Desktop daemon (jamd)"]
-    jamd -- "starts it in the run's workspace" --> launcher["onsen-opencode-builder<br/>role profile · Qwen 3.8"]
-    launcher --> filter["acp_filter.py<br/>keeps closing remarks out"]
-    filter <--> oc["opencode acp"]
-    oc -- "band send @examiner @reviewer [ready] …" --> room
-    jamd -. "reasoning · tool calls · Interrupt" .-> win["BAND Desktop window"]
-```
+How one wake-up runs:
+
+<p align="center"><img src="assets/band-desktop-flow.png" width="100%" alt="How one wake-up runs. A message in the BAND room mentions the Builder. The BAND Desktop daemon, jamd, which shows every step live, starts the Builder's launcher, onsen-opencode-builder, with its role profile and Qwen 3.8. Inside it, acp_filter.py keeps closing remarks out. The launcher talks ACP to opencode acp, where the agent reads, edits and runs code. The agent answers in the room with band send, mentioning the Examiner and the Reviewer with a ready message."></p>
 
 What we built on top of BAND Desktop (setup in [docs/band-desktop.md](docs/band-desktop.md)):
 - **A permission profile for each role.** Each agent runs OpenCode through its own launcher
