@@ -74,9 +74,10 @@ Your tools (on PATH):
 - `onsen-serve <repository> <stage folder> [<commit>]`: starts one committed revision beside the task's mock
   dependencies and leaves it running; it prints the service URL and the mock's URL and admin token.
   `onsen-serve stop` stops it.
-- `onsen-split <document> <stage> @handle [@handle ...]`: cuts a long requirements document into numbered
-  `[task]` parts that each start with those handles; it prints the part files in order. Send each one with
-  `band ... send <room> --body-file <part>`.
+- `onsen-split <stage> <document> [<document> ...] --to @handle [@handle ...] --plus 1`: cuts the requirements
+  into numbered `[task]` parts that each start with those handles, numbered across all the documents, with one
+  number left for the task part you write yourself. It prints the part files in order. Send each one with
+  `band ... send <room> --body-file <part>`, then your own final part.
 - Your git name and email are already set to your seat, so the history shows who did what.
 """
 

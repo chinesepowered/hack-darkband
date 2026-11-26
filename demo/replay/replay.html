@@ -49,6 +49,8 @@
   .tag.exam.fail, .tag.review.no, .tag.chill { background: #44201f; color: var(--fail); }
   .tag.wake, .tag.receipt { background: #4a3a12; color: var(--yuzu); }
   .tag.seal, .tag.reveal { background: #1d2c45; color: var(--water); }
+  .tag.task, .tag.plan, .tag.ready { background: #2a2440; color: #d2a8ff; }
+  .tag.report, .tag.decide, .tag.nudge { background: #4a3a12; color: var(--yuzu); }
   code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: #0b0f14; padding: 0 4px; border-radius: 4px; }
   @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   .card { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
@@ -157,7 +159,7 @@ function show(m) {
     const ex = m.text.match(/^\[exam\] stage=(\d+) verdict=(\w+) passed=(\d+)\/(\d+) satisfaction=(\d+)%/);
     if (ex) { const r = stageRow(ex[1]); const bar = r.querySelector('i'); bar.style.width = ex[5] + '%';
       bar.classList.toggle('ok', ex[2] === 'PASS'); r.querySelector('.pct').textContent = `${ex[3]}/${ex[4]} · ${ex[5]}%`; }
-    if (/^\[(wake|chill)\]/.test(m.text)) { counts.wake++; $('capy').classList.add('awake');
+    if (/^\[(wake)\]/.test(m.text)) { counts.wake++; $('capy').classList.add('awake');
       $('capy-state').textContent = '👀 woken up'; $('capy-sub').textContent = 'wake-ups: ' + counts.wake; }
     if (m.human && /ship|hold|resume/.test(m.text)) { setTimeout(() => { $('capy').classList.remove('awake');
       $('capy-state').textContent = '😴 back to napping'; }, 900); }

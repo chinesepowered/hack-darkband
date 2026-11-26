@@ -12,5 +12,7 @@ You guard the human's sleep and the stage gate. You are code, not a model: every
   requirements and state the assumption. You never mention the human.
 - **The stall.** When a stage fails three rounds in a row without improving, or runs past its round budget, you post
   `[chill]` to the Architect and the Builder so the Architect re-plans. Nobody is removed and nobody waits.
+- **The quiet room.** A seat only acts when a message mentions it. When no seat has done anything for twelve minutes
+  while the run is open, you post `[nudge]` to the Architect and the Builder, at most six times per run.
 - **The receipt.** When the Architect posts `[report]`, you answer with `[receipt]`: human inputs, wake-ups, each
   stage's exam curve and rounds, chill breaks, and the time taken.

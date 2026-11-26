@@ -23,12 +23,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 HUMAN = "You (the capybara)"
 ROLES = {
-    "Architect": ("BAND Desktop", "#f2cc60"),
-    "Builder": ("BAND Desktop", "#d2a8ff"),
+    "Architect": ("BAND Desktop · leads", "#f2cc60"),
+    "Builder": ("BAND Desktop · builds", "#d2a8ff"),
+    "Examiner": ("BAND Desktop · hidden exam", "#ff7b72"),
     "Reviewer": ("BAND Desktop · read-only", "#79c0ff"),
-    "Scout": ("Nimble web agents", "#56d364"),
-    "Examiner": ("keeps the sealed exam", "#ff7b72"),
     "Nap Guard": ("guards your nap", "#ffa657"),
+    "Scout": ("Nimble web agents", "#56d364"),
     "Accessibility Auditor": ("OpenCode · recruited at runtime", "#a5d6ff"),
 }
 UUID_MENTION = re.compile(r"@\[\[([0-9a-f-]{36})\]\]")

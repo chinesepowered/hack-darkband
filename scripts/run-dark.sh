@@ -28,5 +28,7 @@ grep -q "Agent started" "$logs/napguard.log" && echo "✔ Nap Guard online (dark
 
 room="$(uv run onsen-kickoff --title "$title" --skip scout --say-file "$task")"
 echo "$room" > "$ONSEN_HOME/last-room"
+nohup uv run onsen-quiet-watch "$room" > "$logs/quietwatch.log" 2>&1 &   # Nap Guard's quiet-room rule
+echo "$! quietwatch" >> "$ONSEN_HOME/factory.pids"
 echo "room: $room"
 echo "logs: $logs"

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Split a requirements document into numbered handoff parts, so a handoff can carry the whole text.
+"""Split requirements documents into numbered handoff parts, so a handoff can carry the whole text.
 
-    onsen-split <document> <stage> @handle [@handle ...]
+    onsen-split <stage> <document> [<document> ...] --to @handle [@handle ...] [--plus N]
+    onsen-split <document> <stage> @handle [@handle ...]            (one document, older form)
 
-Writes part files next to a temporary directory and prints their paths, in order. Each part starts with the
-handles and `[task] stage=N part=i/k source=<name>`, then a slice of the document cut at heading boundaries
-(never inside a section unless one section alone is too long). Send each with `band send <room> --body-file <part>`.
+Prints the part files, in order. Parts are numbered across all the documents; `--plus N` reserves N more numbers
+for parts you write yourself (for example, the task itself as the last part). Each part starts with the handles
+and `[task] stage=N part=i/k source=<document>`, then a slice of the document cut at heading boundaries (never
+inside a section unless one section alone is too long). Send each with `band send <room> --body-file <part>`.
 """
 import pathlib
 import sys
@@ -18,7 +20,8 @@ def chunks(text: str) -> list[str]:
     sections, cur = [], []
     for line in text.splitlines(keepends=True):
         if line.startswith("#") and cur:
-            sections.append("".join(cur)); cur = []
+            sections.append("".join(cur))
+            cur = []
         cur.append(line)
     if cur:
         sections.append("".join(cur))
@@ -27,24 +30,43 @@ def chunks(text: str) -> list[str]:
         pieces = [sec] if len(sec) <= LIMIT else [p + "\n\n" for p in sec.split("\n\n")]
         for piece in pieces:
             if buf and len(buf) + len(piece) > LIMIT:
-                out.append(buf); buf = ""
+                out.append(buf)
+                buf = ""
             buf += piece
     if buf.strip():
         out.append(buf)
     return out
 
 
+def parse(argv: list[str]) -> tuple[str, list[pathlib.Path], list[str], int]:
+    if len(argv) >= 3 and pathlib.Path(argv[0]).is_file() and argv[1].isdigit():  # older form
+        return argv[1], [pathlib.Path(argv[0])], argv[2:], 0
+    if "--to" not in argv or not argv[0].isdigit():
+        raise SystemExit(__doc__)
+    to = argv.index("--to")
+    stage, docs, rest = argv[0], [pathlib.Path(a) for a in argv[1:to]], argv[to + 1:]
+    plus = 0
+    if "--plus" in rest:
+        i = rest.index("--plus")
+        plus = int(rest[i + 1])
+        rest = rest[:i] + rest[i + 2:]
+    return stage, docs, rest, plus
+
+
 def main() -> int:
-    if len(sys.argv) < 4:
-        print(__doc__, file=sys.stderr); return 2
-    doc, stage, handles = pathlib.Path(sys.argv[1]), sys.argv[2], " ".join(sys.argv[3:])
-    parts = chunks(doc.read_text(encoding="utf-8"))
+    stage, docs, handles, plus = parse(sys.argv[1:])
+    if not docs or not handles:
+        raise SystemExit(__doc__)
+    parts = [(doc.name, part) for doc in docs for part in chunks(doc.read_text(encoding="utf-8"))]
+    total = len(parts) + plus
     outdir = pathlib.Path(tempfile.mkdtemp(prefix=f"handoff-stage{stage}-"))
-    for i, part in enumerate(parts, 1):
+    for i, (name, part) in enumerate(parts, 1):
         f = outdir / f"part-{i:02d}.md"
-        f.write_text(f"{handles} [task] stage={stage} part={i}/{len(parts)} source={doc.name}\n\n{part.rstrip()}\n",
+        f.write_text(f"{' '.join(handles)} [task] stage={stage} part={i}/{total} source={name}\n\n{part.rstrip()}\n",
                      encoding="utf-8")
         print(f)
+    if plus:
+        print(f"# write the remaining part(s) yourself, numbered {len(parts) + 1}..{total} of {total}")
     return 0
 
 

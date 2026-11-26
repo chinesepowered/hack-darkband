@@ -8,7 +8,8 @@ set -uo pipefail
 : "${ONSEN_CHECKER_DIR:?the checker package directory (from the task)}"
 : "${ONSEN_TRACK:?the track name (from the task)}"
 py=${ONSEN_CHECKER_PY:-python3}
-state="${ONSEN_HOME:-$HOME/.onsen}/serve-$(whoami)-$(basename "${PWD}").state"
+# One running instance per seat: each seat's launcher sets its own git name.
+state="${ONSEN_HOME:-$HOME/.onsen}/serve-${GIT_AUTHOR_NAME:-$(whoami)}.state"
 if [ "${1:-}" = stop ]; then
   [ -f "$state" ] && while read -r kind id; do
     case $kind in container) docker rm -f "$id" >/dev/null 2>&1 ;; network) docker network rm "$id" >/dev/null 2>&1 ;; esac
