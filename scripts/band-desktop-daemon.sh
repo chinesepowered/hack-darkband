@@ -16,7 +16,10 @@ mkdir -p "$(dirname "$log")"
 keep=(HOME PATH LANG LC_ALL TERM USER SHELL TZ
       HTTPS_PROXY https_proxy HTTP_PROXY http_proxy NO_PROXY no_proxy
       SSL_CERT_FILE NODE_EXTRA_CA_CERTS REQUESTS_CA_BUNDLE CURL_CA_BUNDLE GIT_SSL_CAINFO NODE_OPTIONS
-      WANDB_API_KEY ONSEN_OPENCODE_BIN)
+      WANDB_API_KEY ONSEN_OPENCODE_BIN
+      ONSEN_HOME ONSEN_CHECKER_DIR ONSEN_CHECKER_PY ONSEN_TRACK ONSEN_CHECKS_DIR)
+# The seats' tools (onsen-check, onsen-serve) come first on their PATH.
+PATH="$here/bin:$PATH"
 envs=()
 for v in "${keep[@]}"; do [ -n "${!v:-}" ] && envs+=("$v=${!v}"); done
 

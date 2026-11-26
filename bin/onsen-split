@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Split a requirements document into numbered handoff parts, so a handoff can carry the whole text.
+
+    onsen-split <document> <stage> @handle [@handle ...]
+
+Writes part files next to a temporary directory and prints their paths, in order. Each part starts with the
+handles and `[task] stage=N part=i/k source=<name>`, then a slice of the document cut at heading boundaries
+(never inside a section unless one section alone is too long). Send each with `band send <room> --body-file <part>`.
+"""
+import pathlib
+import sys
+import tempfile
+
+LIMIT = 7000
+
+
+def chunks(text: str) -> list[str]:
+    sections, cur = [], []
+    for line in text.splitlines(keepends=True):
+        if line.startswith("#") and cur:
+            sections.append("".join(cur)); cur = []
+        cur.append(line)
+    if cur:
+        sections.append("".join(cur))
+    out, buf = [], ""
+    for sec in sections:
+        pieces = [sec] if len(sec) <= LIMIT else [p + "\n\n" for p in sec.split("\n\n")]
+        for piece in pieces:
+            if buf and len(buf) + len(piece) > LIMIT:
+                out.append(buf); buf = ""
+            buf += piece
+    if buf.strip():
+        out.append(buf)
+    return out
+
+
+def main() -> int:
+    if len(sys.argv) < 4:
+        print(__doc__, file=sys.stderr); return 2
+    doc, stage, handles = pathlib.Path(sys.argv[1]), sys.argv[2], " ".join(sys.argv[3:])
+    parts = chunks(doc.read_text(encoding="utf-8"))
+    outdir = pathlib.Path(tempfile.mkdtemp(prefix=f"handoff-stage{stage}-"))
+    for i, part in enumerate(parts, 1):
+        f = outdir / f"part-{i:02d}.md"
+        f.write_text(f"{handles} [task] stage={stage} part={i}/{len(parts)} source={doc.name}\n\n{part.rstrip()}\n",
+                     encoding="utf-8")
+        print(f)
+    return 0
+
+
+raise SystemExit(main())

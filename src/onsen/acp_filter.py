@@ -25,7 +25,8 @@ from typing import Any
 
 # "[ready] …", "@owner/handle [ready] …": a protocol message the agent meant to send to whoever woke it. Only the
 # crew's own tags (crew/PROTOCOL.md) count; a closing "[ok] all done" is still a closing remark.
-CREW_TAGS = ("ready", "review", "task", "plan", "dispute", "blocking-question", "question")
+CREW_TAGS = ("ready", "review", "task", "plan", "dispute", "exam", "seal", "reveal", "report", "blocking-question",
+             "question")
 PROTOCOL = re.compile(r"^\s*(?:@\S+\s+)*\[(?:" + "|".join(CREW_TAGS) + r")\]", re.I)
 LIMIT = 1 << 26  # tool output can make single lines very long
 

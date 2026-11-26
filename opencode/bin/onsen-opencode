@@ -10,6 +10,10 @@ here="$(cd "$(dirname "$0")/.." && pwd)"
 export OPENCODE_CONFIG="$here/opencode.json"
 export OPENCODE_CONFIG_CONTENT="{\"default_agent\": \"onsen-$role\"}"
 export OPENCODE_DISABLE_CLAUDE_CODE=1 OPENCODE_DISABLE_EXTERNAL_SKILLS=1
+# Each seat commits under its own name, so the repository's history shows who did what.
+seat=$(printf '%s' "$role" | sed 's/^./\U&/')
+export GIT_AUTHOR_NAME="$seat" GIT_COMMITTER_NAME="$seat" \
+       GIT_AUTHOR_EMAIL="$role@onsen.example" GIT_COMMITTER_EMAIL="$role@onsen.example"
 if [ "${1:-}" = acp ]; then
   # BAND Desktop posts whatever text a turn ends with; the crew speaks through `band send` instead, so closing
   # remarks that aren't protocol messages stay out of the room (see src/onsen/acp_filter.py).

@@ -18,7 +18,7 @@ import yaml
 from .common import NAMES, agent_config_path, load_env
 
 API = os.environ.get("BAND_REST_URL", "https://app.band.ai").rstrip("/")
-ORDER = ["architect", "builder", "reviewer", "scout", "examiner", "napguard"]
+ORDER = ["architect", "builder", "examiner", "reviewer", "scout", "napguard"]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -26,8 +26,11 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--title", default="Onsen · CapyFinder")
     ap.add_argument("--say", default="build SPEC.md")
+    ap.add_argument("--say-file", help="the kickoff message body, from a file (a dark run's whole task)")
     ap.add_argument("--skip", action="append", default=[], help="agent keys to leave out of the room")
     args = ap.parse_args(argv)
+    if args.say_file:
+        args.say = open(args.say_file, encoding="utf-8").read().strip()
     cfg = yaml.safe_load(agent_config_path().read_text()) or {}
     members = [k for k in ORDER if k in cfg and k not in args.skip]
     if "architect" not in members:

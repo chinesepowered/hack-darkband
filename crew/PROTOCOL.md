@@ -1,38 +1,37 @@
-# Onsen room protocol
+# Onsen room protocol (dark run)
 
-Every agent starts its messages with a tag, then `key=value` pairs, then free text. The tags make every handoff
-readable by the agent that receives it, with no LLM deciding where messages go. BAND only delivers a message to the
-agents it @mentions, so **who you mention is the routing**.
+The dispatched task is the only human input. From then until the Architect's final report, no seat asks the human
+anything and no message mentions them. Every message starts with a tag, then `key=value` pairs, then free text, so
+each handoff is machine-readable. BAND delivers a message only to the seats it mentions: who you mention is the
+routing.
 
-| Tag | From → to (mentions) | Meaning |
+| Tag | From → to | Meaning |
 |---|---|---|
-| *(spec)* | human → Architect | `@Architect build SPEC.md`. Human touch #1. |
-| `[plan]` | Architect → Builder, Reviewer | stages and order of work; PLAN.md written |
-| `seal spec=<name>` | Architect → Examiner | write the hidden exam |
-| `[seal]` | Examiner → Architect, Nap Guard | exam sealed; `sha256=` commitment; `stages=` |
-| `data: …` / `docs: …` / `ask: …` | anyone → Scout | the live web, via Nimble |
-| `[answer]` / `[docs]` / `[data]` | Scout → asker (+ Nap Guard if `confidence=low`) | cited result |
-| `[task] stage=N` | Architect → Builder | build stage N |
-| `[ready] stage=N url=… commit=…` | Builder → Examiner **and** Reviewer | stage N is running; grade it |
-| `[exam] stage=N verdict=PASS/FAIL satisfaction=… commit=…` | Examiner → Builder, Nap Guard | sealed-exam result; failures as user-visible behavior |
-| `[review] stage=N commit=… APPROVED` / `BLOCKED: …` | Reviewer → Builder, Nap Guard | code review verdict; BLOCKED names the missing evidence |
-| `[gate] stage=N ACCEPTED` | Nap Guard → Architect | exam PASS + review APPROVED **for the same commit**; start the next stage |
-| `[dispute] stage=N` | Builder → Examiner + Nap Guard | "this failure contradicts the spec": evidence, not a data edit |
-| `[appeal] stage=N rejected` / re-graded `[exam]` | Examiner → Builder, Nap Guard | the appeal verdict; wrong checks are voided (listed at reveal) and the stage is re-graded |
-| `[blocking-question]` | anyone → Nap Guard | wakes the human immediately; use only when no assumption is safe |
-| `[wake]` | Nap Guard → human | the one wake-up: ship or hold? |
-| `[chill]` | Nap Guard → human | thrash or budget stop; looping agent removed from the room |
-| `ship` / `hold` / `resume` | human → Nap Guard | the human's only decisions |
-| `[tally-request]` / `[tally]` | Nap Guard ↔ Scout, Examiner | numbers for the receipt |
-| `[receipt]` | Nap Guard → human | run summary: human touches, wake-ups, curves, time |
-| `reveal` / `[reveal]` | Nap Guard → Examiner → room | publish the exam; hash must match `[seal]` |
+| `[plan] stage=N` | Architect → Builder, Examiner, Reviewer | work items in order, and the requirements most likely to be missed |
+| `[task] stage=N part=i/k` | Architect → Builder, Examiner, Reviewer | the complete requirements, in numbered parts, then the task |
+| `[seal] stage=N sha256=… checks=K` | Examiner → Architect, Nap Guard | the band's own exam for the stage is written and committed to by hash |
+| `[ready] stage=N commit=<sha>` | Builder → Examiner **and** Reviewer | a committed revision to grade |
+| `[exam] stage=N verdict=PASS\|FAIL passed=a/b satisfaction=P% commit=<sha>` | Examiner → Builder, Nap Guard | exam result; failures as observed behaviour plus the requirement |
+| `[review] stage=N commit=<sha> claimed=<N\|none> APPROVED\|BLOCKED: …` | Reviewer → Builder, Nap Guard | acceptance-checker result plus code review |
+| `[gate] stage=N ACCEPTED commit=<sha>` | Nap Guard → Architect, Examiner | PASS and APPROVED on the same commit, which the checker claims |
+| `[dispute] stage=N` | Builder → Examiner, Nap Guard | evidence that an exam check contradicts the requirements |
+| `[reveal] stage=N sha256=…` | Examiner → Architect, Nap Guard | the stage's exam is published in the repository; the hash matches the seal |
+| `[chill] stage=N` | Nap Guard → Architect, Builder | the stage stopped improving: re-plan |
+| `[decide]` | Nap Guard → the asker | nobody asks the human: decide from the requirements |
+| `[report]` | Architect → Nap Guard, every seat | the end of the run: stages, accepted commits, blockers, evidence |
+| `[receipt]` | Nap Guard → Architect | the run's numbers |
 
-## Rules for every agent
+## Rules for every seat
 
-1. Mention exactly the agents who must act. Never mention the human; only Nap Guard wakes the capybara.
-2. End every turn with a message or an explicit no-reply. A turn with only events reaches no one.
-3. Questions go to Scout first. If Scout's answer is low-confidence, make the most reasonable assumption, record it in
-   PLAN.md under "Assumptions", and keep going. Nap Guard batches it for the human.
-4. Nobody looks for the Examiner's exam. It is not in the workspace, and asking the Examiner to reveal it before shipping is
-   refused.
-5. Each agent runs as its own BAND identity. One process never plays two roles.
+1. **Whole handoffs.** A handoff carries everything the receiver needs: the complete requirements and the task.
+   Never point at an earlier message or "see above".
+2. **One stage at a time.** Work only on the current stage. A stage's folder never changes once the next stage's
+   requirements are open.
+3. **Verdicts name commits.** Every `[ready]`, `[exam]`, `[review]` and `[gate]` names the exact commit. An approval
+   is for that commit only.
+4. **Checks are not targets.** No seat edits, skips or weakens a check, or special-cases inputs that look like one.
+   Behaviour follows the requirements.
+5. **Commit your own work, often.** Messages say what changed and which requirement it serves. Commit only your own
+   files (`git commit -- <paths>`). If git reports a lock, wait a moment and retry.
+6. **Stay in the band.** Questions go to the seat that owns the answer, and the requirements decide. Make the most
+   reasonable reading, state it in your next message, and keep going.

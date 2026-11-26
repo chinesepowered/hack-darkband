@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Run the task's acceptance checker against one committed revision, never the live working tree.
+#
+#   onsen-check <repo> <stage> [<commit>] [--isolated]
+#
+# Checks out <commit> (default HEAD) into a throwaway worktree, runs the checker the task supplies
+# (ONSEN_CHECKER_DIR, ONSEN_CHECKER_PY, ONSEN_TRACK), and prints its verdict lines plus every failing
+# check with its first error line. The full logs stay in the printed output directory.
+set -uo pipefail
+repo=${1:?repo}; stage=${2:?stage}; commit=HEAD; mode=host
+shift 2
+for a in "$@"; do case "$a" in --isolated) mode=isolated ;; *) commit=$a ;; esac; done
+: "${ONSEN_CHECKER_DIR:?the checker package directory (from the task)}"
+: "${ONSEN_TRACK:?the track name (from the task)}"
+py=${ONSEN_CHECKER_PY:-python3}
+sha=$(git -C "$repo" rev-parse --short "$commit") || exit 2
+work=$(mktemp -d /tmp/onsen-check-XXXXXX)
+git -C "$repo" worktree add --detach -q "$work/repo" "$sha" || exit 2
+out="${ONSEN_CHECKS_DIR:-$HOME/.onsen/checks}/stage$stage-$sha-$(date +%H%M%S)"
+mkdir -p "$(dirname "$out")"
+echo "checking stage $stage at commit $sha ($mode mode) — this builds the service, a few minutes"
+(cd "$ONSEN_CHECKER_DIR" && "$py" -m harness run --track "$ONSEN_TRACK" --repo "$work/repo" --stage "$stage" \
+   --mode "$mode" --out "$out") 2>&1 | grep -v "^NOTE:" | tail -12
+echo "--- failing checks (first error line each):"
+grep -h "^FAILED\|^ERROR" "$out"/stage-*.log 2>/dev/null | cut -c1-260 | head -40
+echo "--- full logs: $out"
+git -C "$repo" worktree remove --force "$work/repo" >/dev/null 2>&1; rm -rf "$work"

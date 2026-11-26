@@ -89,3 +89,37 @@ async def test_block_after_acceptance_reopens_the_stage():
     await deliver(ng, "@nap-guard [review] stage=1 commit=ddd4444 APPROVED", "Reviewer", tools)
     await deliver(ng, "@nap-guard [exam] stage=1 verdict=PASS satisfaction=100% by=Builder commit=ddd4444", "Examiner", tools)
     assert last(tools).startswith("[gate] stage=1 ACCEPTED")
+
+
+async def test_dark_run_never_wakes_the_human(monkeypatch):
+    """ONSEN_DARK=1: the dispatched task is the only human input, so Nap Guard gates, answers and reports
+    without ever mentioning the human."""
+    monkeypatch.setenv("ONSEN_DARK", "1")
+    ng, tools = NapGuardAdapter(), FakeAgentTools(participants=CREW)
+    await deliver(ng, "@nap-guard [seal] stage=1 sha256=" + "c" * 64, "Examiner", tools)
+
+    # an approval without the checker's claim for the stage doesn't open the gate
+    await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=9/9 satisfaction=100% commit=abc1234", "Examiner", tools)
+    await deliver(ng, "@b @nap-guard [review] stage=1 commit=abc1234 APPROVED claimed=none", "Reviewer", tools)
+    assert not any(m["content"].startswith("[gate] stage=1 ACCEPTED") for m in tools.messages_sent)
+
+    # with the claim, the stage is accepted, and the Examiner is asked to publish the exam
+    await deliver(ng, "@b @nap-guard [review] stage=1 commit=abc1234 APPROVED claimed=1 checks pass", "Reviewer", tools)
+    gate = last(tools)
+    assert gate.startswith("[gate] stage=1 ACCEPTED") and "Examiner: publish" in gate
+
+    # a question for the human is answered by Nap Guard, not escalated
+    await deliver(ng, "@nap-guard [blocking-question] which time zone should timestamps use?", "Builder", tools)
+    assert last(tools).startswith("[decide]")
+
+    # a stall is a notice to the Architect; nobody is removed or woken
+    for sat in ("50%", "50%", "40%"):
+        await deliver(ng, f"@b @nap-guard [exam] stage=2 verdict=FAIL satisfaction={sat} commit=def5678", "Examiner", tools)
+    assert last(tools).startswith("[chill] stage=2")
+    assert not tools.participants_removed
+
+    # the Architect's final report ends the run with a receipt
+    await deliver(ng, "@nap-guard [report] stages accepted: 1; stage 2 blocked on history ordering", "Architect", tools)
+    receipt = last(tools)
+    assert receipt.startswith("[receipt]") and "wake-ups: 0" in receipt
+    assert all("id-human" not in str(m["mentions"]) for m in tools.messages_sent)

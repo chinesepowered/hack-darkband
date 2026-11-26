@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Start one committed revision of a stage folder beside the task's mock dependencies, and leave it running
+# for hands-on testing. Wiring is exactly what the checker uses (its own modules start both).
+#
+#   onsen-serve <repo> <stage-folder> [<commit>]    prints BASE_URL, MOCK_URL, MOCK_ADMIN_TOKEN, CORPUS
+#   onsen-serve stop                                 stops everything this command started
+set -uo pipefail
+: "${ONSEN_CHECKER_DIR:?the checker package directory (from the task)}"
+: "${ONSEN_TRACK:?the track name (from the task)}"
+py=${ONSEN_CHECKER_PY:-python3}
+state="${ONSEN_HOME:-$HOME/.onsen}/serve-$(whoami)-$(basename "${PWD}").state"
+if [ "${1:-}" = stop ]; then
+  [ -f "$state" ] && while read -r kind id; do
+    case $kind in container) docker rm -f "$id" >/dev/null 2>&1 ;; network) docker network rm "$id" >/dev/null 2>&1 ;; esac
+  done < "$state"; rm -f "$state"; echo "stopped"; exit 0
+fi
+repo=${1:?repo}; folder=${2:?stage folder, e.g. stage-1}; commit=${3:-HEAD}
+"$0" stop >/dev/null
+sha=$(git -C "$repo" rev-parse --short "$commit") || exit 2
+work=$(mktemp -d /tmp/onsen-serve-XXXXXX)
+git -C "$repo" worktree add --detach -q "$work/repo" "$sha" || exit 2
+mkdir -p "$(dirname "$state")"
+cd "$ONSEN_CHECKER_DIR" && "$py" - "$ONSEN_TRACK" "$work/repo/$folder" "$state" "$sha" <<'PY'
+import sys
+from harness import docker_driver as dd, mockweb
+from harness.mockweb import corpus_dir
+track, folder, state, sha = sys.argv[1:5]
+web = mockweb.start(track, mode=dd.HOST, network=None)
+with open(state, "w") as f:
+    if web:
+        f.write(f"container {web.container}\nnetwork {web.network}\n")
+image = dd.build_image(folder, tag=f"onsen-serve-{sha}")
+env = mockweb.service_env(web) if web else {}
+name, base, _ = dd.start_service(image, mode=dd.HOST, network=web.network if web else None, env=env)
+with open(state, "a") as f:
+    f.write(f"container {name}\n")
+dd.wait_healthy(base)
+print(f"commit {sha} is running")
+print(f"BASE_URL={base}")
+if web:
+    print(f"MOCK_URL={web.test_url}\nMOCK_ADMIN_TOKEN={web.token}\nCORPUS={corpus_dir(track)}")
+print("stop it with: onsen-serve stop")
+PY
+rc=$?
+git -C "$repo" worktree remove --force "$work/repo" >/dev/null 2>&1; rm -rf "$work"
+exit $rc

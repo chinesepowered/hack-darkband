@@ -13,7 +13,10 @@
           "name": "Qwen 3.8 27B",
           "tool_call": true,
           "reasoning": true,
-          "limit": { "context": 131072, "output": 16384 }
+          "limit": {
+            "context": 131072,
+            "output": 16384
+          }
         }
       }
     }
@@ -30,19 +33,44 @@
   },
   "agent": {
     "onsen-architect": {
-      "description": "Onsen Architect: plans, hands out stages, writes PLAN.md only",
+      "description": "Onsen Architect: leads the band; plans, hands off whole tasks, reports",
       "mode": "primary",
-      "permission": { "edit": "allow", "bash": "allow", "webfetch": "deny", "external_directory": "deny" }
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "deny",
+        "external_directory": "allow"
+      }
     },
     "onsen-builder": {
       "description": "Onsen Builder: implements one stage at a time in the workspace",
       "mode": "primary",
-      "permission": { "edit": "allow", "bash": "allow", "webfetch": "deny", "external_directory": "deny" }
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "deny",
+        "external_directory": "deny"
+      }
     },
     "onsen-reviewer": {
       "description": "Onsen Reviewer: reads diffs and says no; cannot edit files",
       "mode": "primary",
-      "permission": { "edit": "deny", "bash": "allow", "webfetch": "deny", "external_directory": "deny" }
+      "permission": {
+        "edit": "deny",
+        "bash": "allow",
+        "webfetch": "deny",
+        "external_directory": "deny"
+      }
+    },
+    "onsen-examiner": {
+      "description": "Onsen Examiner: writes and runs the band's sealed exam in its own workspace",
+      "mode": "primary",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "deny",
+        "external_directory": "deny"
+      }
     }
   }
 }

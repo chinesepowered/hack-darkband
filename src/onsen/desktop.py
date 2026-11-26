@@ -24,11 +24,12 @@ import httpx
 import yaml
 
 from .common import NAMES, REPO_ROOT, agent_config_path, load_env, onsen_home
-from .crew import instructions
 from .watch import API
 
-CREW = ("architect", "builder", "reviewer")
-ROLES = ("architect", "builder", "reviewer", "scout", "examiner", "napguard")
+CREW = ("architect", "builder", "examiner", "reviewer")
+ROLES = ("architect", "builder", "examiner", "reviewer", "napguard")
+MANDATES = {"architect": "architect", "builder": "builder", "examiner": "examiner", "reviewer": "reviewer",
+            "napguard": "nap-guard"}
 
 
 def scope(role: str) -> str:
@@ -54,20 +55,29 @@ def handles() -> dict[str, str]:
 DESKTOP_NOTES = """
 ## Working in BAND Desktop
 
-You run inside BAND Desktop. Everyone in the room, and how to mention them:
+You run inside BAND Desktop as your own BAND identity. Everyone in the room, and how to mention them:
 
 {roster}
 
 How to talk in the room:
-- Send every protocol message yourself with BAND's send command (your BAND briefing shows it with this room's id):
-  `band ... send <room> "@handle @handle [tag] key=value … free text"`. Put the handles first, then the tag line.
-  "Post X to @Examiner and @Reviewer" in these instructions means one `band send` that starts with both handles.
-- Only `band send` speaks for you. Onsen's launcher keeps the text you end a turn with out of the room, so you never
-  need to stay silent. Finish each turn normally; a one-line note is fine. Don't put protocol messages in that
-  closing text; send them.
+- Send every protocol message yourself with BAND's send command (your BAND briefing shows it with this room's id).
+  Write the message to a file first, handles first, then the tag line, then the body, and send it with
+  `band ... send <room> --body-file <file>`. "Post X to the Examiner and the Reviewer" means one message that
+  starts with both handles.
+- Only `band send` speaks for you. The text you end a turn with stays out of the room, so finish each turn normally.
 - If the message that woke you needs nothing from you, just finish the turn.
-- Never mention the human. Only Nap Guard wakes the capybara.
-- For multi-line messages, write the body to a file in the workspace and use `--body-file`.
+- Never mention the human, and never wait for one. Nobody wakes the capybara in a dark run.
+
+Your tools (on PATH):
+- `onsen-check <repository> <stage> [<commit>]`: runs the task's acceptance checker on one committed revision, in a
+  clean checkout, and lists every failing check. It builds the service, so it takes a few minutes.
+- `onsen-serve <repository> <stage folder> [<commit>]`: starts one committed revision beside the task's mock
+  dependencies and leaves it running; it prints the service URL and the mock's URL and admin token.
+  `onsen-serve stop` stops it.
+- `onsen-split <document> <stage> @handle [@handle ...]`: cuts a long requirements document into numbered
+  `[task]` parts that each start with those handles; it prints the part files in order. Send each one with
+  `band ... send <room> --body-file <part>`.
+- Your git name and email are already set to your seat, so the history shows who did what.
 """
 
 
@@ -78,7 +88,10 @@ def roster_table(hs: dict[str, str]) -> str:
 
 
 def instructions_text(role: str, hs: dict[str, str]) -> str:
-    return instructions(role).rstrip() + "\n" + DESKTOP_NOTES.format(roster=roster_table(hs))
+    """The seat's mandate, the room protocol, and how to work in BAND Desktop."""
+    mandate = (REPO_ROOT / "mandates" / f"{MANDATES[role]}.md").read_text().rstrip()
+    protocol = (REPO_ROOT / "crew" / "PROTOCOL.md").read_text().rstrip()
+    return f"{mandate}\n\n---\n{protocol}\n" + DESKTOP_NOTES.format(roster=roster_table(hs))
 
 
 def band(*args: str, check: bool = True) -> str:
@@ -91,6 +104,11 @@ def band(*args: str, check: bool = True) -> str:
     return p.stdout
 
 
+def exam_dir(workspace: Path) -> Path:
+    """The Examiner works outside the shared repository, so the exam stays sealed until it is published."""
+    return onsen_home() / "exams" / workspace.name
+
+
 def prepare(workspace: Path) -> None:
     """Write each crew agent's instructions and point its runtime at this run's workspace."""
     hs = handles()
@@ -100,12 +118,14 @@ def prepare(workspace: Path) -> None:
         f = out / f"{role}.md"
         f.write_text(instructions_text(role, hs))
         band("agent", "instructions", "set", "--session", scope(role), "--instructions-file", str(f))
-        band("runtime", "template", "set", "--session", scope(role), "--spawn-cwd", str(workspace),
+        cwd = exam_dir(workspace) if role == "examiner" else workspace
+        cwd.mkdir(parents=True, exist_ok=True)
+        band("runtime", "template", "set", "--session", scope(role), "--spawn-cwd", str(cwd),
              "--apply-and-restart")
         # --apply-and-restart leaves a stopped worker stopped (stop-factory.sh stops them), so start it here.
         # It can report stale rooms from older runs; the worker still starts.
         band("restart", "--session", scope(role), check=False)
-        print(f"✔ {NAMES[role]} ({hs.get(role, '?')}): instructions {f.name}, working directory {workspace}")
+        print(f"✔ {NAMES[role]} ({hs.get(role, '?')}): instructions {f.name}, working directory {cwd}")
 
 
 def status() -> None:

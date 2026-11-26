@@ -13,6 +13,13 @@ It is copied on verdicts and turns them into decisions:
                    the run receipt, and asks the Examiner to reveal the exam.
 
 Human commands (mention Nap Guard): ship | hold | resume | status
+
+Dark mode (ONSEN_DARK=1), for a run where the dispatched task is the only human input:
+  * nobody is ever woken: a blocking question is answered with "decide from the requirements
+    and record the assumption", and a stalled stage gets a [chill] notice to the Architect
+    instead of a pause that waits for a human `resume`
+  * the gate also needs the acceptance checker's claim (`claimed=N` in the review)
+  * the Architect's final `[report]` ends the run; Nap Guard answers with the receipt
 """
 
 from __future__ import annotations
@@ -72,6 +79,11 @@ def chill_action() -> str:
     return os.environ.get("ONSEN_CHILL_ACTION", "remove").lower()  # remove | notice
 
 
+def dark() -> bool:
+    """A dark-factory run: the dispatched task is the only human input, so nobody is woken."""
+    return os.environ.get("ONSEN_DARK", "").lower() in ("1", "true", "yes")
+
+
 DEFAULT_STATE: dict[str, Any] = {
     "started_at": None,
     "stages_total": None,
@@ -88,6 +100,8 @@ DEFAULT_STATE: dict[str, Any] = {
     "awaiting_tallies": False,
     "removed": [],
     "receipt_posted": False,
+    "dispatched_at": None,
+    "decisions": [],
 }
 
 
@@ -123,6 +137,8 @@ class NapGuardAdapter(SimpleAdapter[Any]):
                 st.data["disputes"].append({"stage": kv.get("stage"), "from": msg.sender_name, "text": clip(rest, 600),
                                             "at": now()})
                 await tools.no_reply("dispute recorded; it goes to the human only if the stage stalls")
+            elif tag in ("blocking-question", "question") and dark():
+                await self._decide_yourself(msg, rest, tools, st)
             elif tag == "blocking-question":
                 await self._wake(tools, st, f"[wake] #{len(st.data['wakeups']) + 1} reason=blocking-question "
                                  f"from={msg.sender_name}\n{clip(rest, 1200)}\nReply to me with your answer; "
@@ -131,6 +147,8 @@ class NapGuardAdapter(SimpleAdapter[Any]):
                 await self._on_tally(rest, tools, st)
             elif tag == "appeal":
                 await tools.no_reply("appeal verdict noted")
+            elif tag == "report" and dark():
+                await self._on_report(rest, msg, tools, st)
             else:
                 await tools.no_reply("not addressed to Nap Guard's protocol")
         finally:
@@ -173,6 +191,8 @@ class NapGuardAdapter(SimpleAdapter[Any]):
         kv = parse_kv(rest)
         st.data["stages_total"] = int(kv.get("stages") or 0) or None
         st.data["seal_sha256"] = kv.get("sha256")
+        if kv.get("stage"):
+            st.data.setdefault("seals", {})[str(kv["stage"])] = kv.get("sha256")
         st.data["started_at"] = st.data["started_at"] or now()
         await tools.no_reply("seal recorded")
 
@@ -208,6 +228,10 @@ class NapGuardAdapter(SimpleAdapter[Any]):
             return
         s = self._stage(st, n)
         approved = "APPROVED" in rest.upper() and "BLOCKED" not in rest.upper()
+        claimed = (kv.get("claimed") or "").strip().lower()
+        if approved and dark() and claimed != str(n):
+            approved = False  # an approval without the checker's claim for this stage doesn't count
+            s["review_note"] = clip(rest, 300)
         s["review"] = "APPROVED" if approved else "BLOCKED"
         s["review_commit"] = kv.get("commit")
         s["review_note"] = clip(rest, 300)
@@ -254,8 +278,19 @@ class NapGuardAdapter(SimpleAdapter[Any]):
             curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"])
             total = st.data["stages_total"]
             accepted = sorted(int(k) for k, v in st.data["stages"].items() if v["accepted"])
-            if total and len(accepted) >= total:
+            if total and len(accepted) >= total and not dark():
                 await self._wake_for_ship(tools, st)
+                return
+            if dark():
+                # The Examiner publishes the stage's exam once the stage is in; the Architect moves on.
+                await self._say(
+                    tools,
+                    f"[gate] stage={n} ACCEPTED exam={curve} review=approved commit={exam_commit or '?'} "
+                    f"accepted={','.join(map(str, accepted))}\n"
+                    f"Stage {n} is in: its exam passed and the Reviewer approved the same commit, which the checker "
+                    f"claims for stage {n}. Architect: carry it forward. Examiner: publish stage {n}'s exam.",
+                    [NAMES["architect"], NAMES["examiner"]],
+                )
                 return
             await self._say(
                 tools,
@@ -284,6 +319,20 @@ class NapGuardAdapter(SimpleAdapter[Any]):
 
     async def _chill(self, tools: Any, st: JsonState, n: int, s: dict[str, Any]) -> None:
         st.data["chill_breaks"] += 1
+        if dark():
+            curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"]) or "no exams"
+            reason = "thrash" if s["fails_in_row"] >= thrash_limit() else "round-budget"
+            s["fails_in_row"] = 0  # one notice per stall, not one per round
+            await self._say(
+                tools,
+                f"[chill] stage={n} reason={reason} rounds={len(s['exams'])} exam={curve}\n"
+                f"🧘 Stage {n} has stopped improving. Last review: {clip(s.get('review_note') or 'none', 200)}\n"
+                "Architect: re-plan this stage. Hand the Builder one failing behaviour at a time, with the "
+                "requirement it comes from. If this is the second chill break for the stage, record the blocker "
+                "and its evidence in your final report instead. Nobody wakes the human in a dark run.",
+                [NAMES["architect"], NAMES["builder"]],
+            )
+            return
         culprit = s.get("by") or NAMES["builder"]
         curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"]) or "no exams"
         action = "I left everyone in the room."
@@ -309,6 +358,38 @@ class NapGuardAdapter(SimpleAdapter[Any]):
             "Reply `resume` to put it back and keep going, or `hold` to stop the run.",
             reason=f"chill-{reason}",
         )
+
+    async def _decide_yourself(self, msg: PlatformMessage, rest: str, tools: Any, st: JsonState) -> None:
+        st.data["decisions"].append({"from": msg.sender_name, "text": clip(rest, 400), "at": now()})
+        await tools.send_message(
+            "[decide] 😴 The capybara is asleep and stays asleep: in a dark run nobody asks the human anything. "
+            "Decide from the requirements you were given, choose the most reasonable reading, state the assumption "
+            "in your next handoff, and keep going.",
+            mentions=[msg.sender_id],
+        )
+
+    async def _on_report(self, rest: str, msg: PlatformMessage, tools: Any, st: JsonState) -> None:
+        d = st.data
+        if d["receipt_posted"]:
+            await tools.no_reply("receipt already posted")
+            return
+        lines = []
+        for k in sorted(d["stages"], key=int):
+            v = d["stages"][k]
+            curve = "→".join(f"{e['satisfaction']:.0%}" for e in v["exams"]) or "no exam"
+            lines.append(f"{k} {'✔' if v['accepted'] else '✘'} exam {curve} ({len(v['exams'])} rounds)")
+        elapsed = fmt_duration(now() - d["started_at"]) if d["started_at"] else "n/a"
+        receipt = "\n".join([
+            "[receipt] 🛁 Onsen dark run complete",
+            "• Human input: 1 (the dispatched task) · wake-ups: 0 · questions sent to the human: 0",
+            "• Stages: " + (" · ".join(lines) or "none accepted"),
+            f"• Chill breaks: {d['chill_breaks']} · questions the band decided for itself: {len(d['decisions'])}"
+            f" · disputes: {len(d['disputes'])}",
+            f"• Time from the first exam seal to this report: {elapsed}",
+            "The capybara slept through all of it. 🍊",
+        ])
+        d["receipt_posted"] = True
+        await tools.send_message(receipt, mentions=[msg.sender_id])
 
     async def _on_tally(self, rest: str, tools: Any, st: JsonState) -> None:
         kv = parse_kv(rest)
