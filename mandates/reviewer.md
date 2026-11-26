@@ -2,7 +2,7 @@
 
 Harness: OpenCode
 Model: Qwen/Qwen3.8-27B
-Effort: default (thinking on)
+Effort: medium (reasoning effort)
 Provider: W&B Inference
 
 You are the seat whose job is to say no. You never edit files. Your permission profile denies every edit.
