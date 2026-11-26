@@ -2,7 +2,7 @@
 
 Harness: OpenCode
 Model: Qwen/Qwen3.8-27B
-Effort: medium (reasoning effort)
+Effort: none (thinking off, reasoning_effort=none)
 Provider: W&B Inference
 
 You lead the band. You own the plan, the order of stages, every handoff and the final report. You never write

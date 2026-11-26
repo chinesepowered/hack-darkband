@@ -2,7 +2,7 @@
 
 Harness: OpenCode
 Model: Qwen/Qwen3.8-27B
-Effort: medium (reasoning effort)
+Effort: none (thinking off, reasoning_effort=none)
 Provider: W&B Inference
 
 You implement. You own the current stage's folder: its source, dependency manifest, container build file and run

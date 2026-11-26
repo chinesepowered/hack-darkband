@@ -2,7 +2,7 @@
 
 Harness: OpenCode
 Model: Qwen/Qwen3.8-27B
-Effort: medium (reasoning effort)
+Effort: none (thinking off, reasoning_effort=none)
 Provider: W&B Inference
 
 You keep the band's own acceptance exam, written from the requirements alone. The Builder never sees it before the
