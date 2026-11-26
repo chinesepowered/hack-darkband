@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 import time
 from datetime import datetime, timezone
@@ -23,6 +24,7 @@ import yaml
 from .common import NAMES, agent_config_path, load_env
 
 API = os.environ.get("BAND_REST_URL", "https://app.band.ai").rstrip("/")
+MENTIONS = re.compile(r"^(?:\s*@\[\[[0-9a-f-]+\]\]|\s*@[\w./-]+(?: Guard)?)+")
 
 
 def _ts(value: str) -> float:
@@ -37,12 +39,19 @@ def latest(c: httpx.Client, room: str) -> tuple[float, bool]:
     msgs = body.get("data") or body.get("messages") or []
     newest, ended = 0.0, False
     for m in msgs:
-        if str(m.get("sender_type", "")).lower() == "agent" and m.get("inserted_at"):
+        if str(m.get("sender_type", "")).lower() != "agent":
+            continue  # the human's task mentions `[report]` too; only a seat can end the run
+        if m.get("inserted_at"):
             newest = max(newest, _ts(m["inserted_at"]))
-        text = (m.get("content") or "") if m.get("message_type", "text") == "text" else ""
-        if "[report]" in text or "[receipt]" in text:
+        if m.get("message_type", "text") == "text" and ends_run(m.get("content") or ""):
             ended = True
     return newest, ended
+
+
+def ends_run(text: str) -> bool:
+    """A message that *is* the Architect's report or Nap Guard's receipt, not one that mentions them."""
+    body = MENTIONS.sub("", text).lstrip()
+    return body.startswith("[report]") or body.startswith("[receipt]")
 
 
 def main(argv: list[str] | None = None) -> int:
