@@ -133,10 +133,23 @@ def is_tag(body: str, tag: str) -> bool:
     return MENTIONS.sub("", body).lstrip().startswith(f"[{tag}]")
 
 
+def nap_guard_accepted(room: str, home: Path | None = None) -> dict[int, float]:
+    """{stage: when Nap Guard accepted it}, from Nap Guard's own state file. The room's newest messages are a window:
+    in Run U, four hours in, stage 1's [gate] had scrolled out of it and the watch took stage 1 for open again."""
+    home = home or Path(os.environ.get("ONSEN_HOME") or Path.home() / ".onsen")
+    try:
+        stages = json.loads((home / "state" / f"napguard-{room}.json").read_text()).get("stages", {})
+    except (OSError, ValueError, AttributeError):
+        return {}
+    return {int(k): float(v.get("accepted_at") or 0) for k, v in stages.items()
+            if isinstance(v, dict) and v.get("accepted")}
+
+
 def late_handoff(texts: list[dict], claimed: list[tuple[int, str, float]], now: float, nudged: set,
-                 wait: float) -> tuple[int, str, float] | None:
-    """The first claimed commit of an open stage that wasn't handed off (nor a later commit) within `wait` seconds."""
-    readies, accepted = [], set()
+                 wait: float, known_accepted: set[int] | frozenset = frozenset()) -> tuple[int, str, float] | None:
+    """The first claimed commit of the open stage that wasn't handed off (nor a later commit) within `wait` seconds.
+    Only the open stage can be late: every stage before it is accepted (Nap Guard's state says which)."""
+    readies, accepted = [], set(known_accepted)
     for m in texts:
         body = m.get("content") or ""
         at = _ts(m["inserted_at"]) if m.get("inserted_at") else 0.0
@@ -144,8 +157,9 @@ def late_handoff(texts: list[dict], claimed: list[tuple[int, str, float]], now: 
             accepted |= {int(x) for x in ACCEPTED_RE.findall(body)}
         if is_tag(body, "ready"):  # a handoff, not a message quoting one
             readies += [(int(st), sha[:7], at) for st, sha in READY_RE.findall(body)]
+    open_stage = max(accepted) + 1 if accepted else 1
     for stage, sha, t in sorted(claimed, key=lambda c: c[2]):
-        if stage in accepted or (stage, sha) in nudged:
+        if stage != open_stage or (stage, sha) in nudged:
             continue
         if any(st == stage and (c == sha or rt >= t) for st, c, rt in readies):
             continue
@@ -159,12 +173,13 @@ SLOW_RE = re.compile(r"\[nudge\]\s+stage=(\d+)\s+slow=(\d+)m")
 
 
 def slow_stage(texts: list[dict], claimed: list[tuple[int, str, float]], now: float, run_started: float,
-               thresholds: tuple[int, ...] = (45, 90)) -> tuple[int, int] | None:
+               thresholds: tuple[int, ...] = (45, 90), known: dict[int, float] | None = None) -> tuple[int, int] | None:
     """(stage, minutes) when the open stage has gone that many minutes without a commit the checker claims, and hasn't
     been nudged for it yet. Stage 1 opens with the run; a later stage opens when Nap Guard accepts the one before. Run
     U's Builder spent its first hour on a service that hung under test, every check ran out of time, and nothing in the
     factory spoke up while it was busy."""
-    accepted: dict[int, float] = {}
+    accepted: dict[int, float] = {k: v for k, v in (known or {}).items() if v}
+    accepted.update({k: now for k, v in (known or {}).items() if not v and k not in accepted})
     nudged: set[tuple[int, int]] = set()
     for m in texts:
         body = m.get("content") or ""
@@ -271,7 +286,8 @@ def main(argv: list[str] | None = None) -> int:
             newest, ended, turns = latest(human, args.room)
             texts = text_messages(human, args.room)
             nudged |= already_nudged(texts)
-            late = late_handoff(texts, claims(checks_dir, started), time.time(), nudged, wait)
+            known = nap_guard_accepted(args.room)
+            late = late_handoff(texts, claims(checks_dir, started), time.time(), nudged, wait, set(known))
         except httpx.HTTPError as exc:
             print(f"read failed: {exc}", flush=True)
             continue
@@ -311,7 +327,7 @@ def main(argv: list[str] | None = None) -> int:
                            "mentions": [{"id": builder["agent_id"], "name": NAMES["builder"]}]}})
             print(f"handoff nudge: stage {stage} commit {sha} after {minutes}m -> HTTP {r.status_code}", flush=True)
             continue
-        slow = slow_stage(texts, claims(checks_dir, started), time.time(), started)
+        slow = slow_stage(texts, claims(checks_dir, started), time.time(), started, known=known)
         if slow:
             stage, mark = slow
             print(f"interrupt: {interrupt_builder(args.room)}", flush=True)

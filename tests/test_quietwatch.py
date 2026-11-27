@@ -148,3 +148,21 @@ def test_handoff_nudges_wait_for_running_checks_and_space_out(tmp_path):
              {"inserted_at": "2026-11-27T15:50:00Z", "content": "@[[0a1b2c3d-0000-4000-8000-00000000000b]] [task] "
               "stage=1 part=4/4 quotes [nudge] stage=1 handoff=late commit=abc1234"}]
     assert last_handoff_nudge(texts, 1) > 0 and last_handoff_nudge(texts, 2) == 0.0
+
+
+
+def test_an_accepted_stage_stays_accepted_when_its_gate_scrolls_out_of_the_window(tmp_path):
+    """Run U, four hours in: stage 1's [gate] had left the newest 100 messages, and the watch nudged the Builder every
+    minute about stage-1 commits from hours before. Nap Guard's state file says which stages are accepted."""
+    import json
+    from onsen.quietwatch import late_handoff, nap_guard_accepted, slow_stage
+    (tmp_path / "state").mkdir()
+    (tmp_path / "state" / "napguard-ROOM.json").write_text(json.dumps({"stages": {
+        "1": {"accepted": True, "accepted_at": 1000.0}, "2": {"accepted": True, "accepted_at": 2000.0},
+        "3": {"accepted": False}}}))
+    known = nap_guard_accepted("ROOM", tmp_path)
+    assert known == {1: 1000.0, 2: 2000.0}
+    claims = [(1, "6eb1549", 500.0), (3, "abc1234", 2100.0)]
+    assert late_handoff([], claims, 5000.0, set(), 300, set(known)) == (3, "abc1234", 2100.0)
+    assert late_handoff([], claims[:1], 5000.0, set(), 300, set(known)) is None
+    assert slow_stage([], [], 2000.0 + 46 * 60, 0.0, known=known) == (3, 45)
