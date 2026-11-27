@@ -106,3 +106,22 @@ def test_only_the_receipt_ends_the_watch():
     assert ends_run("@[[0a1b2c3d-0000-4000-8000-00000000000a]] [receipt] 🛁 Onsen dark run complete")
     assert not ends_run("@[[0a1b2c3d-0000-4000-8000-00000000000a]] [report] stage 1 not accepted")
     assert not ends_run("[task] stage=1 part=4/4 finish with your `[report]`; Nap Guard posts its `[receipt]`")
+
+
+
+def test_a_stage_without_a_claimed_commit_for_45_minutes_is_slow():
+    """Run U: every check of the Builder's first hour ran out of time, and the factory said nothing while it was busy."""
+    from onsen.quietwatch import slow_stage
+    start = 1_000_000.0
+    assert slow_stage([], [], start + 44 * 60, start) is None
+    assert slow_stage([], [], start + 46 * 60, start) == (1, 45)
+    assert slow_stage([], [(1, "abc1234", start + 30 * 60)], start + 46 * 60, start) is None  # the checker claimed it
+    nudged = [{"inserted_at": "1970-01-12T13:47:00Z", "content": "@[[0a1b2c3d-0000-4000-8000-00000000000a]] "
+               "[nudge] stage=1 slow=45m the stage is slow"}]
+    assert slow_stage(nudged, [], start + 50 * 60, start) is None
+    assert slow_stage(nudged, [], start + 91 * 60, start) == (1, 90)
+    # stage 2 opens when Nap Guard accepts stage 1; a quoted gate opens nothing
+    gate = {"inserted_at": "1970-01-12T14:00:00Z",
+            "content": "@[[0a1b2c3d-0000-4000-8000-00000000000a]] [gate] stage=1 ACCEPTED commit=abc1234"}
+    opened = 1_000_000.0 + (14 * 3600 - (13 * 3600 + 46 * 60 + 40))
+    assert slow_stage([gate], [], opened + 46 * 60, start) == (2, 45)

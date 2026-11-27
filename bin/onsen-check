@@ -37,8 +37,20 @@ echo "checking stage $stage at commit $sha ($mode mode): it builds the service a
 ( cd "$ONSEN_CHECKER_DIR" && exec setsid timeout -s INT -k 30 "$cap" "$py" -m harness run --track "$ONSEN_TRACK" \
     --repo "$work/repo" --stage "$stage" --mode "$mode" --out "$out" ) > "$console" 2>&1 &
 hp=$!
-trap 'kill -INT -- -$hp 2>/dev/null; sleep 5; kill -KILL -- -$hp 2>/dev/null; git -C "$repo" worktree remove --force "$work/repo" >/dev/null 2>&1; rm -rf "$work"; exit 143' TERM INT HUP
+# Twenty seconds before the cap, keep what the service under test was doing: the harness interrupts its run at the cap
+# and removes the containers, and its own log is written only when a suite finishes, so a capped check would otherwise
+# say nothing about where the service was stuck.
+since=$(date +%s)
+( sleep $((cap - 20)) && kill -0 $hp 2>/dev/null && for c in $(docker ps --filter name=df-svc- --format '{{.Names}}'); do
+    created=$(date -d "$(docker inspect -f '{{.Created}}' "$c" 2>/dev/null)" +%s 2>/dev/null || echo 0)
+    [ "$created" -ge "$since" ] || continue
+    { echo "--- the service under test near the cap: $(docker stats --no-stream --format '{{.CPUPerc}} CPU, {{.MemUsage}}' "$c")"
+      echo "    its last log lines:"; docker logs --tail 25 "$c" 2>&1 | cut -c1-220 | sed 's/^/    /'; } > "$out.service.log"
+  done ) &
+dump=$!
+trap 'kill $dump 2>/dev/null; kill -INT -- -$hp 2>/dev/null; sleep 5; kill -KILL -- -$hp 2>/dev/null; git -C "$repo" worktree remove --force "$work/repo" >/dev/null 2>&1; rm -rf "$work"; exit 143' TERM INT HUP
 wait $hp; rc=$?
+kill $dump 2>/dev/null
 trap - TERM INT HUP
 grep -v "^NOTE:" "$console" | tail -12
 if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
@@ -46,6 +58,7 @@ if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
   echo "    minutes, so the service is probably slow or hung under test (a busy loop, or a request or build that never"
   echo "    finishes), and every check waits for it. Start the commit with onsen-serve and time a build and a few"
   echo "    requests before checking again."
+  [ -s "$out.service.log" ] && cat "$out.service.log"
 fi
 echo "--- failing checks (first error line each):"
 grep -h "^FAILED\|^ERROR" "$out"/stage-*.log 2>/dev/null | cut -c1-260 | head -40

@@ -155,6 +155,34 @@ def late_handoff(texts: list[dict], claimed: list[tuple[int, str, float]], now: 
 
 
 NUDGED_RE = re.compile(r"\[nudge\]\s+stage=(\d+)\s+handoff=late\s+commit=([0-9a-f]{7,40})")
+SLOW_RE = re.compile(r"\[nudge\]\s+stage=(\d+)\s+slow=(\d+)m")
+
+
+def slow_stage(texts: list[dict], claimed: list[tuple[int, str, float]], now: float, run_started: float,
+               thresholds: tuple[int, ...] = (45, 90)) -> tuple[int, int] | None:
+    """(stage, minutes) when the open stage has gone that many minutes without a commit the checker claims, and hasn't
+    been nudged for it yet. Stage 1 opens with the run; a later stage opens when Nap Guard accepts the one before. Run
+    U's Builder spent its first hour on a service that hung under test, every check ran out of time, and nothing in the
+    factory spoke up while it was busy."""
+    accepted: dict[int, float] = {}
+    nudged: set[tuple[int, int]] = set()
+    for m in texts:
+        body = m.get("content") or ""
+        if is_tag(body, "gate"):
+            for x in ACCEPTED_RE.findall(body):
+                at = _ts(m["inserted_at"]) if m.get("inserted_at") else now
+                accepted[int(x)] = min(accepted.get(int(x), at), at)
+        if is_tag(body, "nudge"):
+            nudged |= {(int(st), int(mins)) for st, mins in SLOW_RE.findall(body)}
+    stage = max(accepted) + 1 if accepted else 1
+    opened = accepted.get(stage - 1, run_started)
+    if any(st == stage and t >= opened for st, _sha, t in claimed):
+        return None
+    minutes = (now - opened) / 60
+    for mark in thresholds:
+        if minutes >= mark and (stage, mark) not in nudged:
+            return stage, mark
+    return None
 
 
 def already_nudged(texts: list[dict]) -> set:
@@ -252,6 +280,22 @@ def main(argv: list[str] | None = None) -> int:
             r = agent.post(f"/api/v1/agent/chats/{args.room}/messages", json={"message": {"content": content,
                            "mentions": [{"id": builder["agent_id"], "name": NAMES["builder"]}]}})
             print(f"handoff nudge: stage {stage} commit {sha} after {minutes}m -> HTTP {r.status_code}", flush=True)
+            continue
+        slow = slow_stage(texts, claims(checks_dir, started), time.time(), started)
+        if slow:
+            stage, mark = slow
+            print(f"interrupt: {interrupt_builder(args.room)}", flush=True)
+            content = (f"@{NAMES['architect']} @{NAMES['builder']} [nudge] stage={stage} slow={mark}m\n"
+                       f"🐢 Stage {stage} has been open for {mark} minutes and the checker hasn't claimed it on any "
+                       "commit yet. I interrupted the Builder's turn so this reaches it. Builder: stop adding to what "
+                       "isn't working; get the smallest version of the stage running and checked, then build up from "
+                       "there (a check that runs out of time means the service hangs under test, and onsen-check shows "
+                       "its last log lines). Architect: re-plan the stage with the Builder from the last check's output, "
+                       "the most-failing requirement first.")
+            r = agent.post(f"/api/v1/agent/chats/{args.room}/messages", json={"message": {"content": content,
+                           "mentions": [{"id": arch["agent_id"], "name": NAMES["architect"]},
+                                        {"id": builder["agent_id"], "name": NAMES["builder"]}]}})
+            print(f"slow stage {stage} after {mark}m -> HTTP {r.status_code}", flush=True)
             continue
         now = time.time()
         busy = sorted(s for s, (state, _) in turns.items() if state == "busy")

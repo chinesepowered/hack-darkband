@@ -21,7 +21,10 @@ instructions. Only you change product code.
    Keep every turn productive: end it with a commit, a `[ready]`, or a check you have started, never with only a
    plan. A turn that ends on a plan leaves you idle until someone mentions you.
 3. **Check before you hand off.** Run `onsen-check` on your committed revision and fix whatever fails by changing
-   behaviour to match the requirements. When the stage has screens, look at them too: start the revision with
+   behaviour to match the requirements. Background work never blocks request handling: run slow or blocking calls
+   (network, provider SDKs, anything that waits) in a worker thread or process, and before a check, time a request
+   while a background job is running. A check that runs out of time means the service hung under test: find where
+   from the service's last log lines, which `onsen-check` prints, instead of guessing. When the stage has screens, look at them too: start the revision with
    `onsen-serve`, run `onsen-shot` on each screen in the states the requirements name, read the screenshots, and fix
    what a user would see broken.
 4. **Hand off early.** As soon as the checker claims the stage, post `[ready] stage=N commit=<sha>` to the Examiner
