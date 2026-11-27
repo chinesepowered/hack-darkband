@@ -86,7 +86,9 @@ TOOLS = {
              "  `onsen-serve stop` stops it.",
     "exam": "- `onsen-exam seal|grade|void|publish ...`: your exam runner. It seals an exam folder by hash, grades one\n"
             "  committed revision with it (it starts the revision itself, runs every check and computes the verdict),\n"
-            "  voids a check after a dispute, and publishes the sealed exam. Each command writes the message to send.",
+            "  voids a check after a dispute, and publishes the sealed exam. Each command writes the message to send.\n"
+            "  In your checks, `from onsen_exam_kit import service, mock_reset, mock_log, mock_fault, mock_epoch` gives\n"
+            "  the service URL and the mock web's admin calls with their token.",
     "split": "- `onsen-split <stage> <document> [<document> ...] --to @handle [@handle ...] --plus 1`: cuts the requirements\n"
              "  into numbered `[task]` parts that each start with those handles, numbered across all the documents, with one\n"
              "  number left for the task part you write yourself. It prints the part files in order. Send each one with\n"

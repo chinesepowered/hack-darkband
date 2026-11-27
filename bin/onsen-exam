@@ -11,7 +11,8 @@ An exam is the folder `stage-<N>/` in the current directory (the Examiner's work
 repository): pytest files named `test_*.py`, one test function per check, each with a docstring whose first line
 names the requirement and what a client observes. Checks read SERVICE_URL, MOCK_URL, MOCK_ADMIN_TOKEN and CORPUS
 from the environment. An optional `corpus/` folder holds provider data in the mock's corpus format; when present it
-is served instead of the task's sample corpus (copy the sample in first if you still want its companies).
+is served instead of the task's sample corpus (copy the sample in first if you still want its companies). Checks can
+`import onsen_exam_kit` for the service URL and the mock web's admin calls with their token (mock_reset, mock_log, ...).
 
 Each command writes the message it describes to a file and prints the file's path: send it unchanged with
 `band send <room> --body-file <path>`. The verdict is PASS when at least 90% of the checks that aren't voided pass.
@@ -73,6 +74,13 @@ def checker_py() -> str:
     return os.environ.get("ONSEN_CHECKER_PY") or sys.executable
 
 
+def with_kit(env: dict[str, str]) -> dict[str, str]:
+    """Checks can `import onsen_exam_kit` (it sits beside this tool)."""
+    here = str(pathlib.Path(__file__).resolve().parent)
+    env["PYTHONPATH"] = here + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
+    return env
+
+
 def collect(d: pathlib.Path) -> list[str]:
     # Nothing is running while checks are counted; placeholders let module-level reads of the settings work.
     env = dict(os.environ)
@@ -81,7 +89,7 @@ def collect(d: pathlib.Path) -> list[str]:
     env.setdefault("MOCK_ADMIN_TOKEN", "unset")
     env.setdefault("CORPUS", str(d / "corpus"))
     r = subprocess.run([checker_py(), "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider",
-                        "-o", "addopts=", "."], cwd=d, capture_output=True, text=True, timeout=300, env=env)
+                        "-o", "addopts=", "."], cwd=d, capture_output=True, text=True, timeout=300, env=with_kit(env))
     ids = [ln.strip() for ln in r.stdout.splitlines() if "::" in ln and not ln.startswith(("=", " "))]
     if r.returncode not in (0, 5) or not ids:
         tail = "\n".join((r.stdout + r.stderr).strip().splitlines()[-15:])
@@ -199,7 +207,7 @@ def grade(argv: list[str]) -> None:
     cmd = [checker_py(), "-m", "pytest", "-q", "-p", "no:cacheprovider", "-o", "addopts=", f"--junitxml={xml}"]
     cmd += [a for i in gone for a in ("--deselect", i)] + ["."]
     try:
-        subprocess.run(cmd, cwd=d, env=env, capture_output=True, text=True, timeout=TIMEOUT)
+        subprocess.run(cmd, cwd=d, env=with_kit(env), capture_output=True, text=True, timeout=TIMEOUT)
     except subprocess.TimeoutExpired:
         pass
     finally:

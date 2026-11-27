@@ -74,6 +74,18 @@ def _pct(value: str | None) -> float:
     return v / 100 if v > 1 else v
 
 
+def _stage_no(value: str | None) -> int:
+    """A message's stage number, or 0 when the field isn't one (say, a commit pasted into it)."""
+    v = (value or "").strip()
+    return int(v) if v.isdigit() else 0
+
+
+def _open_stage(st: Any) -> int:
+    """The lowest stage that isn't accepted yet, among those Nap Guard has heard of."""
+    open_ = sorted(int(k) for k, v in st.data["stages"].items() if not v.get("accepted"))
+    return open_[0] if open_ else 0
+
+
 def _same_commit(a: str, b: str) -> bool:
     a, b = a.strip().lower(), b.strip().lower()
     n = min(len(a), len(b), 7)
@@ -298,7 +310,7 @@ class NapGuardAdapter(SimpleAdapter[Any]):
 
     async def _on_exam(self, rest: str, tools: Any, st: JsonState) -> None:
         kv = parse_kv(rest)
-        n = int(kv.get("stage") or 0)
+        n = _stage_no(kv.get("stage")) or _open_stage(st)
         if not n:
             await tools.no_reply("exam without stage")
             return
@@ -335,7 +347,7 @@ class NapGuardAdapter(SimpleAdapter[Any]):
 
     async def _on_review(self, rest: str, msg: PlatformMessage, tools: Any, st: JsonState) -> None:
         kv = parse_kv(rest)
-        n = int(kv.get("stage") or 0)
+        n = _stage_no(kv.get("stage")) or _open_stage(st)
         if not n:
             await tools.no_reply("review without stage")
             return

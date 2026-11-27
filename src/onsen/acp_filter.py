@@ -13,9 +13,9 @@ While a turn is in flight, it holds the agent's message text. When the turn ends
 is a protocol message, i.e. it starts with a tag such as `[ready]`. Tool calls, reasoning, permission requests and
 everything else pass straight through. Standard library only, because the runtime's environment is minimal.
 
-Closing remarks: untagged ones never reach the room. A tagged one reaches it only if the seat sent nothing else that
-turn (ONSEN_PASS_REMARKS=1 passes every tagged one): seats speak through `band send`, so a closing "[exam] … sent to
-the Builder" only duplicated the real message, but a verdict written as the turn's answer is the seat's message.
+Closing remarks: by default none reach the room (ONSEN_PASS_REMARKS=1 passes tagged ones). Seats speak through
+`band send`, whose linter checks each message; a remark would skip it (Run O posted a status note tagged [ready] and a
+malformed [review] that way). When a seat's turn ends without a message, keep-going asks it to send one.
 
 Keep going (ONSEN_KEEP_GOING=1, set for the Builder and the Examiner, with a prompt for each): a seat is woken only by a mention, so a Builder that ends its
 turn on "I'll keep working on X" sits idle until someone mentions it. When a turn that used tools ends without the
@@ -108,9 +108,9 @@ class Filter:
             protocol = is_protocol(text)
             t = self.turns.get(sid)
             stop = (msg.get("result") or {}).get("stopReason")
-            # A tagged closing remark reaches the room when remarks pass, or when the seat sent nothing else this turn
-            # (then it is the seat's message, e.g. a verdict written as the turn's answer, not a duplicate of one).
-            forward = protocol and (self.pass_remarks or not (t and t["sent"]))
+            # A closing remark reaches the room only when remarks pass: otherwise a tagged answer would skip the linter
+            # (a status note tagged [ready], a malformed [review]); keep-going asks the seat to send it properly.
+            forward = protocol and self.pass_remarks
             posted = forward
             if (self.keep_going and t and stop == "end_turn" and t["tools"] > 0 and not t["sent"] and not posted
                     and t["continued"] < self.max_keep_going):

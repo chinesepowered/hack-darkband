@@ -60,6 +60,26 @@ def body_of(args: list[str]) -> str | None:
     return positional[1] if len(positional) > 1 else None
 
 
+# What each tag's first line must carry, so the gate can read it.
+FORMAT = {
+    "ready": (("stage", r"\bstage=\d+\b"), ("commit", r"\bcommit=[0-9a-f]{7,40}\b")),
+    "review": (("stage", r"\bstage=\d+\b"), ("commit", r"\bcommit=[0-9a-f]{7,40}\b"),
+               ("APPROVED or BLOCKED", r"\b(?:APPROVED|BLOCKED)\b")),
+    "exam": (("stage", r"\bstage=\d+\b"), ("passed", r"\bpassed=\d+/\d+\b"), ("commit", r"\bcommit=[0-9a-f]{7,40}\b")),
+    "seal": (("stage", r"\bstage=\d+\b"), ("sha256", r"\bsha256=[0-9a-f]{64}\b")),
+    "dispute": (("stage", r"\bstage=\d+\b"),),
+    "task": (("stage", r"\bstage=\d+\b"),),
+}
+EXAMPLE = {
+    "ready": "@<examiner> @<reviewer> [ready] stage=1 commit=abc1234 <what changed>",
+    "review": "@<builder> @<nap guard> [review] stage=1 commit=abc1234 BLOCKED: <file:line and the requirement>",
+    "exam": "the first line onsen-exam wrote, unchanged",
+    "seal": "the first line onsen-exam seal wrote, unchanged",
+    "dispute": "@<seat> @<nap guard> [dispute] stage=1 commit=abc1234 <requirement text and evidence>",
+    "task": "@<seats> [task] stage=1 part=1/3 <the requirements>",
+}
+
+
 def lint(text: str) -> None:
     m = HEAD.match(text.lstrip())
     if not m:
@@ -77,6 +97,11 @@ def lint(text: str) -> None:
         who = " or ".join(sorted(OWNERS[tag]))
         refuse(f"Only the {who} posts [{tag}]; you are the {seat}. A handoff you received is already with everyone it "
                "names: don't forward it. Do your own part, and end your turn when you are waiting.")
+    first = text.lstrip().splitlines()[0] if text.strip() else ""
+    missing = [name for name, rx in FORMAT.get(tag, ()) if not re.search(rx, first)]
+    if missing:
+        refuse(f"A [{tag}] needs {', '.join(missing)} on its first line, so the gate can read it; for example: "
+               f"{EXAMPLE[tag]}")
     if re.search(r"nap-guard|nap guard", mentions, re.I) and tag not in FOR_NAP_GUARD:
         refuse("Nap Guard reads only [seal], [exam], [review], [dispute] and [report]. It posts [gate], [chill] and "
                "[nudge] on its own and mentions you when it does; don't ask it for status. End your turn now.")
@@ -86,7 +111,9 @@ ONCE = {"ready": "You already handed off commit {c} with [ready]. A new [ready] 
                  "with a verdict on {c}, post one [dispute] stage=N commit={c} with your evidence to the seat that gave "
                  "it, then end your turn.",
         "review": "You already gave commit {c} its verdict. Judge each handed-off commit once: a repeated [ready] for "
-                  "{c} needs no reply. End your turn."}
+                  "{c} needs no reply. End your turn.",
+        "exam": "You already posted this result for commit {c}. Grade each handed-off commit once (again only after "
+                "voiding a check). End your turn."}
 
 
 def once_key(text: str) -> tuple[str, str] | None:
@@ -98,6 +125,9 @@ def once_key(text: str) -> tuple[str, str] | None:
         return None
     if tag == "review":  # a verdict may change once (after a dispute), but never repeat
         tag += ":APPROVED" if re.search(r"\bAPPROVED\b", text) and not re.search(r"\bBLOCKED\b", text) else ":BLOCKED"
+    if tag == "exam":  # the same result twice is a repeat; a different one (after a void) is news
+        n = re.search(r"\bpassed=(\d+/\d+)", text)
+        tag += ":" + (n.group(1) if n else "?")
     return tag, c.group(1)[:7]
 
 

@@ -236,3 +236,14 @@ async def test_dark_after_two_chill_breaks_a_passing_exam_and_the_checker_accept
     await ng.settle()
     gate = posted[-1]["content"]
     assert gate.startswith("[gate] stage=1 ACCEPTED commit=bbb0007") and "review=carried" in gate
+
+
+async def test_a_verdict_with_a_garbled_stage_counts_for_the_open_stage(monkeypatch):
+    """Run O's Reviewer wrote `stage=<commit>`; that blocked review still counts, for the stage that is open."""
+    monkeypatch.setenv("ONSEN_DARK", "1")
+    ng, posted, runs = dark_guard({})
+    tools = FakeAgentTools(participants=CREW)
+    await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=FAIL passed=5/10 commit=ccc0001", "Examiner", tools)
+    await deliver(ng, "@b @nap-guard [review] stage=ccc0001 commit=ccc0001 BLOCKED: x", "Reviewer", tools)
+    await deliver(ng, "@b @nap-guard [review] stage=ccc0002 BLOCKED: y commit=ccc0002", "Reviewer", tools)
+    assert last(tools).startswith("[chill] stage=1 break=1 reason=review-thrash")

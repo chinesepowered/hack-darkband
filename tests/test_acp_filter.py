@@ -110,14 +110,14 @@ def test_a_tagged_remark_after_band_send_is_a_duplicate_and_stays_out():
     assert texts(out) == "" and json.loads(out[-1])["id"] == 5 and not f.to_agent
 
 
-def test_a_verdict_written_as_the_turns_answer_reaches_the_room_when_nothing_else_was_sent():
+def test_a_verdict_written_as_the_turns_answer_stays_out_and_the_seat_is_asked_to_send_it():
     f = Filter(keep_going=True, role="reviewer", pass_remarks=False, max_keep_going=1)
     f.from_client(line({"jsonrpc": "2.0", "id": 3, "method": "session/prompt", "params": {"sessionId": "s"}}))
     f.from_agent(tool_call("s", "git diff abc..def"))
-    f.from_agent(chunk("s", "[review] stage=1 commit=def BLOCKED: providers.py:87"))
-    out = f.from_agent(end(3))
-    # the remark is the seat's only message this turn, so it goes to the room and the turn ends
-    assert "[review]" in texts(out) and json.loads(out[-1])["id"] == 3 and not f.to_agent
+    f.from_agent(chunk("s", "[review] stage=9aeebfd BLOCKED: providers.py:87"))  # malformed, and it would skip the linter
+    assert f.from_agent(end(3)) == []
+    req = json.loads(f.to_agent.pop())
+    assert "send your [review] now with band send" in req["params"]["prompt"][0]["text"]
 
 
 def test_the_reviewer_is_asked_to_send_its_verdict():
