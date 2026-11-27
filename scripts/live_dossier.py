@@ -2,9 +2,11 @@
 
     uv run python scripts/live_dossier.py <stage folder> <domain> --out <file> [--host-network]
 
-Builds the folder's Dockerfile, starts it with only PORT and the Nimble settings (NIMBLE_API_KEY from this
-environment, passed to Docker by name so it never appears on a command line; NIMBLE_BASE_URL defaults to Nimble's
-endpoint), signs up a user, asks for the dossier, polls until the build finishes, and writes the GET response body.
+Builds the folder's Dockerfile and starts it the way the participant guide's live-dossier steps do: PORT, the Nimble
+settings (NIMBLE_API_KEY from this environment, passed to Docker by name so it never appears on a command line;
+NIMBLE_BASE_URL defaults to Nimble's endpoint), and placeholder keys with the real base URLs for the other providers,
+so only Nimble answers. Then it signs up a user, asks for the dossier, polls until the build finishes, and writes the
+GET response body.
 `--host-network` runs the container on the host's network and passes HTTPS_PROXY through, for machines whose only
 way out is a proxy on the host's loopback.
 """
@@ -25,6 +27,9 @@ from pathlib import Path
 import httpx
 
 NIMBLE = "https://sdk.nimbleway.com"
+# The other providers get a placeholder key and their real endpoint, as in the guide, so only Nimble answers.
+OTHERS = {"TAVILY": "https://api.tavily.com", "KERNEL": "https://api.onkernel.com",
+          "BROWSERBASE": "https://api.browserbase.com"}
 
 
 def free_port() -> int:
@@ -51,6 +56,8 @@ def main() -> int:
     name = f"onsen-live-{uuid.uuid4().hex[:8]}"
     run = ["docker", "run", "-d", "--rm", "--name", name, "-e", f"PORT={port}", "-e", "NIMBLE_API_KEY",
            "-e", "NIMBLE_BASE_URL"]
+    for provider, url in OTHERS.items():
+        run += ["-e", f"{provider}_API_KEY=unavailable", "-e", f"{provider}_BASE_URL={url}"]
     if a.host_network:
         run += ["--network", "host"] + [x for k in ("HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy")
                                         if env.get(k) for x in ("-e", k)]
@@ -87,6 +94,9 @@ def main() -> int:
             Path(a.out).write_text(json.dumps(body, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
             known = [k for k, v in (body.get("fields") or {}).items() if isinstance(v, dict) and v.get("status") == "known"]
             print(f"state={body.get('state')} known fields: {', '.join(known) or 'none'} -> {a.out}")
+            if body.get("state") != "ready":
+                print("the build did not finish ready; the service's last log lines:")
+                subprocess.run(["docker", "logs", "--tail", "60", name])
     finally:
         subprocess.run(["docker", "rm", "-f", name], capture_output=True)
         subprocess.run(["docker", "rmi", "-f", tag], capture_output=True)
