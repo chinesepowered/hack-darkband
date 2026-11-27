@@ -4,6 +4,9 @@
 #
 #   onsen-serve <repo> <stage-folder> [<commit>]    prints BASE_URL, MOCK_URL, MOCK_ADMIN_TOKEN, CORPUS
 #   onsen-serve stop                                 stops everything this command started
+#
+# ONSEN_CORPUS=<dir> serves that corpus instead of the task's sample (same format: one JSON file per company,
+# as the mock's README describes), for checks that need provider data the sample doesn't have.
 set -uo pipefail
 : "${ONSEN_CHECKER_DIR:?the checker package directory (from the task)}"
 : "${ONSEN_TRACK:?the track name (from the task)}"
@@ -21,11 +24,16 @@ sha=$(git -C "$repo" rev-parse --short "$commit") || exit 2
 work=$(mktemp -d /tmp/onsen-serve-XXXXXX)
 git -C "$repo" worktree add --detach -q "$work/repo" "$sha" || exit 2
 mkdir -p "$(dirname "$state")"
-cd "$ONSEN_CHECKER_DIR" && "$py" - "$ONSEN_TRACK" "$work/repo/$folder" "$state" "$sha" <<'PY'
+corpus=${ONSEN_CORPUS:-}
+[ -n "$corpus" ] && { corpus=$(cd "$corpus" && pwd) || exit 2; }
+cd "$ONSEN_CHECKER_DIR" && "$py" - "$ONSEN_TRACK" "$work/repo/$folder" "$state" "$sha" "$corpus" <<'PY'
+import pathlib
 import sys
 from harness import docker_driver as dd, mockweb
-from harness.mockweb import corpus_dir
-track, folder, state, sha = sys.argv[1:5]
+track, folder, state, sha, corpus = sys.argv[1:6]
+if corpus:
+    mockweb.corpus_dir = lambda _track: pathlib.Path(corpus)  # start() mounts whatever corpus_dir names
+corpus_dir = mockweb.corpus_dir
 web = mockweb.start(track, mode=dd.HOST, network=None)
 with open(state, "w") as f:
     if web:

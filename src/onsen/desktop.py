@@ -65,7 +65,10 @@ How to talk in the room:
   `band ... send <room> --body-file <file>`. "Post X to the Examiner and the Reviewer" means one message that
   starts with both handles.
 - Only `band send` speaks for you. The text you end a turn with stays out of the room, so finish each turn normally.
-- If the message that woke you needs nothing from you, just finish the turn.
+- If the message that woke you needs nothing from you, just finish the turn. When you are waiting for someone, finish
+  the turn too: messages reach you only between turns, and the next one that mentions you wakes you.
+- `band send` here checks each message before it goes out: it must start with its handles and then a protocol tag,
+  and Nap Guard takes only `[seal]`, `[exam]`, `[review]`, `[dispute]` and `[report]`. A refused message prints why.
 - Never mention the human, and never wait for one. Nobody wakes the capybara in a dark run.
 
 Your tools (on PATH):
@@ -74,6 +77,9 @@ Your tools (on PATH):
 - `onsen-serve <repository> <stage folder> [<commit>]`: starts one committed revision beside the task's mock
   dependencies and leaves it running; it prints the service URL and the mock's URL and admin token.
   `onsen-serve stop` stops it.
+- `onsen-exam seal|grade|void|publish ...`: the Examiner's exam runner. It seals an exam folder by hash, grades one
+  committed revision with it (it starts the revision itself, runs every check and computes the verdict), voids a
+  check after a dispute, and publishes the sealed exam. Each command writes the message to send.
 - `onsen-split <stage> <document> [<document> ...] --to @handle [@handle ...] --plus 1`: cuts the requirements
   into numbered `[task]` parts that each start with those handles, numbered across all the documents, with one
   number left for the task part you write yourself. It prints the part files in order. Send each one with

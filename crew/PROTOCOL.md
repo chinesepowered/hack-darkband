@@ -9,17 +9,22 @@ routing.
 |---|---|---|
 | `[plan] stage=N` | Architect → Builder, Examiner, Reviewer | work items in order, and the requirements most likely to be missed |
 | `[task] stage=N part=i/k` | Architect → Builder, Examiner, Reviewer | the complete requirements, in numbered parts, then the task |
-| `[seal] stage=N sha256=… checks=K` | Examiner → Architect, Nap Guard | the band's own exam for the stage is written and committed to by hash |
-| `[ready] stage=N commit=<sha>` | Builder → Examiner **and** Reviewer | a committed revision to grade |
-| `[exam] stage=N verdict=PASS\|FAIL passed=a/b satisfaction=P% commit=<sha>` | Examiner → Builder, Nap Guard | exam result; failures as observed behaviour plus the requirement |
-| `[review] stage=N commit=<sha> claimed=<N\|none> APPROVED\|BLOCKED: …` | Reviewer → Builder, Nap Guard | acceptance-checker result plus code review |
-| `[gate] stage=N ACCEPTED commit=<sha>` | Nap Guard → Architect, Examiner | PASS and APPROVED on the same commit, which the checker claims |
+| `[seal] stage=N sha256=… checks=K` | Examiner → Architect, Nap Guard | the band's own exam for the stage is written and committed to by hash (written by `onsen-exam seal`) |
+| `[ready] stage=N commit=<sha>` | Builder → Examiner **and** Reviewer | a committed revision to grade, with the checker's result line |
+| `[exam] stage=N verdict=PASS\|FAIL passed=a/b satisfaction=P% commit=<sha>` | Examiner → Builder, Nap Guard | the exam's result, written by `onsen-exam grade`; failures as observed behaviour plus the requirement |
+| `[review] stage=N commit=<sha> APPROVED\|BLOCKED: …` | Reviewer → Builder **and** Nap Guard | code review against the requirements |
+| `[gate] stage=N ACCEPTED\|WAITING commit=<sha>` | Nap Guard → Architect, Examiner (accepted) or Builder, Architect (waiting) | the exam passed and the review approved the same commit; Nap Guard then ran the acceptance checker on it, and it claims the stage (or doesn't yet) |
 | `[dispute] stage=N` | Builder → Examiner, Nap Guard | evidence that an exam check contradicts the requirements |
-| `[reveal] stage=N sha256=…` | Examiner → Architect, Nap Guard | the stage's exam is published in the repository; the hash matches the seal |
-| `[chill] stage=N` | Nap Guard → Architect, Builder | the stage stopped improving: re-plan |
+| `[reveal] stage=N sha256=…` | Examiner → Architect, Nap Guard | the stage's exam is published in the repository; the hash matches the seal (written by `onsen-exam publish`) |
+| `[chill] stage=N break=B` | Nap Guard → Architect, Builder | the stage stopped improving. Break 1: re-plan. Break 2: the exam is advisory. Break 3: report |
+| `[nudge]` | Nap Guard → Architect, Builder | the room has been quiet for a while and the run isn't finished |
 | `[decide]` | Nap Guard → the asker | nobody asks the human: decide from the requirements |
 | `[report]` | Architect → Nap Guard, every seat | the end of the run: stages, accepted commits, blockers, evidence |
 | `[receipt]` | Nap Guard → Architect | the run's numbers |
+
+**Verdicts are computed, not asserted.** `onsen-exam` counts the exam's checks and writes the `[exam]` line; Nap
+Guard recomputes PASS from `passed=a/b` (at least 90%) and runs the acceptance checker itself before it accepts a
+stage. A seat's own summary of a result never opens the gate.
 
 ## Rules for every seat
 
@@ -36,8 +41,10 @@ routing.
    Behaviour follows the requirements.
 6. **Commit your own work, often.** Messages say what changed and which requirement it serves. Commit only your own
    files (`git commit -- <paths>`). If git reports a lock, wait a moment and retry.
-7. **Quiet by default.** Post only when it moves the work: a handoff, a verdict, a blocker, or the answer to a
-   question someone asked you. Don't acknowledge receipt, don't ask for status, and don't reply to a message that
-   needs nothing from you. A seat that is working is not unresponsive: its commits and its `[ready]` show progress.
+7. **Quiet by default, and end your turn.** Post only when it moves the work: a handoff, a verdict, a blocker, or
+   the answer to a question someone asked you. Don't acknowledge receipt, don't ask for status, and don't reply to a
+   message that needs nothing from you. BAND Desktop gives you new messages only between turns, so when you are
+   waiting, end your turn: the next message that mentions you wakes you. `band send` refuses a message that has no
+   protocol tag, and any message to Nap Guard other than `[seal]`, `[exam]`, `[review]`, `[dispute]` or `[report]`.
 8. **Stay in the band.** Questions go to the seat that owns the answer, and the requirements decide. Make the most
    reasonable reading, state it in your next message, and keep going.

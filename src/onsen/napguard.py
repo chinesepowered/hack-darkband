@@ -18,16 +18,26 @@ Dark mode (ONSEN_DARK=1), for a run where the dispatched task is the only human 
   * nobody is ever woken: a blocking question is answered with "decide from the requirements
     and record the assumption", and a stalled stage gets a [chill] notice to the Architect
     instead of a pause that waits for a human `resume`
-  * the gate also needs the acceptance checker's claim (`claimed=N` in the review)
+  * verdicts are computed, not taken on trust: an exam PASSes when at least 90% of its checks pass
+    (from `passed=a/b`, whatever word the message uses), and before a stage is accepted Nap Guard runs the
+    event's acceptance checker on the commit itself and needs it to claim the stage
+  * a stalled stage escalates: the first chill break asks the Architect to re-plan, the second makes the
+    stage's exam advisory (the Reviewer's approval and the checker's claim still gate it), the third ends the run
   * the Architect's final `[report]` ends the run; Nap Guard answers with the receipt
 """
 
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
 import os
 import re
-from typing import Any
+from pathlib import Path
+from typing import Any, Awaitable, Callable
+
+import httpx
+import yaml
 
 from band.core.simple_adapter import SimpleAdapter
 from band.core.types import PlatformMessage
@@ -35,6 +45,7 @@ from band.core.types import PlatformMessage
 from .common import (
     NAMES,
     JsonState,
+    agent_config_path,
     build_agent,
     clip,
     command_text,
@@ -84,6 +95,58 @@ def dark() -> bool:
     return os.environ.get("ONSEN_DARK", "").lower() in ("1", "true", "yes")
 
 
+def pass_mark() -> float:
+    return float(os.environ.get("ONSEN_PASS_MARK", "0.9"))
+
+
+PASSED_RE = re.compile(r"^(\d+)/(\d+)$")
+ROOT = Path(__file__).resolve().parents[2]
+API = os.environ.get("BAND_REST_URL", "https://app.band.ai").rstrip("/")
+
+
+async def run_checker(n: int, commit: str) -> dict[str, Any]:
+    """Run the event's acceptance checker (bin/onsen-check) on one commit of the run's repository."""
+    repo = os.environ.get("ONSEN_REPO")
+    if not repo:
+        return {"claimed": None, "summary": "ONSEN_REPO is not set, so the checker can't run"}
+    proc = await asyncio.create_subprocess_exec(str(ROOT / "bin" / "onsen-check"), repo, str(n), commit,
+                                                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
+    try:
+        out, _ = await asyncio.wait_for(proc.communicate(), timeout=float(os.environ.get("ONSEN_CHECK_TIMEOUT", "2400")))
+    except TimeoutError:
+        proc.kill()
+        return {"claimed": None, "summary": "the checker ran out of time"}
+    text = out.decode(errors="replace")
+    logs = re.search(r"^--- full logs: (.+)$", text, re.M)
+    claimed, counts = None, {}
+    if logs:
+        d = Path(logs.group(1).strip())
+        try:
+            claimed = json.loads((d / "report.json").read_text()).get("claimed_stage")
+        except (OSError, ValueError):
+            pass
+        try:
+            counts = json.loads((d / f"stage-{n}.counts.json").read_text())
+        except (OSError, ValueError):
+            pass
+    failing = text.split("--- failing checks", 1)[-1].split("--- full logs", 1)[0] if "--- failing checks" in text else text[-1500:]
+    return {"claimed": int(claimed) if str(claimed or "").isdigit() else None,
+            "passed": counts.get("passed"), "total": counts.get("collected"),
+            "summary": clip("\n".join(ln for ln in failing.splitlines()[1:] if ln.strip()), 1500)}
+
+
+async def post_as_napguard(room: str, content: str, roles: list[str]) -> None:
+    """Post outside a message turn (a finished background check), through the REST API."""
+    cfg = yaml.safe_load(agent_config_path().read_text()) or {}
+    me = cfg["napguard"]
+    mentions = [{"id": cfg[r]["agent_id"], "name": NAMES[r]} for r in roles if r in cfg]
+    body = {"message": {"content": " ".join(f"@{NAMES[r]}" for r in roles) + " " + content, "mentions": mentions}}
+    async with httpx.AsyncClient(base_url=API, headers={"X-API-Key": me["api_key"]}, timeout=30) as c:
+        r = await c.post(f"/api/v1/agent/chats/{room}/messages", json=body)
+        if r.status_code >= 300:
+            logger.warning("post failed: HTTP %s %s", r.status_code, r.text[:200])
+
+
 DEFAULT_STATE: dict[str, Any] = {
     "started_at": None,
     "stages_total": None,
@@ -111,12 +174,23 @@ def _participants(tools: Any) -> list[dict[str, Any]]:
 
 
 class NapGuardAdapter(SimpleAdapter[Any]):
-    def __init__(self) -> None:
+    def __init__(self, checker: Callable[[int, str], Awaitable[dict[str, Any]]] | None = None,
+                 poster: Callable[[str, str, list[str]], Awaitable[None]] | None = None) -> None:
         super().__init__()
+        self.checker = checker or run_checker
+        self.poster = poster or post_as_napguard
+        self._checks: dict[tuple[str, int, str], asyncio.Task] = {}
+        self._room = ""
+
+    async def settle(self) -> None:
+        """Wait for background checker runs (tests)."""
+        while any(not t.done() for t in self._checks.values()):
+            await asyncio.gather(*self._checks.values(), return_exceptions=True)
 
     # ----- entry point -----
     async def on_message(self, msg: PlatformMessage, tools: Any, history: Any, participants_msg: str | None,
                          contacts_msg: str | None, *, is_session_bootstrap: bool, room_id: str) -> None:
+        self._room = room_id
         text = command_text(msg.content)
         tag, rest = parse_tagged(text)
         st = JsonState("napguard", room_id, {k: (v.copy() if isinstance(v, (dict, list)) else v)
@@ -157,8 +231,11 @@ class NapGuardAdapter(SimpleAdapter[Any]):
     # ----- helpers -----
     def _stage(self, st: JsonState, n: int) -> dict[str, Any]:
         stages = st.data["stages"]
-        return stages.setdefault(str(n), {"exams": [], "review": None, "accepted": False, "fails_in_row": 0,
-                                          "best": 0.0, "by": None, "review_note": None})
+        s = stages.setdefault(str(n), {"exams": [], "review": None, "accepted": False, "fails_in_row": 0,
+                                       "best": 0.0, "by": None, "review_note": None})
+        s.setdefault("chills", 0)
+        s.setdefault("checks", [])
+        return s
 
     def _human_mention(self, tools: Any) -> list[str]:
         wanted = os.environ.get("ONSEN_HUMAN")
@@ -203,19 +280,30 @@ class NapGuardAdapter(SimpleAdapter[Any]):
             await tools.no_reply("exam without stage")
             return
         s = self._stage(st, n)
-        sat = _pct(kv.get("satisfaction"))
-        verdict = (kv.get("verdict") or "FAIL").upper()
-        s["exams"].append({"satisfaction": sat, "verdict": verdict, "at": now(), "commit": kv.get("commit")})
+        said = (kv.get("verdict") or "FAIL").upper()
+        m = PASSED_RE.match((kv.get("passed") or "").strip())
+        sat = int(m.group(1)) / int(m.group(2)) if m and int(m.group(2)) else _pct(kv.get("satisfaction"))
+        # The verdict is the numbers', not the message's word. In a dark run an exam without counts can't pass.
+        if dark():
+            verdict = "PASS" if m and int(m.group(2)) and sat >= pass_mark() - 1e-9 else "FAIL"
+        else:
+            verdict = said
+        s["exams"].append({"satisfaction": sat, "verdict": verdict, "said": said, "at": now(),
+                           "commit": kv.get("commit")})
         s["by"] = (kv.get("by") or s.get("by") or NAMES["builder"]).replace("_", " ")
         st.data["started_at"] = st.data["started_at"] or now()
-        if verdict == "PASS":
+        if dark() and s["chills"] >= 2:
+            pass  # the exam is advisory now: it no longer counts toward a stall
+        elif verdict == "PASS":
             s["fails_in_row"] = 0
         elif sat > s["best"] + 1e-9:
             s["fails_in_row"] = 1  # still failing, but improving: not thrash yet
         else:
             s["fails_in_row"] += 1
         s["best"] = max(s["best"], sat)
-        if verdict == "FAIL" and (s["fails_in_row"] >= thrash_limit() or len(s["exams"]) >= max_rounds()):
+        counting = not (dark() and s["chills"] >= 2)
+        exam_rounds = len(s["exams"]) - s.get("rounds_at_chill", 0)
+        if counting and verdict == "FAIL" and (s["fails_in_row"] >= thrash_limit() or exam_rounds >= max_rounds()):
             await self._chill(tools, st, n, s)
             return
         await self._maybe_gate(tools, st, n, s)
@@ -228,10 +316,6 @@ class NapGuardAdapter(SimpleAdapter[Any]):
             return
         s = self._stage(st, n)
         approved = "APPROVED" in rest.upper() and "BLOCKED" not in rest.upper()
-        claimed = (kv.get("claimed") or "").strip().lower()
-        if approved and dark() and claimed != str(n):
-            approved = False  # an approval without the checker's claim for this stage doesn't count
-            s["review_note"] = clip(rest, 300)
         s["review"] = "APPROVED" if approved else "BLOCKED"
         s["review_commit"] = kv.get("commit")
         s["review_note"] = clip(rest, 300)
@@ -263,9 +347,14 @@ class NapGuardAdapter(SimpleAdapter[Any]):
     async def _maybe_gate(self, tools: Any, st: JsonState, n: int, s: dict[str, Any]) -> None:
         last = s["exams"][-1] if s["exams"] else {}
         last_exam = last.get("verdict")
+        advisory = dark() and s["chills"] >= 2
+        exam_ok = last_exam == "PASS" or advisory
         exam_commit, review_commit = last.get("commit"), s.get("review_commit")
         same_code = not exam_commit or not review_commit or _same_commit(exam_commit, review_commit)
-        if last_exam == "PASS" and s["review"] == "APPROVED" and not same_code and not s["accepted"]:
+        if s["accepted"] or not exam_ok or s["review"] != "APPROVED":
+            await tools.no_reply("gate not ready")
+            return
+        if not advisory and not same_code:
             await self._say(
                 tools,
                 f"[gate] stage={n} WAITING exam passed commit={exam_commit} but the approval was for "
@@ -273,33 +362,64 @@ class NapGuardAdapter(SimpleAdapter[Any]):
                 [NAMES["reviewer"]],
             )
             return
-        if last_exam == "PASS" and s["review"] == "APPROVED" and same_code and not s["accepted"]:
-            s["accepted"] = True
-            curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"])
-            total = st.data["stages_total"]
-            accepted = sorted(int(k) for k, v in st.data["stages"].items() if v["accepted"])
-            if total and len(accepted) >= total and not dark():
-                await self._wake_for_ship(tools, st)
-                return
-            if dark():
-                # The Examiner publishes the stage's exam once the stage is in; the Architect moves on.
-                await self._say(
-                    tools,
-                    f"[gate] stage={n} ACCEPTED exam={curve} review=approved commit={exam_commit or '?'} "
-                    f"accepted={','.join(map(str, accepted))}\n"
-                    f"Stage {n} is in: its exam passed and the Reviewer approved the same commit, which the checker "
-                    f"claims for stage {n}. Architect: carry it forward. Examiner: publish stage {n}'s exam.",
-                    [NAMES["architect"], NAMES["examiner"]],
-                )
-                return
-            await self._say(
-                tools,
-                f"[gate] stage={n} ACCEPTED exam={curve} review=approved accepted={','.join(map(str, accepted))}"
-                f"{f'/{total}' if total else ''}\nStage {n} is in. Hand the next stage to the builders.",
-                [NAMES["architect"]],
-            )
+        if dark():
+            # Nobody's word is enough: the event's checker has to claim the stage on this exact commit.
+            commit = (review_commit if advisory else exam_commit) or review_commit or exam_commit or "HEAD"
+            key = (self._room, n, commit[:7])
+            if key not in self._checks:
+                self._checks[key] = asyncio.create_task(self._check_and_gate(self._room, n, commit, advisory))
+            await tools.no_reply(f"running the acceptance checker on {commit}")
             return
-        await tools.no_reply("gate not ready")
+        s["accepted"] = True
+        curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"])
+        total = st.data["stages_total"]
+        accepted = sorted(int(k) for k, v in st.data["stages"].items() if v["accepted"])
+        if total and len(accepted) >= total:
+            await self._wake_for_ship(tools, st)
+            return
+        await self._say(
+            tools,
+            f"[gate] stage={n} ACCEPTED exam={curve} review=approved accepted={','.join(map(str, accepted))}"
+            f"{f'/{total}' if total else ''}\nStage {n} is in. Hand the next stage to the builders.",
+            [NAMES["architect"]],
+        )
+
+    async def _check_and_gate(self, room: str, n: int, commit: str, advisory: bool) -> None:
+        """Background: run the checker on `commit`, then accept stage n or say what the checker found."""
+        try:
+            res = await self.checker(n, commit)
+        except Exception as exc:  # noqa: BLE001
+            res = {"claimed": None, "summary": f"the checker could not run: {clip(str(exc), 200)}"}
+        st = JsonState("napguard", room, {k: (v.copy() if isinstance(v, (dict, list)) else v)
+                                          for k, v in DEFAULT_STATE.items()})
+        s = self._stage(st, n)
+        counts = f"{res.get('passed')}/{res.get('total')}" if res.get("total") else "?"
+        s["checks"].append({"commit": commit, "claimed": res.get("claimed"), "counts": counts, "at": now()})
+        if s["accepted"]:
+            st.save()
+            return
+        if res.get("claimed") == n:
+            s["accepted"] = True
+            s["accepted_commit"] = commit
+            curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"]) or "none"
+            accepted = sorted(int(k) for k, v in st.data["stages"].items() if v["accepted"])
+            st.save()
+            how = ("its exam is advisory after two chill breaks, the Reviewer approved it" if advisory else
+                   "its exam passed and the Reviewer approved the same commit")
+            await self.poster(room,
+                f"[gate] stage={n} ACCEPTED commit={commit} exam={curve} review=approved checker=claimed:{n} "
+                f"({counts} shipped checks) accepted={','.join(map(str, accepted))}\n"
+                f"Stage {n} is in: {how}, and I ran the acceptance checker on that commit myself: it claims stage {n}. "
+                f"Architect: carry it forward. Examiner: publish stage {n}'s exam.",
+                ["architect", "examiner"])
+            return
+        st.save()
+        await self.poster(room,
+            f"[gate] stage={n} WAITING commit={commit} checker=claimed:{res.get('claimed') or 'none'} ({counts})\n"
+            f"The exam and the review agree on {commit}, but the acceptance checker doesn't claim stage {n} there, "
+            f"so the stage stays open. What it reported:\n{res.get('summary') or 'no detail'}\n"
+            "Builder: fix it and post `[ready]` with the new commit.",
+            ["builder", "architect"])
 
     async def _wake_for_ship(self, tools: Any, st: JsonState) -> None:
         lines = [
@@ -320,18 +440,34 @@ class NapGuardAdapter(SimpleAdapter[Any]):
     async def _chill(self, tools: Any, st: JsonState, n: int, s: dict[str, Any]) -> None:
         st.data["chill_breaks"] += 1
         if dark():
+            s["chills"] += 1
             curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"]) or "no exams"
             reason = "thrash" if s["fails_in_row"] >= thrash_limit() else "round-budget"
             s["fails_in_row"] = 0  # one notice per stall, not one per round
+            s["rounds_at_chill"] = len(s["exams"])
+            if s["chills"] == 1:
+                what = ("Architect: re-plan this stage. Hand the Builder one failing behaviour at a time, with the "
+                        "requirement it comes from.")
+            elif s["chills"] == 2:
+                what = (f"This is stage {n}'s second chill break, so its exam is advisory from now on: the stage is "
+                        "accepted once the Reviewer approves a commit and the acceptance checker claims the stage "
+                        "on it. Builder: post `[ready]` for your best commit. Architect: list the exam's open "
+                        "failures in your final report.")
+            else:
+                what = (f"This is stage {n}'s third chill break. Architect: record the blocker and its evidence, "
+                        "and end the run with your `[report]`.")
             await self._say(
                 tools,
-                f"[chill] stage={n} reason={reason} rounds={len(s['exams'])} exam={curve}\n"
+                f"[chill] stage={n} break={s['chills']} reason={reason} rounds={len(s['exams'])} exam={curve}\n"
                 f"🧘 Stage {n} has stopped improving. Last review: {clip(s.get('review_note') or 'none', 200)}\n"
-                "Architect: re-plan this stage. Hand the Builder one failing behaviour at a time, with the "
-                "requirement it comes from. If this is the second chill break for the stage, record the blocker "
-                "and its evidence in your final report instead. Nobody wakes the human in a dark run.",
+                f"{what} Nobody wakes the human in a dark run.",
                 [NAMES["architect"], NAMES["builder"]],
             )
+            if s["chills"] == 2 and s["review"] == "APPROVED" and not s["accepted"]:
+                commit = s.get("review_commit") or "HEAD"
+                key = (self._room, n, commit[:7])
+                if key not in self._checks:
+                    self._checks[key] = asyncio.create_task(self._check_and_gate(self._room, n, commit, True))
             return
         culprit = s.get("by") or NAMES["builder"]
         curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"]) or "no exams"
@@ -377,7 +513,9 @@ class NapGuardAdapter(SimpleAdapter[Any]):
         for k in sorted(d["stages"], key=int):
             v = d["stages"][k]
             curve = "→".join(f"{e['satisfaction']:.0%}" for e in v["exams"]) or "no exam"
-            lines.append(f"{k} {'✔' if v['accepted'] else '✘'} exam {curve} ({len(v['exams'])} rounds)")
+            claim = next((c for c in reversed(v.get("checks", [])) if c.get("claimed") == int(k)), None)
+            checker = f", checker claims it at {claim['commit']} ({claim['counts']})" if claim else ""
+            lines.append(f"{k} {'✔' if v['accepted'] else '✘'} exam {curve} ({len(v['exams'])} rounds{checker})")
         elapsed = fmt_duration(now() - d["started_at"]) if d["started_at"] else "n/a"
         receipt = "\n".join([
             "[receipt] 🛁 Onsen dark run complete",

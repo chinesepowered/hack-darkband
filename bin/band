@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""Onsen's room linter, in front of the real `band` CLI on the seats' PATH.
+
+`band send` posts only protocol messages: after its mentions, a message starts with a protocol tag, and a message
+to Nap Guard carries one of the tags Nap Guard reads. Every other band command passes straight through.
+"""
+import os
+import pathlib
+import re
+import sys
+
+HERE = pathlib.Path(__file__).resolve().parent
+TAGS = {"plan", "task", "seal", "ready", "exam", "review", "dispute", "reveal", "report", "decide"}
+FOR_NAP_GUARD = {"seal", "exam", "review", "report", "dispute"}
+QUESTIONS = {"question", "blocking-question", "ask", "help"}
+VALUE_OPTS = {"--profile", "--session", "--scope", "--config-dir", "--as", "--body-file", "--artifact", "--type",
+              "--page", "--cursor"}
+MENTION = r"@(?:\[\[[0-9a-f-]+\]\]|[\w.-]+(?:/[\w.-]+)?)"
+HEAD = re.compile(rf"^((?:\s*{MENTION})*)\s*\[([A-Za-z-]+)\]")
+
+
+def real_band() -> str:
+    for d in os.environ.get("PATH", "").split(os.pathsep):
+        try:
+            if not d or pathlib.Path(d).resolve() == HERE:
+                continue
+        except OSError:
+            continue
+        c = pathlib.Path(d) / "band"
+        if c.is_file() and os.access(c, os.X_OK):
+            return str(c)
+    return "/usr/bin/band"
+
+
+def refuse(why: str) -> None:
+    print(f"Not sent. {why}", file=sys.stderr)
+    raise SystemExit(2)
+
+
+def body_of(args: list[str]) -> str | None:
+    positional, i = [], 0
+    while i < len(args):
+        a = args[i]
+        if a == "--body-file" and i + 1 < len(args):
+            return pathlib.Path(args[i + 1]).read_text(encoding="utf-8")
+        if a.startswith("--body-file="):
+            return pathlib.Path(a.split("=", 1)[1]).read_text(encoding="utf-8")
+        if a in VALUE_OPTS:
+            i += 2
+            continue
+        if not a.startswith("-"):
+            positional.append(a)
+        i += 1
+    return positional[1] if len(positional) > 1 else None
+
+
+def lint(text: str) -> None:
+    m = HEAD.match(text.lstrip())
+    if not m:
+        refuse("A room message starts with its mentions and then a protocol tag ([task], [ready], [exam], [review], "
+               "[dispute], [reveal], [report], ...). If you have nothing to hand off, end your turn: whoever needs "
+               "you next will mention you, and that wakes you.")
+    mentions, tag = m.group(1), m.group(2).lower()
+    if tag in QUESTIONS:
+        refuse("In a dark run nobody answers questions: decide from the requirements, state the assumption in your "
+               "next handoff, and keep going.")
+    if tag not in TAGS:
+        refuse(f"[{tag}] isn't a protocol tag. The tags are: " + ", ".join(f"[{t}]" for t in sorted(TAGS)) + ".")
+    if re.search(r"nap-guard|nap guard", mentions, re.I) and tag not in FOR_NAP_GUARD:
+        refuse("Nap Guard reads only [seal], [exam], [review], [dispute] and [report]. It posts [gate], [chill] and "
+               "[nudge] on its own and mentions you when it does; don't ask it for status. End your turn now.")
+
+
+def main() -> None:
+    args = sys.argv[1:]
+    real = real_band()
+    try:
+        i = next(k for k, a in enumerate(args) if a == "send" and (k == 0 or args[k - 1] not in VALUE_OPTS))
+    except StopIteration:
+        os.execv(real, [real] + args)
+    text = body_of(args[i + 1:])
+    if text is not None:
+        lint(text)
+    os.execv(real, [real] + args)
+
+
+if __name__ == "__main__":
+    main()

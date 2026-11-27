@@ -91,35 +91,103 @@ async def test_block_after_acceptance_reopens_the_stage():
     assert last(tools).startswith("[gate] stage=1 ACCEPTED")
 
 
+def dark_guard(claims: dict[str, int | None]):
+    """A Nap Guard whose acceptance checker and REST poster are fakes: `claims` maps commit -> claimed stage."""
+    posted: list[dict] = []
+    runs: list[tuple[int, str]] = []
+
+    async def checker(n, commit):
+        runs.append((n, commit))
+        return {"claimed": claims.get(commit), "passed": 120, "total": 122, "summary": "FAILED test_x"}
+
+    async def poster(room, content, roles):
+        posted.append({"content": content, "roles": roles})
+
+    return NapGuardAdapter(checker=checker, poster=poster), posted, runs
+
+
 async def test_dark_run_never_wakes_the_human(monkeypatch):
     """ONSEN_DARK=1: the dispatched task is the only human input, so Nap Guard gates, answers and reports
     without ever mentioning the human."""
     monkeypatch.setenv("ONSEN_DARK", "1")
-    ng, tools = NapGuardAdapter(), FakeAgentTools(participants=CREW)
+    ng, posted, runs = dark_guard({"abc1234": 1})
+    tools = FakeAgentTools(participants=CREW)
     await deliver(ng, "@nap-guard [seal] stage=1 sha256=" + "c" * 64, "Examiner", tools)
 
-    # an approval without the checker's claim for the stage doesn't open the gate
+    # exam PASS + approval on the same commit: Nap Guard runs the checker itself, and it claims the stage
     await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=9/9 satisfaction=100% commit=abc1234", "Examiner", tools)
-    await deliver(ng, "@b @nap-guard [review] stage=1 commit=abc1234 APPROVED claimed=none", "Reviewer", tools)
-    assert not any(m["content"].startswith("[gate] stage=1 ACCEPTED") for m in tools.messages_sent)
-
-    # with the claim, the stage is accepted, and the Examiner is asked to publish the exam
-    await deliver(ng, "@b @nap-guard [review] stage=1 commit=abc1234 APPROVED claimed=1 checks pass", "Reviewer", tools)
-    gate = last(tools)
-    assert gate.startswith("[gate] stage=1 ACCEPTED") and "Examiner: publish" in gate
+    await deliver(ng, "@b @nap-guard [review] stage=1 commit=abc1234 APPROVED", "Reviewer", tools)
+    await ng.settle()
+    assert runs == [(1, "abc1234")]
+    gate = posted[-1]
+    assert gate["content"].startswith("[gate] stage=1 ACCEPTED") and "Examiner: publish" in gate["content"]
+    assert "checker=claimed:1" in gate["content"] and gate["roles"] == ["architect", "examiner"]
 
     # a question for the human is answered by Nap Guard, not escalated
     await deliver(ng, "@nap-guard [blocking-question] which time zone should timestamps use?", "Builder", tools)
     assert last(tools).startswith("[decide]")
 
     # a stall is a notice to the Architect; nobody is removed or woken
-    for sat in ("50%", "50%", "40%"):
-        await deliver(ng, f"@b @nap-guard [exam] stage=2 verdict=FAIL satisfaction={sat} commit=def5678", "Examiner", tools)
-    assert last(tools).startswith("[chill] stage=2")
+    for sat in ("5/10", "5/10", "4/10"):
+        await deliver(ng, f"@b @nap-guard [exam] stage=2 verdict=FAIL passed={sat} commit=def5678", "Examiner", tools)
+    assert last(tools).startswith("[chill] stage=2 break=1")
     assert not tools.participants_removed
 
     # the Architect's final report ends the run with a receipt
     await deliver(ng, "@nap-guard [report] stages accepted: 1; stage 2 blocked on history ordering", "Architect", tools)
     receipt = last(tools)
-    assert receipt.startswith("[receipt]") and "wake-ups: 0" in receipt
+    assert receipt.startswith("[receipt]") and "wake-ups: 0" in receipt and "checker claims it at abc1234" in receipt
     assert all("id-human" not in str(m["mentions"]) for m in tools.messages_sent)
+
+
+async def test_dark_verdict_comes_from_the_counts_not_the_word(monkeypatch):
+    """An Examiner that says FAIL at 25/26 still passes (at least 90%); one that says PASS at 8/10 doesn't."""
+    monkeypatch.setenv("ONSEN_DARK", "1")
+    ng, posted, runs = dark_guard({"aaa1111": 1, "bbb2222": 1})
+    tools = FakeAgentTools(participants=CREW)
+    await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=8/10 satisfaction=80% commit=bbb2222", "Examiner", tools)
+    await deliver(ng, "@b @nap-guard [review] stage=1 commit=bbb2222 APPROVED", "Reviewer", tools)
+    await ng.settle()
+    assert not runs and not posted
+    await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=FAIL passed=25/26 satisfaction=96% commit=aaa1111", "Examiner", tools)
+    await deliver(ng, "@b @nap-guard [review] stage=1 commit=aaa1111 APPROVED", "Reviewer", tools)
+    await ng.settle()
+    assert runs == [(1, "aaa1111")] and posted[-1]["content"].startswith("[gate] stage=1 ACCEPTED")
+
+
+async def test_dark_gate_needs_the_checker_to_claim_the_stage(monkeypatch):
+    monkeypatch.setenv("ONSEN_DARK", "1")
+    ng, posted, runs = dark_guard({"ccc3333": None, "ddd4444": 1})
+    tools = FakeAgentTools(participants=CREW)
+    await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=10/10 commit=ccc3333", "Examiner", tools)
+    await deliver(ng, "@b @nap-guard [review] stage=1 commit=ccc3333 APPROVED", "Reviewer", tools)
+    await ng.settle()
+    assert posted[-1]["content"].startswith("[gate] stage=1 WAITING") and posted[-1]["roles"][0] == "builder"
+    await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=10/10 commit=ddd4444", "Examiner", tools)
+    await deliver(ng, "@b @nap-guard [review] stage=1 commit=ddd4444 APPROVED", "Reviewer", tools)
+    await ng.settle()
+    assert posted[-1]["content"].startswith("[gate] stage=1 ACCEPTED commit=ddd4444")
+
+
+async def test_dark_second_chill_makes_the_exam_advisory_and_third_ends_the_run(monkeypatch):
+    monkeypatch.setenv("ONSEN_DARK", "1")
+    ng, posted, runs = dark_guard({"eee5555": 1})
+    tools = FakeAgentTools(participants=CREW)
+    for _ in range(3):
+        await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=FAIL passed=5/10 commit=eee5555", "Examiner", tools)
+    assert "break=1" in last(tools) and "re-plan" in last(tools)
+    await deliver(ng, "@b @nap-guard [review] stage=1 commit=eee5555 APPROVED", "Reviewer", tools)
+    for _ in range(3):
+        await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=FAIL passed=5/10 commit=eee5555", "Examiner", tools)
+    assert "break=2" in last(tools) and "advisory" in last(tools)
+    await ng.settle()  # the approval already on record is checked right away
+    assert posted and posted[-1]["content"].startswith("[gate] stage=1 ACCEPTED") and "advisory" in posted[-1]["content"]
+
+    ng2, posted2, _ = dark_guard({})
+    tools2 = FakeAgentTools(participants=CREW)
+    for _ in range(6):
+        await deliver(ng2, "@b @nap-guard [exam] stage=2 verdict=FAIL passed=5/10 commit=fff6666", "Examiner", tools2)
+    assert "break=2" in last(tools2)
+    for _ in range(3):
+        await deliver(ng2, "@b @nap-guard [review] stage=2 commit=fff6666 BLOCKED", "Reviewer", tools2)
+    assert "break=3" in last(tools2) and "[report]" in last(tools2)

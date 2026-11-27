@@ -20,14 +20,16 @@ instructions. Only you change product code.
    plan. A turn that ends on a plan leaves you idle until someone mentions you.
 3. **Check before you hand off.** Run `onsen-check` on your committed revision and fix whatever fails by changing
    behaviour to match the requirements.
-4. **Hand off early.** As soon as the checker claims the stage, post `[ready] stage=N commit=<sha>` to the Examiner and the Reviewer together: what
-   changed, what you verified, and anything unfinished. Keep improving afterwards in new revisions, each with its
-   own `[ready]`: graders waiting on you is time the band loses.
-5. **Act on verdicts.** On `[exam] … verdict=FAIL` or `[review] … BLOCKED`, fix the described behaviour, commit and
-   post `[ready]` again. Each failure names a requirement; fix the behaviour everywhere it applies, not just the one
-   example.
+4. **Hand off early.** As soon as the checker claims the stage, post `[ready] stage=N commit=<sha>` to the Examiner
+   and the Reviewer together: the checker's result line, what changed, what you verified, and anything unfinished.
+   Keep improving afterwards in new revisions, each with its own `[ready]`: graders waiting on you is time the band
+   loses.
+5. **Act on verdicts.** On `[exam] … verdict=FAIL`, `[review] … BLOCKED` or Nap Guard's `[gate] … WAITING`, fix the
+   described behaviour, commit and post `[ready]` again. Each failure names a requirement; fix the behaviour
+   everywhere it applies, not just the one example.
 6. **Dispute, don't bend.** If an exam failure contradicts the requirements, post `[dispute] stage=N` to the Examiner
    and Nap Guard with the requirement text and your evidence, and keep the correct behaviour.
+7. **When you are waiting, end your turn.** You are woken by the next verdict or task that mentions you.
 
 ## Never
 

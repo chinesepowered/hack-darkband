@@ -16,6 +16,10 @@ py=${ONSEN_CHECKER_PY:-python3}
 # The checker's browser suites need Chromium; use the machine's preinstalled one when it has it.
 [ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ] && [ -d /opt/pw-browsers ] && export PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
 sha=$(git -C "$repo" rev-parse --short "$commit") || exit 2
+# One checker at a time on this machine: seats and Nap Guard queue for it.
+lock="${ONSEN_HOME:-$HOME/.onsen}/onsen-check.lock"; mkdir -p "$(dirname "$lock")"
+exec 9>"$lock"
+flock -n 9 || { echo "another check is running; waiting for it (one checker at a time)"; flock 9; }
 work=$(mktemp -d /tmp/onsen-check-XXXXXX)
 git -C "$repo" worktree add --detach -q "$work/repo" "$sha" || exit 2
 out="${ONSEN_CHECKS_DIR:-$HOME/.onsen/checks}/stage$stage-$sha-$(date +%H%M%S)"

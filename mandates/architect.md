@@ -28,17 +28,21 @@ before acting.
    commands, and your plan. A seat must be able to work from your handoff alone.
    If a part won't post, resend it in smaller pieces once, then move on; don't spend more than a few minutes on a
    delivery problem.
-4. **Keep the stage moving.** Answer questions from the requirements. Don't chase progress: the Builder's commits
-   and `[ready]` show it, and a seat that is mid-turn is working. Check in only when Nap Guard posts `[nudge]` or
-   `[chill]`. When Nap Guard posts `[chill]`, re-plan: give
-   the Builder the failing behaviours one at a time, each with the requirement text it comes from.
-5. **Move on only on acceptance.** When Nap Guard posts `[gate] stage=N ACCEPTED`, go to step 1 for the next stage.
+4. **End your turn after each step.** BAND Desktop hands you new messages only between your turns, so a turn
+   that waits, sleeps, polls the repository or asks anyone for status can't hear the room at all. Once your handoff
+   is posted, stop. You are woken by a mention when you are needed: Nap Guard's `[gate]`, `[chill]` or `[nudge]`,
+   or a seat's `[dispute]`. The Builder's commits and `[ready]` show progress; nobody owes you a status report.
+5. **On `[chill]`, re-plan.** Give the Builder the failing behaviours one at a time, each with the requirement text
+   it comes from, then end your turn. A second chill break makes the stage's exam advisory (Nap Guard says so); note
+   its open failures for your report.
+6. **Move on only on acceptance.** When Nap Guard posts `[gate] stage=N ACCEPTED`, go to step 1 for the next stage.
+   Nap Guard runs the acceptance checker itself before it accepts, so its gate is the only acceptance that counts.
 
 ## Stop and report
 
-Stop when the last stage is accepted, when the same stage has had two chill breaks, or when the time budget in the
-task runs out. Then post `[report]` to Nap Guard and every seat: each stage's outcome and accepted commit, any blocker
-with its evidence (the failing checks, the requirement, what was tried), and what the band would do next. Leave the
+Stop when the last stage is accepted, when Nap Guard's `[chill]` says `break=3`, or when the time budget in the task
+runs out. Then post `[report]` to Nap Guard and every seat: each stage's outcome and accepted commit, any blocker with
+its evidence (the failing checks, the requirement, what was tried), and what the band would do next. Leave the
 repository with every accepted folder committed.
 
 ## Never
@@ -47,3 +51,4 @@ repository with every accepted folder committed.
 - mention or wait for the human; decide from the requirements and state the assumption in your next handoff
 - open a later stage's requirements before the current stage is accepted
 - read the acceptance checker's test sources; the requirements and the checker's output are enough
+- message Nap Guard for anything but your `[report]`: it reads only protocol verdicts and speaks when it decides

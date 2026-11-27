@@ -13,6 +13,7 @@ set -a; [ -f .env ] && . ./.env; [ -n "${ONSEN_ENV_FILE:-}" ] && . "$ONSEN_ENV_F
 [ -n "${ONSEN_EVENT_ENV:-}" ] && . "$ONSEN_EVENT_ENV"; set +a
 repo="$(realpath "$1")"; task="$(realpath "$2")"; title="${3:-Onsen · $(basename "$repo")}"
 export ONSEN_DARK=1 ONSEN_CHILL_ACTION=notice
+export ONSEN_REPO="$repo"   # Nap Guard runs the acceptance checker on this repository before it gates
 export ONSEN_HOME="${ONSEN_HOME:-$HOME/.onsen}"
 run="$(basename "$repo")-$(date +%H%M)"
 logs="$ONSEN_HOME/logs/$run"; mkdir -p "$logs"

@@ -1,0 +1,312 @@
+#!/usr/bin/env python3
+"""The Examiner's exam runner. The tool, not the seat, counts the checks and decides the verdict.
+
+    onsen-exam seal    <stage> --to @handle...                 hash the exam, count its checks, write the [seal] message
+    onsen-exam grade   <stage> <repo> <commit> --to @handle... serve that commit, run every check, write the [exam] message
+    onsen-exam void    <stage> <check> <reason...>             void one check after a dispute; grading skips it
+    onsen-exam publish <stage> <repo> --to @handle...          copy the sealed exam into <repo>/exams/stage-<N>/, commit it,
+                                                               write the [reveal] message
+
+An exam is the folder `stage-<N>/` in the current directory (the Examiner's workspace, outside the shared
+repository): pytest files named `test_*.py`, one test function per check, each with a docstring whose first line
+names the requirement and what a client observes. Checks read SERVICE_URL, MOCK_URL, MOCK_ADMIN_TOKEN and CORPUS
+from the environment. An optional `corpus/` folder holds provider data in the mock's corpus format; when present it
+is served instead of the task's sample corpus (copy the sample in first if you still want its companies).
+
+Each command writes the message it describes to a file and prints the file's path: send it unchanged with
+`band send <room> --body-file <path>`. The verdict is PASS when at least 90% of the checks that aren't voided pass.
+Once an exam has graded a commit it is frozen: `seal` refuses to run again, and `grade` refuses an exam whose files
+no longer hash to the seal. A check changes after that only by being voided, in public.
+"""
+from __future__ import annotations
+
+import ast
+import datetime as dt
+import hashlib
+import json
+import os
+import pathlib
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import xml.etree.ElementTree as ET
+
+PASS_MARK = 0.9
+NOT_HASHED = {"SEAL.json", "SEAL.md", "voided.txt", "grading.json"}
+SKIP_DIRS = {"results", "__pycache__", ".pytest_cache"}
+TIMEOUT = int(os.environ.get("ONSEN_EXAM_TIMEOUT", "1500"))
+
+
+def die(msg: str, code: int = 2) -> None:
+    print(f"onsen-exam: {msg}", file=sys.stderr)
+    raise SystemExit(code)
+
+
+def exam_dir(stage: str) -> pathlib.Path:
+    d = pathlib.Path.cwd() / f"stage-{stage}"
+    if not d.is_dir():
+        die(f"no exam folder {d}: write your checks in stage-{stage}/test_*.py first")
+    return d
+
+
+def hashed_files(d: pathlib.Path) -> list[str]:
+    out = []
+    for p in d.rglob("*"):
+        rel = p.relative_to(d)
+        if not p.is_file() or set(rel.parts[:-1]) & SKIP_DIRS or rel.parts[0] in SKIP_DIRS:
+            continue
+        if len(rel.parts) == 1 and rel.name in NOT_HASHED:
+            continue
+        out.append(rel.as_posix())
+    return sorted(out)
+
+
+def exam_hash(d: pathlib.Path) -> str:
+    """Equals `find . -type f <the exclusions> | LC_ALL=C sort | xargs sha256sum | sha256sum` run in the folder."""
+    lines = "".join(f"{hashlib.sha256((d / f).read_bytes()).hexdigest()}  ./{f}\n" for f in hashed_files(d))
+    return hashlib.sha256(lines.encode()).hexdigest()
+
+
+def checker_py() -> str:
+    return os.environ.get("ONSEN_CHECKER_PY") or sys.executable
+
+
+def collect(d: pathlib.Path) -> list[str]:
+    # Nothing is running while checks are counted; placeholders let module-level reads of the settings work.
+    env = dict(os.environ)
+    for k in ("SERVICE_URL", "BASE_URL", "MOCK_URL"):
+        env.setdefault(k, "http://127.0.0.1:9")
+    env.setdefault("MOCK_ADMIN_TOKEN", "unset")
+    env.setdefault("CORPUS", str(d / "corpus"))
+    r = subprocess.run([checker_py(), "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider",
+                        "-o", "addopts=", "."], cwd=d, capture_output=True, text=True, timeout=300, env=env)
+    ids = [ln.strip() for ln in r.stdout.splitlines() if "::" in ln and not ln.startswith(("=", " "))]
+    if r.returncode not in (0, 5) or not ids:
+        tail = "\n".join((r.stdout + r.stderr).strip().splitlines()[-15:])
+        die(f"pytest could not collect any checks in {d}:\n{tail}")
+    return ids
+
+
+def docstrings(d: pathlib.Path) -> dict[str, str]:
+    """`file::func` and `file::Class::func` -> first docstring line."""
+    out: dict[str, str] = {}
+    for f in d.rglob("test_*.py"):
+        if set(f.relative_to(d).parts) & SKIP_DIRS:
+            continue
+        try:
+            tree = ast.parse(f.read_text(encoding="utf-8"))
+        except SyntaxError:
+            continue
+        rel = f.relative_to(d).as_posix()
+
+        def visit(nodes, prefix):
+            for n in nodes:
+                if isinstance(n, ast.ClassDef):
+                    visit(n.body, f"{prefix}{n.name}::")
+                elif isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name.startswith("test"):
+                    doc = (ast.get_docstring(n) or "").strip().splitlines()
+                    out[f"{rel}::{prefix}{n.name}"] = doc[0] if doc else ""
+        visit(tree.body, "")
+    return out
+
+
+def voided(d: pathlib.Path) -> dict[str, str]:
+    f = d / "voided.txt"
+    if not f.exists():
+        return {}
+    rows = [ln.split("\t", 1) for ln in f.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    return {r[0]: (r[1] if len(r) > 1 else "") for r in rows}
+
+
+def handles(argv: list[str]) -> tuple[list[str], list[str]]:
+    if "--to" not in argv:
+        die("say who the message is for: --to @handle [@handle ...] (names from your roster)")
+    i = argv.index("--to")
+    to = [a for a in argv[i + 1:] if a.startswith("@")]
+    if not to:
+        die("--to needs at least one @handle")
+    return argv[:i], to
+
+
+def write_message(d: pathlib.Path, name: str, text: str) -> None:
+    out = d / "results" / name
+    out.parent.mkdir(exist_ok=True)
+    out.write_text(text, encoding="utf-8")
+    print(text)
+    print(f"--- send it unchanged: band send <room> --body-file {out}")
+
+
+def seal(argv: list[str]) -> None:
+    argv, to = handles(argv)
+    stage = argv[0]
+    d = exam_dir(stage)
+    if (d / "grading.json").exists():
+        die("this exam has already graded a commit, so it is frozen; a check changes only by `onsen-exam void`")
+    ids = collect(d)
+    h = exam_hash(d)
+    (d / "SEAL.json").write_text(json.dumps({"stage": int(stage), "sha256": h, "checks": len(ids),
+                                             "at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")},
+                                            indent=2) + "\n")
+    write_message(d, "seal.md", f"{' '.join(to)} [seal] stage={stage} sha256={h} checks={len(ids)}\n"
+                                f"Stage {stage}'s exam is sealed: {len(ids)} executable checks, kept outside the "
+                                "repository until the stage is accepted.\n")
+
+
+def serve(repo: str, stage: str, commit: str, d: pathlib.Path) -> dict[str, str]:
+    env = dict(os.environ)
+    if (d / "corpus").is_dir():
+        env["ONSEN_CORPUS"] = str(d / "corpus")
+    r = subprocess.run(["onsen-serve", repo, f"stage-{stage}", commit], capture_output=True, text=True,
+                       env=env, timeout=900)
+    vals = dict(ln.split("=", 1) for ln in r.stdout.splitlines() if re.match(r"^[A-Z_]+=", ln))
+    if r.returncode or "BASE_URL" not in vals:
+        tail = "\n".join((r.stdout + r.stderr).strip().splitlines()[-20:])
+        die(f"commit {commit} did not start (that is a failure of the build, not of the exam):\n{tail}", 4)
+    return vals
+
+
+def grade(argv: list[str]) -> None:
+    argv, to = handles(argv)
+    if len(argv) < 3:
+        die("usage: onsen-exam grade <stage> <repo> <commit> --to @handle...")
+    stage, repo, commit = argv[:3]
+    d = exam_dir(stage)
+    seal_file = d / "SEAL.json"
+    if not seal_file.exists():
+        die(f"stage {stage}'s exam isn't sealed yet: run `onsen-exam seal {stage} --to ...` and post it first")
+    sealed = json.loads(seal_file.read_text())["sha256"]
+    now_hash = exam_hash(d)
+    if now_hash != sealed:
+        die(f"the exam no longer matches its seal (sealed {sealed[:12]}, now {now_hash[:12]}): restore the sealed "
+            "files; a sealed check changes only by `onsen-exam void`", 3)
+    sha = subprocess.run(["git", "-C", repo, "rev-parse", "--short", commit], capture_output=True,
+                         text=True).stdout.strip()
+    if not sha:
+        die(f"no commit {commit} in {repo}")
+    gone = voided(d)
+    ids = collect(d)
+    live = [i for i in ids if i not in gone]
+    docs = docstrings(d)
+    vals = serve(repo, stage, sha, d)
+    xml = pathlib.Path(tempfile.mkdtemp(prefix="onsen-exam-")) / "junit.xml"
+    env = dict(os.environ, SERVICE_URL=vals["BASE_URL"], BASE_URL=vals["BASE_URL"], EXAM_STAGE=stage,
+               MOCK_URL=vals.get("MOCK_URL", ""), MOCK_ADMIN_TOKEN=vals.get("MOCK_ADMIN_TOKEN", ""),
+               CORPUS=vals.get("CORPUS", ""))
+    if not env.get("PLAYWRIGHT_BROWSERS_PATH") and os.path.isdir("/opt/pw-browsers"):
+        env["PLAYWRIGHT_BROWSERS_PATH"] = "/opt/pw-browsers"
+    cmd = [checker_py(), "-m", "pytest", "-q", "-p", "no:cacheprovider", "-o", "addopts=", f"--junitxml={xml}"]
+    cmd += [a for i in gone for a in ("--deselect", i)] + ["."]
+    try:
+        subprocess.run(cmd, cwd=d, env=env, capture_output=True, text=True, timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        pass
+    finally:
+        subprocess.run(["onsen-serve", "stop"], capture_output=True, text=True)
+    results: dict[str, tuple[str, str]] = {}
+    if xml.exists():
+        live_set = set(live)
+        for case in ET.parse(xml).getroot().iter("testcase"):
+            parts, name = case.get("classname", "").split("."), case.get("name", "")
+            node = None
+            for k in range(len(parts), 0, -1):  # classname is the module path, then any classes
+                cand = "/".join(parts[:k]) + ".py::" + "::".join(parts[k:] + [name])
+                if cand in live_set:
+                    node = cand
+                    break
+            if node is None:
+                continue
+            bad = next((c for c in case if c.tag in ("failure", "error", "skipped")), None)
+            if bad is None:
+                results[node] = ("passed", "")
+            else:
+                msg = (bad.get("message") or (bad.text or "")).strip().splitlines()
+                results[node] = (bad.tag, msg[0][:240] if msg else "")
+    passed = sum(1 for i in live if results.get(i, ("missing",))[0] == "passed")
+    total = len(live)
+    ratio = passed / total if total else 0.0
+    verdict = "PASS" if total and ratio >= PASS_MARK else "FAIL"
+    lines = [f"{' '.join(to)} [exam] stage={stage} verdict={verdict} passed={passed}/{total} "
+             f"satisfaction={ratio:.0%} commit={sha} exam={sealed[:12]}"]
+    failures = [i for i in live if results.get(i, ("missing",))[0] != "passed"]
+    if failures:
+        lines.append(f"{len(failures)} check(s) failed, as a client observed them:")
+        for i in failures:
+            kind, msg = results.get(i, ("missing", "the check did not finish (time limit or crash)"))
+            what = docs.get(re.sub(r"\[.*\]$", "", i)) or i.split("::")[-1].replace("_", " ")
+            lines.append(f"- {what}" + (f" — observed: {msg}" if msg else f" — {kind}"))
+    else:
+        lines.append(f"Every check passed on commit {sha}.")
+    if gone:
+        lines.append(f"Voided after dispute (not counted): {len(gone)}.")
+    hist = d / "grading.json"
+    rows = json.loads(hist.read_text()) if hist.exists() else []
+    rows.append({"commit": sha, "passed": passed, "total": total, "verdict": verdict,
+                 "at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+                 "failed": failures})
+    hist.write_text(json.dumps(rows, indent=2) + "\n")
+    write_message(d, f"exam-{sha}.md", "\n".join(lines) + "\n")
+
+
+def void(argv: list[str]) -> None:
+    if len(argv) < 3:
+        die("usage: onsen-exam void <stage> <check> <reason...>")
+    stage, check, reason = argv[0], argv[1], " ".join(argv[2:])
+    d = exam_dir(stage)
+    ids = collect(d)
+    hits = [i for i in ids if i == check or i.endswith("::" + check)]
+    if len(hits) != 1:
+        die(f"name exactly one check (matches: {hits or 'none'})")
+    with open(d / "voided.txt", "a", encoding="utf-8") as f:
+        f.write(f"{hits[0]}\t{reason}\n")
+    print(f"voided {hits[0]}: {reason}\nSay so in the room (the check and the requirement text), then grade again.")
+
+
+def publish(argv: list[str]) -> None:
+    argv, to = handles(argv)
+    stage, repo = argv[0], argv[1]
+    d = exam_dir(stage)
+    sealed = json.loads((d / "SEAL.json").read_text())["sha256"]
+    if exam_hash(d) != sealed:
+        die("the exam no longer matches its seal; publish the sealed files", 3)
+    dest = pathlib.Path(repo) / "exams" / f"stage-{stage}"
+    if dest.exists():
+        shutil.rmtree(dest)
+    for f in hashed_files(d) + [n for n in sorted(NOT_HASHED) if (d / n).exists()]:
+        (dest / f).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(d / f, dest / f)
+    (dest / "SEAL.md").write_text(
+        f"# Stage {stage} exam\n\nWritten by the Examiner from the stage's requirements alone, sealed before the "
+        f"first build was graded, and kept outside this repository until the stage was accepted.\n\n"
+        f"sha256 `{sealed}`. To check it, run this in this folder:\n\n```bash\n"
+        "find . -type f -not -path './results/*' -not -path '*/__pycache__/*' -not -path './.pytest_cache/*' "
+        "-not -name SEAL.json -not -name SEAL.md -not -name voided.txt -not -name grading.json "
+        "| LC_ALL=C sort | xargs sha256sum | sha256sum\n```\n\n"
+        "`grading.json` lists every commit this exam graded; `voided.txt`, if present, lists checks voided after a "
+        "dispute.\n", encoding="utf-8")
+    rel = dest.relative_to(repo).as_posix()
+    for attempt in range(5):
+        add = subprocess.run(["git", "-C", repo, "add", "--", rel], capture_output=True, text=True)
+        com = subprocess.run(["git", "-C", repo, "commit", "-q", "-m", f"exams: publish stage {stage}'s sealed exam",
+                              "--", rel], capture_output=True, text=True)
+        if add.returncode == 0 and com.returncode == 0:
+            break
+        if "index.lock" not in add.stderr + com.stderr:
+            die(f"commit failed: {(add.stderr + com.stderr).strip()[-400:]}")
+        import time
+        time.sleep(3)
+    sha = subprocess.run(["git", "-C", repo, "rev-parse", "--short", "HEAD"], capture_output=True,
+                         text=True).stdout.strip()
+    write_message(d, "reveal.md", f"{' '.join(to)} [reveal] stage={stage} sha256={sealed} commit={sha}\n"
+                                  f"Stage {stage}'s exam is published in `{rel}/`; it hashes to its seal.\n")
+
+
+def main() -> None:
+    if len(sys.argv) < 3 or sys.argv[1] not in ("seal", "grade", "void", "publish"):
+        raise SystemExit(__doc__)
+    {"seal": seal, "grade": grade, "void": void, "publish": publish}[sys.argv[1]](sys.argv[2:])
+
+
+if __name__ == "__main__":
+    main()
