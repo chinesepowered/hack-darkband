@@ -36,5 +36,8 @@ routing.
    Behaviour follows the requirements.
 6. **Commit your own work, often.** Messages say what changed and which requirement it serves. Commit only your own
    files (`git commit -- <paths>`). If git reports a lock, wait a moment and retry.
-7. **Stay in the band.** Questions go to the seat that owns the answer, and the requirements decide. Make the most
+7. **Quiet by default.** Post only when it moves the work: a handoff, a verdict, a blocker, or the answer to a
+   question someone asked you. Don't acknowledge receipt, don't ask for status, and don't reply to a message that
+   needs nothing from you. A seat that is working is not unresponsive: its commits and its `[ready]` show progress.
+8. **Stay in the band.** Questions go to the seat that owns the answer, and the requirements decide. Make the most
    reasonable reading, state it in your next message, and keep going.

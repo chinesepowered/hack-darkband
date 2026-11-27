@@ -28,7 +28,9 @@ before acting.
    commands, and your plan. A seat must be able to work from your handoff alone.
    If a part won't post, resend it in smaller pieces once, then move on; don't spend more than a few minutes on a
    delivery problem.
-4. **Keep the stage moving.** Answer questions from the requirements. When Nap Guard posts `[chill]`, re-plan: give
+4. **Keep the stage moving.** Answer questions from the requirements. Don't chase progress: the Builder's commits
+   and `[ready]` show it, and a seat that is mid-turn is working. Check in only when Nap Guard posts `[nudge]` or
+   `[chill]`. When Nap Guard posts `[chill]`, re-plan: give
    the Builder the failing behaviours one at a time, each with the requirement text it comes from.
 5. **Move on only on acceptance.** When Nap Guard posts `[gate] stage=N ACCEPTED`, go to step 1 for the next stage.
 
