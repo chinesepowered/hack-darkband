@@ -1,43 +1,43 @@
-# Running the crew in BAND Desktop
+# Running the seats in BAND Desktop
 
-In this mode, BAND Desktop runs the coding crew: the Architect, the Builder and the Reviewer. Its daemon, `jamd`, owns each
-agent's OpenCode runtime. When a room message mentions one of them, BAND Desktop starts OpenCode (Qwen 3.8 on W&B) in
-the run's workspace, hands it the message, and posts what the agent sends back to the room. Each agent's work, tool
-calls and reasoning show up live in the BAND Desktop window.
+BAND Desktop runs Onsen's four coding seats: the Architect, the Builder, the Examiner and the Reviewer. Its daemon,
+`jamd`, owns one OpenCode runtime per seat per room. When a room message mentions a seat, BAND Desktop starts (or
+wakes) that seat's runtime in the run's workspace, hands it the message, and shows its work, tool calls and reasoning
+live in the BAND Desktop window. Every coding seat runs GPT-6 Luna (OpenAI) at medium effort.
 
-Scout, the Examiner and Nap Guard stay small Python agents (`onsen-scout`, `onsen-examiner`, `onsen-nap-guard`). They
-are deterministic or call Nimble, so they don't need a coding runtime.
+Nap Guard stays a small band-sdk agent (`onsen-nap-guard`, plus its watch `onsen-quiet-watch`): it has no model, so it
+needs no coding runtime.
 
 ```
-BAND Desktop (jamd) ── owns ──▶ Architect · Builder · Reviewer      OpenCode + Qwen 3.8, one runtime per agent per room
-band-sdk processes ──────────▶ Scout · Examiner · Nap Guard
-                       all six are BAND identities in one room
+BAND Desktop (jamd) ── owns ──▶ Architect · Builder · Examiner · Reviewer   OpenCode + GPT-6 Luna, one runtime per seat per room
+band-sdk process ────────────▶ Nap Guard                                    no model: the gate, the checker runs, the watch
+                       all five are BAND identities in one room
 ```
-
-This is how runs 5 and later ran. Runs 1–4 used band-sdk's `OpencodeAdapter` for the crew instead (`ONSEN_CREW=sdk`,
-the default), which needs no desktop app.
 
 ## One-time setup
 
-These steps were done on Linux (Ubuntu 24.04). The launchers in `opencode/bin/` are POSIX shell scripts, so on Windows
-run the crew under WSL, or adapt the launchers.
+These steps were done on Linux (Ubuntu 24.04, 4 vCPU). The launchers in `opencode/bin/` are POSIX shell scripts, so on
+Windows run the seats under WSL, or adapt the launchers.
 
 1. **Install BAND Desktop** (0.4.18 here): `sudo apt install ./jam-amd64.deb` from
    [docs.band.ai](https://docs.band.ai/band-desktop/install). It installs `band-desktop`, the `band` CLI and `jamd`.
-2. **Put OpenCode on your PATH** (`npm i -g opencode-ai`). In the setup wizard, or under **Settings › Integrations**,
-   turn on **OpenCode**. Onsen doesn't use the other runtimes.
+2. **Put OpenCode on your PATH** (`npm i -g opencode-ai`; we ran 1.19.5). In the setup wizard, or under
+   **Settings › Integrations**, turn on **OpenCode**. Onsen doesn't use the other runtimes.
 3. **Sign in.** Use the wizard, or run `band init --auth api-key --user-api-key "$BAND_USER_KEY"`.
-4. **Start the daemon with the W&B key**:
+4. **Register the five seats** with `uv run onsen-register`. It creates the BAND identities and writes their keys to
+   `$ONSEN_HOME/agent_config.yaml`.
+5. **Start the daemon**:
 
    ```bash
    scripts/band-desktop-daemon.sh
    ```
 
-   The daemon passes its own environment to every agent runtime, so this script starts it with a minimal one: home,
-   PATH, proxy and CA settings, and `WANDB_API_KEY`. Tokens that happen to be in your shell stay out of the agents'
-   reach.
-5. **Adopt the three crew agents.** They were registered by `onsen-register`, so they keep their names, handles and
-   rooms:
+   The daemon passes its own environment to every runtime it starts, so this script starts it with a minimal one:
+   home, PATH (with the factory's `bin/` first), proxy and CA settings, `OPENAI_API_KEY`, `ONSEN_OPENCODE_CONFIG`
+   (the OpenCode config to load, `opencode/opencode-openai.json`) and the checker settings (`ONSEN_HOME`,
+   `ONSEN_CHECKER_DIR`, `ONSEN_CHECKER_PY`, `ONSEN_TRACK`, `ONSEN_CHECKS_DIR`). Tokens that happen to be in your shell
+   stay out of the seats' reach.
+6. **Adopt the four coding seats**, which keep the names and handles `onsen-register` gave them:
 
    ```bash
    band adopt --agent-key <architect key> --session onsen-architect --host opencode
@@ -48,62 +48,68 @@ run the crew under WSL, or adapt the launchers.
    ```
 
    ```bash
+   band adopt --agent-key <examiner key> --session onsen-examiner --host opencode
+   ```
+
+   ```bash
    band adopt --agent-key <reviewer key> --session onsen-reviewer --host opencode
    ```
 
-   The keys are in `~/.onsen/agent_config.yaml`.
-6. **Give each one an OpenCode runtime.** In BAND Desktop, open **Agents › Builder › Runtime**, select **Set up** and
-   fill in:
+7. **Give each seat its OpenCode runtime**, through its own launcher (repeat for `architect`, `builder`, `examiner`
+   and `reviewer`):
 
-   | Field | Value |
-   |---|---|
-   | Runtime | OpenCode |
-   | Approval policy | Allow automatically (the role's OpenCode profile still denies what it must, e.g. edits for the Reviewer) |
-   | Command | `<repo>/opencode/bin/onsen-opencode-builder` |
-   | Arguments | `acp` |
-   | Environment allowlist | `PATH, WANDB_API_KEY` |
+   ```bash
+   band runtime template set --session onsen-builder --transport opencode \
+     --spawn-command <repo>/opencode/bin/onsen-opencode-builder --spawn-arg acp --runtime-approval approve-all \
+     --runtime-env PATH --runtime-env OPENAI_API_KEY --runtime-env ONSEN_OPENCODE_CONFIG --runtime-env HOME \
+     --runtime-env ONSEN_HOME --runtime-env ONSEN_CHECKER_DIR --runtime-env ONSEN_CHECKER_PY \
+     --runtime-env ONSEN_TRACK --runtime-env ONSEN_CHECKS_DIR
+   ```
 
-   Select **Test runtime**, then **Save agent setup**. Repeat for the Architect and the Reviewer with their own
-   launchers. Each launcher loads `opencode/opencode.json` and picks the role's profile (`default_agent`). That is
-   how the Reviewer gets an OpenCode runtime that can't edit files.
+   (An adopted seat with no template yet gets one from **Agents › seat › Runtime › Set up** first.) Each launcher puts
+   the factory's `bin/` first on `PATH` (BAND Desktop starts runtimes with `/usr/bin` first, which would hide the room
+   linter), loads the OpenCode config with the seat's permission profile (the Reviewer's denies every edit; OpenCode's
+   question tool and BAND's ask-the-human tool are off for everyone), sets the seat's git name, gives shell commands
+   25 minutes, installs the git hook that keeps the Examiner and the Reviewer from committing, and runs
+   `src/onsen/acp_filter.py` in front of `opencode acp`.
 
 ## Every run
 
 ```bash
-ONSEN_CREW=desktop scripts/run-factory.sh capyfinder
+scripts/run-dark.sh <result repository> <task file> "Onsen · Dossier"
 ```
 
-Before the kickoff, `run-factory.sh` runs `uv run onsen-desktop prepare --workspace <new run folder>`, which:
-- writes each crew agent's instructions to `~/.onsen/desktop/<role>.md`. The file holds the role's brief from `crew/`,
-  `crew/PROTOCOL.md`, and a roster of everyone's BAND handle. It's live-linked in BAND Desktop
-  (**Agents › <name> › Instructions**).
-- points each agent's runtime at the new workspace (`band runtime template set --spawn-cwd … --apply-and-restart`).
+It moves earlier runs' exam workspaces and the seats' scratch files out of reach, takes the seats out of old rooms,
+installs the result repository's own pre-commit hook (no commits to an accepted stage's folder), starts Nap Guard in
+dark mode, runs `uv run onsen-desktop prepare --workspace <result repository>`, opens a fresh room with the five seats,
+posts the task as the only human message, and starts Nap Guard's watch on the room. `onsen-desktop prepare`:
+- writes each seat's instructions to `$ONSEN_HOME/desktop/<seat>.md`: its mandate (`mandates/`), the room protocol
+  (`crew/PROTOCOL.md`), its own tools, and a roster of every seat's BAND handle. The file is live-linked in BAND
+  Desktop (**Agents › <name> › Instructions**).
+- points each seat's runtime at the result repository (the Examiner at its own workspace, so its exam stays out of the
+  repository until it is published) and restarts it.
 
-Open the run's room in BAND Desktop to watch it. `scripts/stop-factory.sh` stops the crew's runtimes along with
-everything else.
+Open the run's room in BAND Desktop to watch it.
 
-## What changes for the agents
+## What changes for the seats
 
-BAND Desktop posts an agent's final answer as a reply to whoever woke it. In Onsen every protocol message goes to
-specific agents (a `[ready]` goes to both the Examiner and the Reviewer), so the crew sends every message itself with
-`band send <room> "@owner/handle … [tag] …"`. `onsen-desktop prepare` writes a roster of handles into each agent's
-instructions.
+BAND Desktop posts the text a turn ends with as a reply to whoever woke the seat. In Onsen every protocol message goes
+to specific seats (a `[ready]` goes to both the Examiner and the Reviewer), so the seats send every message themselves
+with `band send <room> "@owner/handle … [tag] …"`, through the room linter. `acp_filter.py`, a small standard-library
+proxy between BAND Desktop and `opencode acp`, keeps a turn's closing text out of the room, and when a working seat's
+turn ends without it having sent anything, prompts it to carry on (and, if its last edit was cut off mid-stream, to
+make that change again in smaller parts). Tool calls, reasoning and permission requests pass straight through, so BAND
+Desktop still shows every step.
 
-That leaves the text a turn ends with. Qwen 3.8 can't end a turn without some ("." or "No reply needed."), and BAND
-Desktop posts it to whoever woke the agent:
-- **Run 5:** the crew traded acknowledgments, and the Architect's "Seal receipt confirmed …" re-sealed the exam.
-- **Run 6:** told to stay silent, the Architect looped on no-op tool calls instead.
-
-The fix is in the launcher. In ACP mode, `opencode/bin/onsen-opencode` runs `src/onsen/acp_filter.py`, a small
-standard-library proxy between BAND Desktop and `opencode acp`. It holds the agent's message text while a turn is in
-flight and passes it on at the end only if it starts with a crew protocol tag (`[ready]`, `[review]`, `[task]`, …).
-Tool calls, reasoning and permission requests pass straight through, so BAND Desktop still shows every step. With
-that in place, run 7 went from kickoff to `ship` with no stray messages.
+A seat hears new messages only between its turns. That is why every mandate says to end the turn while waiting, and
+why Nap Guard's watch interrupts the Builder's turn (`band runtime interrupt` on the room's host session) when it must
+hear something at once: its stage was accepted, or a commit the checker claims has gone five minutes without a
+handoff.
 
 ## Notes
 
-- `stop-factory.sh` leaves the crew's workers running; their OpenCode runtimes stop by themselves after 10 idle
-  minutes. If a worker shows as stopped, `band restart --session onsen-<role>` brings it back.
-- Our build machine had no display, so the BAND Desktop window ran on a virtual one (Xvfb). There its web view
-  stopped repainting after about 25 minutes. The daemon and the agents were unaffected; restarting `band-desktop`
-  brings the window back.
+- Our build machine had no display, so the BAND Desktop window ran on a virtual one (Xvfb). In a room with a long
+  history its renderer used about two of the machine's four cores and slowed the band's checks; on its Home page it
+  uses a tenth of a core. The daemon and the seats don't depend on the window: restarting `band-desktop` is safe.
+- Before the event, the coding seats ran Qwen 3.8 27B on W&B Inference (`opencode/opencode.json`); the launchers
+  still accept that config through `ONSEN_OPENCODE_CONFIG` with `WANDB_API_KEY`.

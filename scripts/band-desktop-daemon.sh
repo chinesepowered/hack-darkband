@@ -2,14 +2,15 @@
 # Start (or restart) BAND Desktop's daemon, jamd, for the Onsen crew.
 #
 # The daemon hands its own environment to every agent runtime it starts, so we give it a minimal one:
-# home, PATH, locale, the network proxy and CA settings if the machine has them, and WANDB_API_KEY for Qwen 3.8
-# on W&B. Tokens that happen to be in your shell (GitHub, cloud, ...) stay out of the agents' reach.
+# home, PATH, locale, the network proxy and CA settings if the machine has them, the model key (OPENAI_API_KEY for
+# GPT-6 Luna, or WANDB_API_KEY for Qwen 3.8 on W&B) and the checker settings. Tokens that happen to be in your shell
+# (GitHub, cloud, ...) stay out of the agents' reach.
 #
-#   scripts/band-desktop-daemon.sh            # reads WANDB_API_KEY from the environment, .env or $ONSEN_ENV_FILE
+#   scripts/band-desktop-daemon.sh            # reads the keys from the environment, .env or $ONSEN_ENV_FILE
 set -euo pipefail
 here="$(cd "$(dirname "$0")/.." && pwd)"
 set -a; [ -f "$here/.env" ] && . "$here/.env"; [ -n "${ONSEN_ENV_FILE:-}" ] && . "$ONSEN_ENV_FILE"; set +a
-: "${WANDB_API_KEY:?WANDB_API_KEY is required (Qwen 3.8 on W&B Inference)}"
+: "${OPENAI_API_KEY:-${WANDB_API_KEY:?set OPENAI_API_KEY (GPT-6 Luna) or WANDB_API_KEY (Qwen 3.8 on W&B Inference)}}"
 log="${ONSEN_HOME:-$HOME/.onsen}/logs/jamd.log"
 mkdir -p "$(dirname "$log")"
 
