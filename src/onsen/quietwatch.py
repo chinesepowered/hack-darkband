@@ -93,6 +93,26 @@ def late_handoff(texts: list[dict], claimed: list[tuple[int, str, float]], now: 
     return None
 
 
+NUDGED_RE = re.compile(r"\[nudge\]\s+stage=(\d+)\s+handoff=late\s+commit=([0-9a-f]{7,40})")
+
+
+def already_nudged(texts: list[dict]) -> set:
+    """(stage, commit) pairs a late-handoff nudge in the room already covers (so a restarted watcher doesn't repeat)."""
+    return {(int(st), sha[:7]) for m in texts for st, sha in NUDGED_RE.findall(m.get("content") or "")}
+
+
+def interrupt_builder(room: str) -> str:
+    """Interrupt the Builder's active turn in this room: BAND Desktop keeps one host session per room, named after the
+    seat and the room, besides a parked default one; the interrupt has to name the room's."""
+    out = subprocess.run(["band", "status", "--session", "onsen-builder"], capture_output=True, text=True).stdout
+    host = next((ln.split()[0] for ln in out.splitlines() if f"room={room}" in ln), "")
+    if not host:
+        return "no host session for this room"
+    r = subprocess.run(["band", "runtime", "interrupt", "--session", "onsen-builder", "--host-session", host],
+                       capture_output=True, text=True)
+    return (r.stdout + r.stderr).strip()[:200] or f"interrupted {host}"
+
+
 def text_messages(c: httpx.Client, room: str) -> list[dict]:
     r = c.get(f"/api/v1/me/chats/{room}/messages", params={"page": 1, "page_size": 100, "message_type": "text"})
     r.raise_for_status()
@@ -118,7 +138,7 @@ def main(argv: list[str] | None = None) -> int:
     human = httpx.Client(base_url=API, headers={"X-API-Key": os.environ["BAND_USER_KEY"]}, timeout=30)
     agent = httpx.Client(base_url=API, headers={"X-API-Key": me["api_key"]}, timeout=30)
     last_nudge, nudges = 0.0, 0
-    started, nudged = time.time(), set()
+    started, nudged = float(os.environ.get("ONSEN_RUN_STARTED") or time.time()), set()
     checks_dir = Path(os.environ.get("ONSEN_CHECKS_DIR") or Path.home() / ".onsen" / "checks")
     wait = float(os.environ.get("ONSEN_HANDOFF_MIN", "5")) * 60
     print(f"watching {args.room}: nudge after {quiet / 60:.0f} quiet minutes, at most {budget} times", flush=True)
@@ -126,7 +146,9 @@ def main(argv: list[str] | None = None) -> int:
         time.sleep(60)
         try:
             newest, ended = latest(human, args.room)
-            late = late_handoff(text_messages(human, args.room), claims(checks_dir, started), time.time(), nudged, wait)
+            texts = text_messages(human, args.room)
+            nudged |= already_nudged(texts)
+            late = late_handoff(texts, claims(checks_dir, started), time.time(), nudged, wait)
         except httpx.HTTPError as exc:
             print(f"read failed: {exc}", flush=True)
             continue
@@ -137,7 +159,7 @@ def main(argv: list[str] | None = None) -> int:
             stage, sha, t = late
             nudged.add((stage, sha))
             minutes = int((time.time() - t) // 60)
-            subprocess.run(["band", "runtime", "interrupt", "--session", "onsen-builder"], capture_output=True)
+            print(f"interrupt: {interrupt_builder(args.room)}", flush=True)
             content = (f"@{NAMES['builder']} [nudge] stage={stage} handoff=late commit={sha}\n"
                        f"⏰ The acceptance checker claimed stage {stage} on commit {sha} {minutes} minutes ago, and it "
                        "hasn't been handed off. I interrupted your turn so this reaches you. Builder: post `[ready] "

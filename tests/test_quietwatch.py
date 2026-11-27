@@ -28,3 +28,9 @@ def test_an_accepted_stage_needs_no_handoff():
     t = 1_800_000_000.0
     gate = [msg("@a @e [gate] stage=1 ACCEPTED commit=abc1234", "2027-01-15T08:00:00Z")]
     assert late_handoff(gate, [(1, "fff0000", t)], t + 999, set(), 300) is None
+
+
+def test_a_restarted_watcher_knows_which_commits_it_already_nudged():
+    from onsen.quietwatch import already_nudged
+    texts = [msg("@b [nudge] stage=1 handoff=late commit=90357c2\n⏰ ...", "2027-01-15T08:00:00Z")]
+    assert already_nudged(texts) == {(1, "90357c2")}
