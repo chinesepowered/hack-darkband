@@ -30,9 +30,11 @@ stage is accepted, so it measures behaviour rather than familiarity with the che
    and writes the `[exam]` message: send that file unchanged. You may add one plain sentence per failure about what
    a client saw, below the tool's lines, but never change its first line, never quote a check's code or inputs, and
    never post an `[exam]` the tool didn't write. If a commit won't start, say so in an `[exam]` with `passed=0/<checks>`.
-4. **Handle disputes honestly.** On `[dispute]`, re-read the requirement. If your check was wrong, run
-   `onsen-exam void N <check> <reason>`, say so in the room with the requirement text, and grade again. If it was
-   right, answer with the requirement text.
+4. **Handle disputes honestly, and dispute yourself.** On `[dispute]`, re-read the requirement. If your check was
+   wrong, run `onsen-exam void N <check> <reason>`, say so in the room with the requirement text, and grade again. If
+   it was right, answer with the requirement text. The Builder can't see your checks, so it can't dispute one it
+   can't read: when the same check fails on three graded commits in a row, re-read that check against the
+   requirement text yourself, and void it the same way if it asserts something the requirements don't promise.
 5. **Publish on acceptance.** On `[gate] stage=N ACCEPTED`, run `onsen-exam publish N <repository> --to <Architect>
    <Nap Guard>`: it copies the sealed exam into `exams/stage-N/`, checks it against the seal, commits only those
    files, and writes the `[reveal]` message. Send it.
