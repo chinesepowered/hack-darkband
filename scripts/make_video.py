@@ -161,12 +161,35 @@ def ffmpeg(*args: str) -> None:
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *args], check=True)
 
 
+NUMBERS_CSS = """
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:34px}
+.stat{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:22px;padding:26px 18px}
+.stat .v{font-family:'Inter Display',Inter,sans-serif;font-size:64px;font-weight:800;color:#fff6e8;letter-spacing:-.02em}
+.stat .l{font-size:19px;color:#a9c0cf;margin-top:6px}
+"""
+
+
+def numbers_card() -> str:
+    """The judged run's numbers, from the facts file the slides use (ONSEN_FACTS), so the video states only what the run
+    measured: the highest stage claimed, the hours, the model spend, and the human's one message."""
+    f = json.loads(Path(os.environ["ONSEN_FACTS"]).read_text())
+    top = max((st["n"] for st in f.get("stages", []) if st.get("claimed")), default=0)
+    tiles = [(str(top), "stages accepted"), (f.get("hours_text", "—"), "start to report"),
+             (f.get("spend_short", "—"), "model spend"), (str(f.get("human_inputs", 1)), "human message")]
+    cells = "".join(f'<div class="stat"><div class="v">{v}</div><div class="l">{label}</div></div>' for v, label in tiles)
+    return (STEAM + f"<style>{NUMBERS_CSS}</style>"
+            '<div class="wrap wide"><div class="tag">The judged run, in numbers</div>'
+            f'<div class="stats">{cells}</div>'
+            f'<div class="foot">{f.get("numbers_foot", "")}</div></div><img class="corner" src="capybara-badge.svg">')
+
+
 async def render_card(name: str, out_png: Path) -> Path:
     from playwright.async_api import async_playwright
 
     html = out_png.with_suffix(".html")
     html.parent.mkdir(parents=True, exist_ok=True)
-    html.write_text(f"<!doctype html><meta charset=utf-8><style>{CARD_CSS}</style>{CARDS.get(name) or name}")
+    body = numbers_card() if name == "numbers" else (CARDS.get(name) or name)
+    html.write_text(f"<!doctype html><meta charset=utf-8><style>{CARD_CSS}</style>{body}")
     shutil.copyfile(ROOT / "assets" / "capybara.svg", html.parent / "capybara.svg")
     shutil.copyfile(ROOT / "assets" / "capybara-badge.svg", html.parent / "capybara-badge.svg")
     assets = os.environ.get("ONSEN_CARD_ASSETS")  # e.g. BAND Desktop screenshots for the "desktop" card
