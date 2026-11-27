@@ -48,7 +48,8 @@
     "edit": "allow",
     "bash": "allow",
     "webfetch": "deny",
-    "external_directory": "deny"
+    "external_directory": "deny",
+    "question": "deny"
   },
   "agent": {
     "onsen-architect": {
@@ -58,7 +59,8 @@
         "edit": "allow",
         "bash": "allow",
         "webfetch": "deny",
-        "external_directory": "allow"
+        "external_directory": "allow",
+        "question": "deny"
       }
     },
     "onsen-builder": {
@@ -68,7 +70,8 @@
         "edit": "allow",
         "bash": "allow",
         "webfetch": "deny",
-        "external_directory": "deny"
+        "external_directory": "deny",
+        "question": "deny"
       }
     },
     "onsen-reviewer": {
@@ -78,7 +81,8 @@
         "edit": "deny",
         "bash": "allow",
         "webfetch": "deny",
-        "external_directory": "deny"
+        "external_directory": "deny",
+        "question": "deny"
       }
     },
     "onsen-examiner": {
@@ -88,7 +92,8 @@
         "edit": "allow",
         "bash": "allow",
         "webfetch": "deny",
-        "external_directory": "deny"
+        "external_directory": "deny",
+        "question": "deny"
       }
     }
   }

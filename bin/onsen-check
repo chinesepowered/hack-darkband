@@ -23,5 +23,10 @@ echo "checking stage $stage at commit $sha ($mode mode) — this builds the serv
    --mode "$mode" --out "$out") 2>&1 | grep -v "^NOTE:" | tail -12
 echo "--- failing checks (first error line each):"
 grep -h "^FAILED\|^ERROR" "$out"/stage-*.log 2>/dev/null | cut -c1-260 | head -40
+echo "--- why each one failed (the assertion lines from the checker's log):"
+for log in "$out"/stage-*.log; do
+  awk '/^_____+ .* _____+$/ { name = $0; gsub(/^_+ | _+$/, "", name); shown = 0; next }
+       /^E / && name != "" && shown < 6 { if (shown == 0) print "* " name; print "    " substr($0, 1, 240); shown++ }' "$log"
+done 2>/dev/null | head -150
 echo "--- full logs: $out"
 git -C "$repo" worktree remove --force "$work/repo" >/dev/null 2>&1; rm -rf "$work"
