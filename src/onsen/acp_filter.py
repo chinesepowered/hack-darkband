@@ -13,7 +13,10 @@ While a turn is in flight, it holds the agent's message text. When the turn ends
 is a protocol message, i.e. it starts with a tag such as `[ready]`. Tool calls, reasoning, permission requests and
 everything else pass straight through. Standard library only, because the runtime's environment is minimal.
 
-Keep going (ONSEN_KEEP_GOING=1, set for the Builder): a seat is woken only by a mention, so a Builder that ends its
+Closing remarks: by default none reach the room, not even tagged ones (ONSEN_PASS_REMARKS=1 passes tagged ones):
+seats speak through `band send`, and a closing "[exam] … sent to the Builder" only duplicated the real message.
+
+Keep going (ONSEN_KEEP_GOING=1, set for the Builder and the Examiner, with a prompt for each): a seat is woken only by a mention, so a Builder that ends its
 turn on "I'll keep working on X" sits idle until someone mentions it. When a turn that used tools ends without the
 seat having sent anything to the room, the proxy doesn't end the turn: it asks the agent to carry on, up to
 ONSEN_KEEP_GOING_MAX times (default 4) per prompt, and ends the turn when the agent sends a message, stops using
@@ -38,10 +41,16 @@ CREW_TAGS = ("ready", "review", "task", "plan", "dispute", "exam", "seal", "reve
 PROTOCOL = re.compile(r"^\s*(?:@\S+\s+)*\[(?:" + "|".join(CREW_TAGS) + r")\]", re.I)
 LIMIT = 1 << 26  # tool output can make single lines very long
 SENDS = re.compile(r"\bband\b[^\n]{0,300}?\bsend\b")  # a tool call that posts to the room
-KEEP_GOING = ("Your turn ended, but you haven't sent anything to the room, so nobody will wake you to finish. If the "
-              "stage's work is unfinished, carry on now: implement, commit, run the checker, and post [ready] when it "
-              "claims the stage. If your latest commit is already handed off and you are only waiting for verdicts, "
-              "end your turn without using any tool.")
+KEEP_GOING = {
+    "builder": ("Your turn ended, but you haven't sent anything to the room, so nobody will wake you to finish. If the "
+                "stage's work is unfinished, carry on now: implement, commit, run the checker, and post [ready] when it "
+                "claims the stage. If your latest commit is already handed off and you are only waiting for verdicts, "
+                "end your turn without using any tool."),
+    "examiner": ("Your turn ended, but you haven't sent anything to the room. If every part of the stage's task has "
+                 "arrived and its exam isn't sealed yet, write it now and seal it with onsen-exam seal. If a [ready] is "
+                 "waiting for your grade, grade it. If the exam is sealed and nothing is waiting, end your turn without "
+                 "using any tool."),
+}
 
 
 def is_protocol(text: str) -> bool:
@@ -51,12 +60,14 @@ def is_protocol(text: str) -> bool:
 class Filter:
     """The decision logic, kept apart from the pipes so it can be tested line by line."""
 
-    def __init__(self, keep_going: bool = False, max_keep_going: int = 4) -> None:
+    def __init__(self, keep_going: bool = False, max_keep_going: int = 4, role: str = "builder",
+                 pass_remarks: bool = True) -> None:
         self.prompts: dict[Any, Any] = {}  # in-flight session/prompt request id -> sessionId
         self.held: dict[Any, list[tuple[bytes, str]]] = {}  # sessionId -> held message chunks
         self.keep_going, self.max_keep_going = keep_going, max_keep_going
         self.turns: dict[Any, dict[str, Any]] = {}  # sessionId -> {client_id, tools, sent, continued}
         self.to_agent: list[bytes] = []  # lines the proxy itself sends to the agent (keep-going prompts)
+        self.role, self.pass_remarks = role, pass_remarks
         self._ids = itertools.count(1)
 
     def from_client(self, line: bytes) -> None:
@@ -93,7 +104,8 @@ class Filter:
             protocol = is_protocol(text)
             t = self.turns.get(sid)
             stop = (msg.get("result") or {}).get("stopReason")
-            if (self.keep_going and t and stop == "end_turn" and t["tools"] > 0 and not t["sent"] and not protocol
+            posted = protocol and self.pass_remarks  # a closing remark that reaches the room counts as a message
+            if (self.keep_going and t and stop == "end_turn" and t["tools"] > 0 and not t["sent"] and not posted
                     and t["continued"] < self.max_keep_going):
                 # The agent stopped mid-work without telling anyone: ask it to carry on, in the same client turn.
                 t["continued"] += 1
@@ -102,9 +114,10 @@ class Filter:
                 self.prompts[rid] = sid
                 self.to_agent.append(_line({"jsonrpc": "2.0", "id": rid, "method": "session/prompt",
                                             "params": {"sessionId": sid,
-                                                       "prompt": [{"type": "text", "text": KEEP_GOING}]}}))
+                                                       "prompt": [{"type": "text", "text": KEEP_GOING.get(
+                                                           self.role, KEEP_GOING["builder"])}]}}))
                 return []
-            kept = [raw for raw, _ in chunks] if protocol else []
+            kept = [raw for raw, _ in chunks] if protocol and self.pass_remarks else []
             if t is not None:
                 self.turns.pop(sid, None)
                 if msg["id"] != t["client_id"]:  # the client's turn ends with its own request id
@@ -134,7 +147,10 @@ async def run(argv: list[str]) -> int:
     await loop.connect_read_pipe(lambda: asyncio.StreamReaderProtocol(stdin), sys.stdin)
     out = sys.stdout.buffer
     f = Filter(keep_going=os.environ.get("ONSEN_KEEP_GOING", "") in ("1", "true", "yes"),
-               max_keep_going=int(os.environ.get("ONSEN_KEEP_GOING_MAX", "4")))
+               max_keep_going=int(os.environ.get("ONSEN_KEEP_GOING_MAX", "4")),
+               role=os.environ.get("ONSEN_ROLE", "builder"),
+               # Seats speak through `band send`; a turn's closing text, even a tagged one, only duplicates it.
+               pass_remarks=os.environ.get("ONSEN_PASS_REMARKS", "") in ("1", "true", "yes"))
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(sig, proc.terminate)
 

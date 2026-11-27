@@ -99,3 +99,15 @@ def test_keep_going_is_off_by_default():
     f.from_client(line({"jsonrpc": "2.0", "id": 7, "method": "session/prompt", "params": {"sessionId": "s"}}))
     f.from_agent(tool_call("s", "git commit -m wip"))
     assert json.loads(f.from_agent(end(7))[-1])["id"] == 7 and not f.to_agent
+
+
+def test_closing_remarks_can_be_dropped_entirely_and_then_keep_going_continues():
+    f = Filter(keep_going=True, role="examiner", pass_remarks=False)
+    f.from_client(line({"jsonrpc": "2.0", "id": 5, "method": "session/prompt", "params": {"sessionId": "s"}}))
+    f.from_agent(tool_call("s", "ls"))
+    f.from_agent(chunk("s", "[exam] stage=1 passed 13/14, sent to the Builder."))
+    assert f.from_agent(end(5)) == []  # the tagged remark isn't posted, so the seat hasn't spoken: carry on
+    req = json.loads(f.to_agent.pop())
+    assert "exam" in req["params"]["prompt"][0]["text"] and "onsen-exam seal" in req["params"]["prompt"][0]["text"]
+    out = f.from_agent(end(req["id"]))  # no tools this time: the turn ends, and no remark reaches the room
+    assert texts(out) == "" and json.loads(out[-1])["id"] == 5

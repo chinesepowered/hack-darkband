@@ -14,6 +14,9 @@ import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 TAGS = {"plan", "task", "seal", "ready", "exam", "review", "dispute", "reveal", "report", "decide"}
+OWNERS = {"plan": {"Architect"}, "task": {"Architect"}, "report": {"Architect"}, "decide": {"Architect"},
+          "ready": {"Builder"}, "seal": {"Examiner"}, "exam": {"Examiner"}, "reveal": {"Examiner"},
+          "review": {"Reviewer"}, "dispute": {"Builder", "Examiner", "Reviewer", "Architect"}}
 FOR_NAP_GUARD = {"seal", "exam", "review", "report", "dispute"}
 QUESTIONS = {"question", "blocking-question", "ask", "help"}
 VALUE_OPTS = {"--profile", "--session", "--scope", "--config-dir", "--as", "--body-file", "--artifact", "--type",
@@ -69,6 +72,11 @@ def lint(text: str) -> None:
                "next handoff, and keep going.")
     if tag not in TAGS:
         refuse(f"[{tag}] isn't a protocol tag. The tags are: " + ", ".join(f"[{t}]" for t in sorted(TAGS)) + ".")
+    seat = os.environ.get("GIT_AUTHOR_NAME", "")
+    if seat in {"Architect", "Builder", "Examiner", "Reviewer"} and seat not in OWNERS[tag]:
+        who = " or ".join(sorted(OWNERS[tag]))
+        refuse(f"Only the {who} posts [{tag}]; you are the {seat}. A handoff you received is already with everyone it "
+               "names: don't forward it. Do your own part, and end your turn when you are waiting.")
     if re.search(r"nap-guard|nap guard", mentions, re.I) and tag not in FOR_NAP_GUARD:
         refuse("Nap Guard reads only [seal], [exam], [review], [dispute] and [report]. It posts [gate], [chill] and "
                "[nudge] on its own and mentions you when it does; don't ask it for status. End your turn now.")

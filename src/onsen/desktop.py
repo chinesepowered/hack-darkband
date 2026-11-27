@@ -73,20 +73,27 @@ How to talk in the room:
 - Never mention the human, and never wait for one. Nobody wakes the capybara in a dark run.
 
 Your tools (on PATH):
-- `onsen-check <repository> <stage> [<commit>]`: runs the task's acceptance checker on one committed revision, in a
-  clean checkout, and lists every failing check. It builds the service, so it takes a few minutes.
-- `onsen-serve <repository> <stage folder> [<commit>]`: starts one committed revision beside the task's mock
-  dependencies and leaves it running; it prints the service URL and the mock's URL and admin token.
-  `onsen-serve stop` stops it.
-- `onsen-exam seal|grade|void|publish ...`: the Examiner's exam runner. It seals an exam folder by hash, grades one
-  committed revision with it (it starts the revision itself, runs every check and computes the verdict), voids a
-  check after a dispute, and publishes the sealed exam. Each command writes the message to send.
-- `onsen-split <stage> <document> [<document> ...] --to @handle [@handle ...] --plus 1`: cuts the requirements
-  into numbered `[task]` parts that each start with those handles, numbered across all the documents, with one
-  number left for the task part you write yourself. It prints the part files in order. Send each one with
-  `band ... send <room> --body-file <part>`, then your own final part.
+{tools}
 - Your git name and email are already set to your seat, so the history shows who did what.
 """
+
+
+TOOLS = {
+    "check": "- `onsen-check <repository> <stage> [<commit>]`: runs the task's acceptance checker on one committed revision, "
+             "in a\n  clean checkout, and lists every failing check. It builds the service, so it takes a few minutes.",
+    "serve": "- `onsen-serve <repository> <stage folder> [<commit>]`: starts one committed revision beside the task's mock\n"
+             "  dependencies and leaves it running; it prints the service URL and the mock's URL and admin token.\n"
+             "  `onsen-serve stop` stops it.",
+    "exam": "- `onsen-exam seal|grade|void|publish ...`: your exam runner. It seals an exam folder by hash, grades one\n"
+            "  committed revision with it (it starts the revision itself, runs every check and computes the verdict),\n"
+            "  voids a check after a dispute, and publishes the sealed exam. Each command writes the message to send.",
+    "split": "- `onsen-split <stage> <document> [<document> ...] --to @handle [@handle ...] --plus 1`: cuts the requirements\n"
+             "  into numbered `[task]` parts that each start with those handles, numbered across all the documents, with one\n"
+             "  number left for the task part you write yourself. It prints the part files in order. Send each one with\n"
+             "  `band ... send <room> --body-file <part>`, then your own final part.",
+}
+ROLE_TOOLS = {"architect": ("split",), "builder": ("check", "serve"), "examiner": ("exam", "serve"),
+              "reviewer": ("serve",)}
 
 
 def roster_table(hs: dict[str, str]) -> str:
@@ -99,7 +106,8 @@ def instructions_text(role: str, hs: dict[str, str]) -> str:
     """The seat's mandate, the room protocol, and how to work in BAND Desktop."""
     mandate = (REPO_ROOT / "mandates" / f"{MANDATES[role]}.md").read_text().rstrip()
     protocol = (REPO_ROOT / "crew" / "PROTOCOL.md").read_text().rstrip()
-    return f"{mandate}\n\n---\n{protocol}\n" + DESKTOP_NOTES.format(roster=roster_table(hs))
+    tools = "\n".join(TOOLS[t] for t in ROLE_TOOLS.get(role, ()))
+    return f"{mandate}\n\n---\n{protocol}\n" + DESKTOP_NOTES.format(roster=roster_table(hs), tools=tools)
 
 
 def band(*args: str, check: bool = True) -> str:

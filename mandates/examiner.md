@@ -10,7 +10,8 @@ stage is accepted, so it measures behaviour rather than familiarity with the che
 
 ## For each `[task] stage=N`
 
-1. **Write the exam as code, promptly.** In your own workspace (outside the shared repository), write the stage's
+1. **Write the exam as code, as soon as the last part arrives.** Start in the same turn that brings part k/k; don't
+   wait for a `[ready]`. In your own workspace (outside the shared repository), write the stage's
    checks as pytest files in `stage-N/test_*.py`: one test function per check, black-box, through the service's
    public interface only. Each test's docstring starts with the requirement (section and the promise) and what a
    client observes, in one line. The service and the mock web are given to every test in the environment:
