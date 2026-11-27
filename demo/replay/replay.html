@@ -92,7 +92,7 @@
     <div class="card"><h3>Run</h3><div class="stats">
       <div class="stat"><div class="v" id="s-msgs">0</div><div class="k">handoffs</div></div>
       <div class="stat"><div class="v" id="s-tools">0</div><div class="k">tool calls</div></div>
-      <div class="stat"><div class="v" id="s-web">0</div><div class="k">Scout · Nimble</div></div>
+      <div class="stat"><div class="v" id="s-web">0</div><div class="k">verdicts</div></div>
       <div class="stat"><div class="v" id="s-human">0</div><div class="k">human touches</div></div>
     </div></div>
   </div>
@@ -153,7 +153,7 @@ function show(m) {
     feed.appendChild(el); bump('msgs');
     const b = el.querySelector('.body'); if (b.scrollHeight > b.clientHeight + 2) b.classList.add('clipped');
     if (m.human) bump('human');
-    if (m.sender === 'Scout') bump('web');
+    if (/^\[(exam|review)\]/.test(m.text)) bump('web');
     const seal = m.text.match(/^\[seal\].*sha256=([0-9a-f]{64})/);
     if (seal) $('hash').textContent = 'sha256 ' + seal[1];
     const ex = m.text.match(/^\[exam\] stage=(\d+) verdict=(\w+) passed=(\d+)\/(\d+) satisfaction=(\d+)%/);
