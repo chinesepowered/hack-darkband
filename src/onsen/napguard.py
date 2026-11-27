@@ -372,6 +372,12 @@ class NapGuardAdapter(SimpleAdapter[Any]):
                     await self._chill(tools, st, n, s)
                     return
         if not approved:
+            if s["accepted"] and dark():
+                # In a dark run an accepted stage stays accepted: the next stage's requirements are already open and its
+                # folder can't change again (the event's rule). A late block is a finding carried forward, not a reopen.
+                s.setdefault("late_findings", []).append(clip(rest, 300))
+                await tools.no_reply("finding on an accepted stage, carried forward")
+                return
             if s["accepted"]:
                 # A block after acceptance reopens the stage: approval is about the code as it is now.
                 s["accepted"] = False

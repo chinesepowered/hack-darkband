@@ -1,0 +1,15 @@
+#!/bin/sh
+# A result repository's own pre-commit hook (run-dark.sh installs it): a stage's folder is final once Nap Guard has
+# accepted the stage, because the next stage's requirements are open then and earlier folders never change.
+[ "${ONSEN_EXAM_PUBLISH:-}" = 1 ] && exit 0
+state=$(ls -t "${ONSEN_HOME:-$HOME/.onsen}"/state/napguard-*.json 2>/dev/null | head -1)
+[ -n "$state" ] || exit 0
+closed=$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(" ".join(k for k,v in d.get("stages",{}).items() if v.get("accepted")))' "$state" 2>/dev/null)
+for n in $closed; do
+  if git diff --cached --name-only | grep -q "^stage-$n/"; then
+    next=$((n + 1))
+    echo "Not committed: stage $n is accepted, so stage-$n/ is final (the next stage's requirements are open, and earlier folders never change). Make your changes in stage-$next/; if it doesn't exist yet, copy stage-$n/ to stage-$next/ first." >&2
+    exit 1
+  fi
+done
+exit 0

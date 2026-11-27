@@ -26,6 +26,8 @@ for d in "$ONSEN_HOME"/exams/* /tmp/opencode /tmp/handoff-stage* /tmp/onsen-serv
 done
 
 uv run onsen-cleanup --all >/dev/null || true        # old rooms can't wake the seats mid-run
+# The result repository refuses commits to a stage folder Nap Guard has accepted (earlier folders never change).
+cp opencode/git-hooks/closed-stages "$repo/.git/hooks/pre-commit" && chmod +x "$repo/.git/hooks/pre-commit"
 pkill -f "onsen-nap-guard" 2>/dev/null || true
 nohup uv run onsen-nap-guard > "$logs/napguard.log" 2>&1 &
 echo "$! napguard" > "$ONSEN_HOME/factory.pids"
