@@ -128,6 +128,12 @@ def claims(checks_dir: Path, since: float) -> list[tuple[int, str, float]]:
     return out
 
 
+def is_tag(body: str, tag: str) -> bool:
+    """Whether a message *is* a `[tag]` message (after its mentions), not one that quotes the tag: a handoff that
+    explains "a stage is accepted when Nap Guard posts `[gate] stage=1 ACCEPTED`" accepts nothing (Run S)."""
+    return MENTIONS.sub("", body).lstrip().startswith(f"[{tag}]")
+
+
 def late_handoff(texts: list[dict], claimed: list[tuple[int, str, float]], now: float, nudged: set,
                  wait: float) -> tuple[int, str, float] | None:
     """The first claimed commit of an open stage that wasn't handed off (nor a later commit) within `wait` seconds."""
@@ -135,8 +141,9 @@ def late_handoff(texts: list[dict], claimed: list[tuple[int, str, float]], now: 
     for m in texts:
         body = m.get("content") or ""
         at = _ts(m["inserted_at"]) if m.get("inserted_at") else 0.0
-        accepted |= {int(x) for x in ACCEPTED_RE.findall(body)}
-        if MENTIONS.sub("", body).lstrip().startswith("[ready]"):  # a handoff, not a message quoting one
+        if is_tag(body, "gate"):
+            accepted |= {int(x) for x in ACCEPTED_RE.findall(body)}
+        if is_tag(body, "ready"):  # a handoff, not a message quoting one
             readies += [(int(st), sha[:7], at) for st, sha in READY_RE.findall(body)]
     for stage, sha, t in sorted(claimed, key=lambda c: c[2]):
         if stage in accepted or (stage, sha) in nudged:
@@ -153,7 +160,8 @@ NUDGED_RE = re.compile(r"\[nudge\]\s+stage=(\d+)\s+handoff=late\s+commit=([0-9a-
 
 def already_nudged(texts: list[dict]) -> set:
     """(stage, commit) pairs a late-handoff nudge in the room already covers (so a restarted watcher doesn't repeat)."""
-    return {(int(st), sha[:7]) for m in texts for st, sha in NUDGED_RE.findall(m.get("content") or "")}
+    return {(int(st), sha[:7]) for m in texts if is_tag(m.get("content") or "", "nudge")
+            for st, sha in NUDGED_RE.findall(m.get("content") or "")}
 
 
 CLOSED_RE = re.compile(r"\[nudge\]\s+stage=(\d+)\s+closed")
@@ -164,9 +172,10 @@ def newly_accepted(texts: list[dict]) -> list[int]:
     accepted, closed = set(), set()
     for m in texts:
         body = m.get("content") or ""
-        if MENTIONS.sub("", body).lstrip().startswith("[gate]"):
+        if is_tag(body, "gate"):
             accepted |= {int(x) for x in ACCEPTED_RE.findall(body)}
-        closed |= {int(x) for x in CLOSED_RE.findall(body)}
+        if is_tag(body, "nudge"):
+            closed |= {int(x) for x in CLOSED_RE.findall(body)}
     return sorted(accepted - closed)
 
 

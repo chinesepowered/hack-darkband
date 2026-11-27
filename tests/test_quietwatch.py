@@ -83,3 +83,18 @@ def test_each_seat_is_last_seen_at_its_own_newest_event():
             {"inserted_at": "2026-11-27T14:09:00Z", "sender_name": "the human", "sender_type": "User"}]
     seen = last_seen(msgs)
     assert set(seen) == {"Builder", "Architect"} and seen["Architect"] - seen["Builder"] == 13 * 60 + 37
+
+
+
+def test_a_handoff_that_quotes_the_gate_accepts_nothing():
+    """Run S: the Architect's handoff explained that 'a stage is accepted only when Nap Guard posts `[gate] stage=1
+    ACCEPTED`', and the watcher read that as stage 1 being accepted, so a commit the checker claimed went unhanded
+    for eleven minutes without a nudge. Only a message that *is* a [gate] (or [nudge]) counts."""
+    from onsen.quietwatch import late_handoff, newly_accepted, already_nudged
+    task = {"inserted_at": "2026-11-27T14:16:54Z", "content": "@[[0a1b2c3d-0000-4000-8000-00000000000a]] [task] "
+            "stage=1 part=4/4 Check with onsen-check; a stage is accepted only when Nap Guard posts `[gate] stage=1 "
+            "ACCEPTED`. A late handoff gets `[nudge] stage=1 handoff=late commit=fdf07f5` and a closed stage "
+            "`[nudge] stage=1 closed`."}
+    claimed = [(1, "fdf07f5", 1000.0)]
+    assert late_handoff([task], claimed, 1000.0 + 301, set(), 300) == (1, "fdf07f5", 1000.0)
+    assert newly_accepted([task]) == [] and already_nudged([task]) == set()
