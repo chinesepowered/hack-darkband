@@ -91,8 +91,9 @@ async def test_block_after_acceptance_reopens_the_stage():
     assert last(tools).startswith("[gate] stage=1 ACCEPTED")
 
 
-def dark_guard(claims: dict[str, int | None]):
-    """A Nap Guard whose acceptance checker and REST poster are fakes: `claims` maps commit -> claimed stage."""
+def dark_guard(claims: dict[str, int | None], unclaimed: set[str] = frozenset()):
+    """A Nap Guard whose acceptance checker and REST poster are fakes: `claims` maps commit -> claimed stage when Nap
+    Guard runs the checker; the Builder's own checker runs claim every commit's stage except those in `unclaimed`."""
     posted: list[dict] = []
     runs: list[tuple[int, str]] = []
 
@@ -103,7 +104,8 @@ def dark_guard(claims: dict[str, int | None]):
     async def poster(room, content, roles):
         posted.append({"content": content, "roles": roles})
 
-    return NapGuardAdapter(checker=checker, poster=poster), posted, runs
+    return (NapGuardAdapter(checker=checker, poster=poster, claimed=lambda n, c: c not in unclaimed), posted,
+            runs)
 
 
 async def test_dark_run_never_wakes_the_human(monkeypatch):
@@ -247,3 +249,32 @@ async def test_a_verdict_with_a_garbled_stage_counts_for_the_open_stage(monkeypa
     await deliver(ng, "@b @nap-guard [review] stage=ccc0001 commit=ccc0001 BLOCKED: x", "Reviewer", tools)
     await deliver(ng, "@b @nap-guard [review] stage=ccc0002 BLOCKED: y commit=ccc0002", "Reviewer", tools)
     assert last(tools).startswith("[chill] stage=1 break=1 reason=review-thrash")
+
+
+async def test_dark_failing_verdicts_on_work_the_checker_doesnt_claim_are_not_a_stall(monkeypatch):
+    """Run R's stage 2: two handoffs of a barely started stage were blocked, and that counted as a stall 14 minutes
+    in. A stall is graders failing work the checker claims; until then the failures are the work still to do."""
+    monkeypatch.setenv("ONSEN_DARK", "1")
+    early = {"aaa0001", "aaa0002", "aaa0003", "aaa0004"}
+    ng, posted, runs = dark_guard({}, unclaimed=early)
+    tools = FakeAgentTools(participants=CREW)
+    for c in sorted(early):
+        await deliver(ng, f"@b @nap-guard [review] stage=2 commit={c} BLOCKED: no screens yet", "Reviewer", tools)
+        await deliver(ng, f"@b @nap-guard [exam] stage=2 verdict=FAIL passed=3/14 commit={c}", "Examiner", tools)
+    assert not any(m["content"].startswith("[chill]") for m in tools.messages_sent)
+    for c in ("bbb0001", "bbb0002"):  # claimed by the checker, still blocked: that is a stall
+        await deliver(ng, f"@b @nap-guard [review] stage=2 commit={c} BLOCKED: edge case", "Reviewer", tools)
+    assert last(tools).startswith("[chill] stage=2 break=1 reason=review-thrash")
+
+
+def test_checker_claimed_reads_the_checker_reports(tmp_path, monkeypatch):
+    from onsen.napguard import checker_claimed
+    import json
+    monkeypatch.setenv("ONSEN_CHECKS_DIR", str(tmp_path))
+    for name, claimed, rev in (("stage2-c312718-134428", None, "c3127183892f"), ("stage2-abc1234-140000", 2, "abc12345"),
+                               ("stage1-abc1234-130000", 1, "abc12345")):
+        (tmp_path / name).mkdir()
+        (tmp_path / name / "report.json").write_text(json.dumps({"state": "completed", "claimed_stage": claimed,
+                                                                 "revision": rev}))
+    assert not checker_claimed(2, "c312718") and checker_claimed(2, "abc1234") and checker_claimed(1, "abc1234")
+    assert not checker_claimed(3, "abc1234") and not checker_claimed(2, None)

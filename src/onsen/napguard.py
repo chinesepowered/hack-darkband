@@ -92,6 +92,25 @@ def _same_commit(a: str, b: str) -> bool:
     return n >= 4 and a[:n] == b[:n]
 
 
+def checks_dir() -> Path:
+    return Path(os.environ.get("ONSEN_CHECKS_DIR") or Path.home() / ".onsen" / "checks")
+
+
+def checker_claimed(n: int, commit: str | None) -> bool:
+    """Whether a finished acceptance-checker run (the Builder's or Nap Guard's own) claims stage n on this commit."""
+    if not commit:
+        return False
+    for rep in checks_dir().glob(f"stage{n}-*/report.json"):
+        try:
+            r = json.loads(rep.read_text())
+        except (OSError, ValueError):
+            continue
+        if (isinstance(r, dict) and r.get("state") == "completed" and str(r.get("claimed_stage")) == str(n)
+                and _same_commit(str(r.get("revision") or ""), commit)):
+            return True
+    return False
+
+
 def thrash_limit() -> int:
     return int(os.environ.get("ONSEN_THRASH_LIMIT", "3"))
 
@@ -199,10 +218,15 @@ def _participants(tools: Any) -> list[dict[str, Any]]:
 
 class NapGuardAdapter(SimpleAdapter[Any]):
     def __init__(self, checker: Callable[[int, str], Awaitable[dict[str, Any]]] | None = None,
-                 poster: Callable[[str, str, list[str]], Awaitable[None]] | None = None) -> None:
+                 poster: Callable[[str, str, list[str]], Awaitable[None]] | None = None,
+                 claimed: Callable[[int, str | None], bool] | None = None) -> None:
         super().__init__()
         self.checker = checker or run_checker
         self.poster = poster or post_as_napguard
+        # In a dark run a stall is graders failing work the acceptance checker already claims. Failing verdicts on a
+        # commit it doesn't claim are the work not being done yet (Run R's stage 2 hit a chill break 14 minutes in, on
+        # two handoffs of a barely started stage), so they don't count toward a chill.
+        self.claimed = claimed or checker_claimed
         self._checks: dict[tuple[str, int, str], asyncio.Task] = {}
         self._room = ""
 
@@ -340,7 +364,8 @@ class NapGuardAdapter(SimpleAdapter[Any]):
         s["best"] = max(s["best"], sat)
         counting = not repeat and not (dark() and s["chills"] >= 2)
         exam_rounds = len({e.get("commit") for e in s["exams"][s.get("rounds_at_chill", 0):]})
-        if counting and verdict == "FAIL" and (s["fails_in_row"] >= thrash_limit() or exam_rounds >= max_rounds()):
+        stalled = s["fails_in_row"] >= thrash_limit() or exam_rounds >= max_rounds()
+        if counting and verdict == "FAIL" and stalled and (not dark() or self.claimed(n, kv.get("commit"))):
             await self._chill(tools, st, n, s)
             return
         await self._maybe_gate(tools, st, n, s)
@@ -362,10 +387,11 @@ class NapGuardAdapter(SimpleAdapter[Any]):
             s["review_blocks"] = 0
         elif not repeat:
             if dark():
-                s["review_blocks"] += 1  # one count per blocked commit, however often it is re-reviewed
-                if s["review_blocks"] >= review_thrash_limit():
-                    await self._chill(tools, st, n, s, reason="review-thrash")
-                    return
+                if self.claimed(n, kv.get("commit")):  # one count per blocked commit the checker claims
+                    s["review_blocks"] += 1
+                    if s["review_blocks"] >= review_thrash_limit():
+                        await self._chill(tools, st, n, s, reason="review-thrash")
+                        return
             else:
                 s["fails_in_row"] += 1
                 if s["fails_in_row"] >= thrash_limit():

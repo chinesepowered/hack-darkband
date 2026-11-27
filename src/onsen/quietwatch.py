@@ -209,8 +209,8 @@ def main(argv: list[str] | None = None) -> int:
             content = (f"@{NAMES['architect']} @{NAMES['builder']} [nudge] quiet={minutes}m\n"
                        f"😴 The room has been quiet for {minutes} minutes and the run isn't finished. Architect: check "
                        "where the current stage stands (the last handoff, the latest commit, the latest verdicts) and "
-                       "hand the next step to the seat that owns it. Builder: if you were mid-task, carry on and post "
-                       "your `[ready]` when the revision is committed.")
+                       "hand the next step to the seat that owns it. Builder: if you were mid-task, carry on, and hand "
+                       "a committed revision off with `[ready]` once the checker claims the stage on it.")
             body = {"message": {"content": content, "mentions": [
                 {"id": arch["agent_id"], "name": NAMES["architect"]},
                 {"id": builder["agent_id"], "name": NAMES["builder"]}]}}
