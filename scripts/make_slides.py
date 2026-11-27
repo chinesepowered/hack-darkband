@@ -118,7 +118,7 @@ async def render(html: str, out: Path) -> None:
     from playwright.async_api import async_playwright
 
     tmp = out.with_suffix(".html")
-    tmp.write_text(f"<!doctype html><meta charset=utf-8><style>{make_video.CARD_CSS}{SLIDE_CSS}</style>{html}")
+    tmp.write_text(f"<!doctype html><meta charset=utf-8><title>Onsen · a dark software factory on BAND</title><style>{make_video.CARD_CSS}{SLIDE_CSS}</style>{html}")
     for name in ("capybara.svg", "architecture.png"):
         (tmp.parent / name).write_bytes((ROOT / "assets" / name).read_bytes())
     async with async_playwright() as p:

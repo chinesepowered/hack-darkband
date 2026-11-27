@@ -4,7 +4,7 @@
 BAND room turn a written spec into working software, and you say exactly two things: `build SPEC.md` and `ship`.
 
 - Repo: this repository (start with the README)
-- Demo video: `demo/onsen-demo.mp4` (built from run 7, with the crew in BAND Desktop)
+- Demo video: `demo/capyfinder-demo.mp4` (built from run 7, with the crew in BAND Desktop)
 - Real runs: `runs/` (cleaned room transcripts and receipts)
 
 BAND's hacker guide asks for four short answers.
@@ -161,6 +161,6 @@ Full setup: [docs/band-desktop.md](band-desktop.md). Runs 5–7 ran this way.
 
 ## Checklist
 
-- [x] Demo video (`demo/onsen-demo.mp4`, built from run 7 with the crew in BAND Desktop)
+- [x] Demo video (`demo/capyfinder-demo.mp4`, built from run 7 with the crew in BAND Desktop)
 - [x] Run 7 transcript, receipt and revealed exam in `runs/run7/` (and every earlier run in `runs/`)
 - [x] README quickstart: a fresh clone runs `uv sync` and passes all 29 tests; the factory itself ran live in runs 1–4
