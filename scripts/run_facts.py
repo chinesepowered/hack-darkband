@@ -66,9 +66,18 @@ def main() -> int:
     start = ts(human[0]) if human else ts(text[0])
     gates = {}
     for m in by_seat:
-        g = re.search(r"\[gate\] stage=(\d+) ACCEPTED commit=(\w+)", m.get("content") or "")
+        body = m.get("content") or ""
+        g = re.search(r"\[gate\] stage=(\d+) ACCEPTED commit=(\w+)", body)
         if g and g.group(1) not in gates:
-            gates[g.group(1)] = {"commit": g.group(2), "minutes_from_task": round((ts(m) - start).total_seconds() / 60)}
+            first = body.split("\n", 1)[0]
+            exam = re.search(r"\bexam=(\S+)", first)
+            review = re.search(r"\breview=(\w+)", first)
+            shipped = re.search(r"\((\d+)/(\d+) shipped checks\)", first)
+            gates[g.group(1)] = {"commit": g.group(2), "at": ts(m).strftime("%H:%M"),
+                                 "minutes_from_task": round((ts(m) - start).total_seconds() / 60),
+                                 "exam_curve": exam.group(1) if exam else None,
+                                 "review": review.group(1) if review else None,
+                                 "shipped_checks": f"{shipped.group(1)}/{shipped.group(2)}" if shipped else None}
     tags = collections.Counter()
     for m in by_seat:
         t = re.search(r"\[([a-z-]+)\]", m.get("content") or "")
