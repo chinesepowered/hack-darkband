@@ -19,6 +19,12 @@ run="$(basename "$repo")-$(date +%H%M)"
 logs="$ONSEN_HOME/logs/$run"; mkdir -p "$logs"
 band daemon status 2>/dev/null | grep -q "daemon running" || scripts/band-desktop-daemon.sh
 
+# A fresh run sees nothing of earlier ones: other runs' exam workspaces and the seats' scratch files move out of reach.
+archive="${ONSEN_ARCHIVE:-$HOME/onsen-archive}/before-$run"; mkdir -p "$archive"
+for d in "$ONSEN_HOME"/exams/* /tmp/opencode /tmp/handoff-stage* /tmp/onsen-serve-* /tmp/onsen-exam-*; do
+  [ -e "$d" ] && [ "$d" != "$ONSEN_HOME/exams/$(basename "$repo")" ] && mv "$d" "$archive/" 2>/dev/null || true
+done
+
 uv run onsen-cleanup --all >/dev/null || true        # old rooms can't wake the seats mid-run
 pkill -f "onsen-nap-guard" 2>/dev/null || true
 nohup uv run onsen-nap-guard > "$logs/napguard.log" 2>&1 &

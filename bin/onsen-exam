@@ -289,7 +289,8 @@ def publish(argv: list[str]) -> None:
     for attempt in range(5):
         add = subprocess.run(["git", "-C", repo, "add", "--", rel], capture_output=True, text=True)
         com = subprocess.run(["git", "-C", repo, "commit", "-q", "-m", f"exams: publish stage {stage}'s sealed exam",
-                              "--", rel], capture_output=True, text=True)
+                              "--", rel], capture_output=True, text=True,
+                             env=dict(os.environ, ONSEN_EXAM_PUBLISH="1"))  # the Examiner's one allowed commit
         if add.returncode == 0 and com.returncode == 0:
             break
         if "index.lock" not in add.stderr + com.stderr:

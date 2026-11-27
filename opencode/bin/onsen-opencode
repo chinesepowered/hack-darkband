@@ -2,7 +2,7 @@
 # BAND Desktop starts each Onsen crew agent's OpenCode runtime through a per-role launcher
 # (onsen-opencode-architect, -builder, -reviewer), which calls this with the role first:
 #   onsen-opencode <role> acp
-# It loads Onsen's OpenCode config (Qwen 3.8 on W&B), picks the role's agent profile, which sets its
+# It loads Onsen's OpenCode config (ONSEN_OPENCODE_CONFIG, default Qwen 3.8 on W&B), picks the role's agent profile, which sets its
 # permissions (the Reviewer can't edit), and keeps out skills and prompts that other tools on the machine
 # may have installed.
 role="$1"; shift
@@ -15,6 +15,11 @@ export OPENCODE_DISABLE_CLAUDE_CODE=1 OPENCODE_DISABLE_EXTERNAL_SKILLS=1
 seat=$(printf '%s' "$role" | sed 's/^./\U&/')
 export GIT_AUTHOR_NAME="$seat" GIT_COMMITTER_NAME="$seat" \
        GIT_AUTHOR_EMAIL="$role@onsen.example" GIT_COMMITTER_EMAIL="$role@onsen.example"
+# The Examiner and the Reviewer never commit to the shared repository (onsen-exam publish excepted): a pre-commit
+# hook for every repository they touch refuses it and says why.
+case "$role" in examiner|reviewer)
+  export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0="$here/git-hooks" ;;
+esac
 if [ "${1:-}" = acp ]; then
   # BAND Desktop posts whatever text a turn ends with; the crew speaks through `band send` instead, so closing
   # remarks that aren't protocol messages stay out of the room (see src/onsen/acp_filter.py).

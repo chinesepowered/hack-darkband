@@ -1,0 +1,9 @@
+#!/bin/sh
+# Installed (through GIT_CONFIG_*) for the seats that never commit to the shared repository: the Examiner and the
+# Reviewer. The one exception is `onsen-exam publish`, which commits an accepted stage's sealed exam.
+[ "${ONSEN_EXAM_PUBLISH:-}" = 1 ] && exit 0
+case "${GIT_AUTHOR_NAME:-}" in
+  Examiner) echo "Not committed: the Examiner doesn't commit to the shared repository. Your exam stays in your own workspace; once the stage is accepted, \`onsen-exam publish\` commits it." >&2 ;;
+  *) echo "Not committed: the ${GIT_AUTHOR_NAME:-seat} never changes the shared repository; only the Builder (and the Architect, when it starts a stage folder) commits there." >&2 ;;
+esac
+exit 1
