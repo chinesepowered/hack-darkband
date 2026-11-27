@@ -54,4 +54,12 @@ for log in "$out"/stage-*.log; do
        /^E / && name != "" && shown < 6 { if (shown == 0) print "* " name; print "    " substr($0, 1, 240); shown++ }' "$log"
 done 2>/dev/null | head -150
 echo "--- full logs: $out"
+# The moment a revision claims the stage is the moment to hand it off: graders waiting on a Builder that keeps
+# polishing is time the band loses, and a later revision gets its own [ready].
+claimed=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("claimed_stage") or "")' "$out/report.json" 2>/dev/null)
+if [ "$claimed" = "$stage" ]; then
+  echo "--- the checker claims stage $stage on commit $sha. If you are the Builder and haven't handed this commit off yet,"
+  echo "    do it now: post [ready] stage=$stage commit=$sha to the Examiner and the Reviewer, with the result line above."
+  echo "    Then keep improving in new revisions: the failures listed above are your next work, each with its own [ready]."
+fi
 git -C "$repo" worktree remove --force "$work/repo" >/dev/null 2>&1; rm -rf "$work"

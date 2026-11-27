@@ -83,34 +83,43 @@ def _agent(initials: str, color: str, name: str, what: str, chip: str) -> str:
 CARDS = {
     "title": STEAM + """<div class="wrap"><div class="halo"><img src="capybara.svg" width="300"></div><h1>Onsen</h1>
       <div class="tag">A dark software factory on BAND</div><div class="sub">One rule: don't wake the capybara.</div></div>""",
-    "crew": STEAM + '<div class="wrap wide"><div class="tag">Six agents · one BAND room · one human message</div><div class="grid">'
-      + _agent("A", "#f2cc60", "Architect", "plans, hands out stages", "BAND Desktop · OpenCode")
-      + _agent("B", "#d2a8ff", "Builder", "builds each stage", "BAND Desktop · OpenCode")
+    "crew": STEAM + '<div class="wrap wide"><div class="tag">Five seats · one BAND room · one human message</div><div class="grid">'
+      + _agent("A", "#f2cc60", "Architect", "plans, hands off whole stages", "BAND Desktop · OpenCode")
+      + _agent("B", "#d2a8ff", "Builder", "writes every line of the service", "BAND Desktop · OpenCode")
+      + _agent("E", "#ff7b72", "Examiner", "keeps a sealed, executable exam", "BAND Desktop · OpenCode")
       + _agent("R", "#79c0ff", "Reviewer", "reads every diff, can say no", "BAND Desktop · read-only")
-      + _agent("S", "#56d364", "Scout", "asks the live web, not you", "Nimble")
-      + _agent("E", "#ff7b72", "Examiner", "keeps the sealed exam", "Qwen 3.8 · Playwright")
-      + _agent("NG", "#ffa657", "Nap Guard", "the only one who wakes you", "deterministic")
-      + """</div><div class="foot">Every model call: Qwen 3.8 27B on W&amp;B Inference</div></div>
+      + _agent("NG", "#ffa657", "Nap Guard", "gates each stage; runs the checker itself", "band-sdk · no model")
+      + """</div><div class="foot">Every coding seat: GPT-6 Luna through OpenCode, in BAND Desktop</div></div>
       <img class="corner" src="capybara-badge.svg">""",
-    "desktop": STEAM + """<div class="wrap wide"><div class="tag">BAND Desktop runs the coding crew</div>
-      <div class="sub" style="margin-bottom:24px">Its daemon starts each agent's OpenCode runtime the moment a message mentions it.</div>
+    "desktop": STEAM + """<div class="wrap wide"><div class="tag">BAND Desktop runs the four coding seats</div>
+      <div class="sub" style="margin-bottom:24px">Its daemon starts each seat's OpenCode runtime the moment a message mentions it.</div>
       <img class="shot" src="desktop-agents.png" style="width:1120px">
-      <div class="chips"><span>🧑‍💻 OpenCode runtime per agent</span><span>🍊 Qwen 3.8 on W&amp;B</span>
+      <div class="chips"><span>🧑‍💻 OpenCode runtime per seat</span><span>🌙 GPT-6 Luna</span>
       <span>🔒 permissions per role</span><span>👀 live reasoning · Interrupt</span></div></div>
       <img class="corner" src="capybara-badge.svg">""",
-    "lessons": STEAM + """<div class="wrap wide" style="max-width:1080px;width:1080px"><div class="tag">It took seven runs to get here</div>
+    "gate": STEAM + """<div class="wrap wide" style="max-width:1080px;width:1080px"><div class="tag">No seat's word opens the gate</div>
       <div class="rows">
-      <div class="row"><span class="pill">Run 1</span><div>The Builder edited the data to pass a check. The Reviewer said no.
-        <em>Approvals now bind to the exact commit that passed.</em></div></div>
-      <div class="row"><span class="pill">Run 4</span><div>The exam caught a bug the Reviewer had approved, and four in the factory.
-        <em>Each fix went into the factory.</em></div></div>
-      <div class="row"><span class="pill">Runs 5–6</span><div>BAND Desktop posted every closing remark, so agents pinged each other.
-        <em>The launcher keeps them out of the room now.</em></div></div>
-      <div class="row"><span class="pill">Run 7</span><div>One kickoff, one wake-up, <code>ship</code>. 🛁</div></div>
+      <div class="row"><span class="pill">exam</span><div>The Examiner's checks are code, sealed by hash before any build exists.
+        <em><code>onsen-exam</code> runs them and computes the verdict.</em></div></div>
+      <div class="row"><span class="pill">review</span><div>The Reviewer reads the diff against the spec and probes the running commit.
+        <em>Its seat can't edit or commit.</em></div></div>
+      <div class="row"><span class="pill">gate</span><div>Nap Guard recounts the exam, then runs the event's checker on that exact commit itself.
+        <em>Only then is the stage in.</em></div></div>
+      </div></div><img class="corner" src="capybara-badge.svg">""",
+    "lessons": STEAM + """<div class="wrap wide" style="max-width:1080px;width:1080px"><div class="tag">What the practice runs taught the factory</div>
+      <div class="rows">
+      <div class="row"><span class="pill">Exam</span><div>A model Examiner reported 26 checks after running one.
+        <em>Verdicts are computed by tools now.</em></div></div>
+      <div class="row"><span class="pill">Room</span><div>Seats argued by re-posting, and the gatekeeper counted every repeat.
+        <em>A linter on <code>band send</code>: one tag owner, one verdict per commit.</em></div></div>
+      <div class="row"><span class="pill">Idle</span><div>The Builder ended turns on "I'll keep going" and slept.
+        <em>Its launcher keeps it going until it hands off.</em></div></div>
+      <div class="row"><span class="pill">Hang</span><div>A busy-looping service froze the checker for everyone.
+        <em>Checks are capped and say why.</em></div></div>
       </div></div><img class="corner" src="capybara-badge.svg">""",
     "outro": STEAM + """<div class="wrap"><div class="halo"><img src="capybara.svg" width="250"></div><h1>Onsen</h1>
       <div class="sub" style="color:#fff6e8;font-size:30px">Specs go in. Software comes out. The capybara keeps napping.</div>
-      <div class="foot">Built on BAND · with Nimble · Qwen 3.8 on W&amp;B</div>
+      <div class="foot">Built on BAND · researched with Nimble · GPT-6 Luna via OpenCode</div>
       <div class="url">github.com/chinesepowered/hack-darkband</div></div>""",
 }
 # Recordings shown inside a window on the card background: the app as the factory built it, and BAND Desktop.
@@ -130,7 +139,7 @@ def window_frame(x: int, y: int, w: int, h: int, title: str) -> str:
   </div></div>"""
 
 
-APP_FRAME = window_frame(APP_X, APP_Y, APP_W, APP_H, "localhost:8000 · CapyFinder, as the factory built it")
+APP_FRAME = window_frame(APP_X, APP_Y, APP_W, APP_H, "Dossier, as the factory built it")
 
 
 def ffmpeg_probe_width(path: Path) -> int:
