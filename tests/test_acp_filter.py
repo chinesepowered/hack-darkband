@@ -101,13 +101,30 @@ def test_keep_going_is_off_by_default():
     assert json.loads(f.from_agent(end(7))[-1])["id"] == 7 and not f.to_agent
 
 
-def test_closing_remarks_can_be_dropped_entirely_and_then_keep_going_continues():
+def test_a_tagged_remark_after_band_send_is_a_duplicate_and_stays_out():
     f = Filter(keep_going=True, role="examiner", pass_remarks=False)
     f.from_client(line({"jsonrpc": "2.0", "id": 5, "method": "session/prompt", "params": {"sessionId": "s"}}))
-    f.from_agent(tool_call("s", "ls"))
+    f.from_agent(tool_call("s", "band --profile default --session onsen-examiner send ROOM --body-file /tmp/e.md"))
     f.from_agent(chunk("s", "[exam] stage=1 passed 13/14, sent to the Builder."))
-    assert f.from_agent(end(5)) == []  # the tagged remark isn't posted, so the seat hasn't spoken: carry on
-    req = json.loads(f.to_agent.pop())
-    assert "exam" in req["params"]["prompt"][0]["text"] and "onsen-exam seal" in req["params"]["prompt"][0]["text"]
-    out = f.from_agent(end(req["id"]))  # no tools this time: the turn ends, and no remark reaches the room
-    assert texts(out) == "" and json.loads(out[-1])["id"] == 5
+    out = f.from_agent(end(5))
+    assert texts(out) == "" and json.loads(out[-1])["id"] == 5 and not f.to_agent
+
+
+def test_a_verdict_written_as_the_turns_answer_reaches_the_room_when_nothing_else_was_sent():
+    f = Filter(keep_going=True, role="reviewer", pass_remarks=False, max_keep_going=1)
+    f.from_client(line({"jsonrpc": "2.0", "id": 3, "method": "session/prompt", "params": {"sessionId": "s"}}))
+    f.from_agent(tool_call("s", "git diff abc..def"))
+    f.from_agent(chunk("s", "[review] stage=1 commit=def BLOCKED: providers.py:87"))
+    out = f.from_agent(end(3))
+    # the remark is the seat's only message this turn, so it goes to the room and the turn ends
+    assert "[review]" in texts(out) and json.loads(out[-1])["id"] == 3 and not f.to_agent
+
+
+def test_the_reviewer_is_asked_to_send_its_verdict():
+    f = Filter(keep_going=True, role="reviewer", pass_remarks=False)
+    f.from_client(line({"jsonrpc": "2.0", "id": 4, "method": "session/prompt", "params": {"sessionId": "s"}}))
+    f.from_agent(tool_call("s", "onsen-serve /repo stage-1 abc"))
+    f.from_agent(chunk("s", "I checked it."))
+    assert f.from_agent(end(4)) == []
+    prompt = json.loads(f.to_agent.pop())["params"]["prompt"][0]["text"]
+    assert "send your [review] now" in prompt

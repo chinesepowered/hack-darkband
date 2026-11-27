@@ -16,7 +16,7 @@ routing.
 | `[gate] stage=N ACCEPTED\|WAITING commit=<sha>` | Nap Guard → Architect, Examiner (accepted) or Builder, Architect (waiting) | the exam passed and the review approved the same commit; Nap Guard then ran the acceptance checker on it, and it claims the stage (or doesn't yet) |
 | `[dispute] stage=N commit=<sha>` | Builder → the seat whose verdict it disputes, and Nap Guard | evidence that a check or a review finding contradicts the requirements |
 | `[reveal] stage=N sha256=…` | Examiner → Architect, Nap Guard | the stage's exam is published in the repository; the hash matches the seal (written by `onsen-exam publish`) |
-| `[chill] stage=N break=B` | Nap Guard → Architect, Builder | the stage stopped improving. Break 1: re-plan. Break 2: the exam is advisory. Break 3: the review effort is spent; the checker alone gates the stage and open findings carry forward |
+| `[chill] stage=N break=B` | Nap Guard → Architect, Builder | the stage stopped improving. Break 1: re-plan. Break 2: one grader's pass (exam or review) plus the checker accepts the stage. Break 3: the checker alone does. Open findings carry forward |
 | `[nudge]` | Nap Guard → Architect, Builder | the room has been quiet for a while and the run isn't finished |
 | `[decide]` | Nap Guard → the asker | nobody asks the human: decide from the requirements |
 | `[report]` | Architect → Nap Guard, every seat | the end of the run: stages, accepted commits, blockers, evidence |

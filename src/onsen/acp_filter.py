@@ -13,8 +13,9 @@ While a turn is in flight, it holds the agent's message text. When the turn ends
 is a protocol message, i.e. it starts with a tag such as `[ready]`. Tool calls, reasoning, permission requests and
 everything else pass straight through. Standard library only, because the runtime's environment is minimal.
 
-Closing remarks: by default none reach the room, not even tagged ones (ONSEN_PASS_REMARKS=1 passes tagged ones):
-seats speak through `band send`, and a closing "[exam] … sent to the Builder" only duplicated the real message.
+Closing remarks: untagged ones never reach the room. A tagged one reaches it only if the seat sent nothing else that
+turn (ONSEN_PASS_REMARKS=1 passes every tagged one): seats speak through `band send`, so a closing "[exam] … sent to
+the Builder" only duplicated the real message, but a verdict written as the turn's answer is the seat's message.
 
 Keep going (ONSEN_KEEP_GOING=1, set for the Builder and the Examiner, with a prompt for each): a seat is woken only by a mention, so a Builder that ends its
 turn on "I'll keep working on X" sits idle until someone mentions it. When a turn that used tools ends without the
@@ -46,6 +47,9 @@ KEEP_GOING = {
                 "stage's work is unfinished, carry on now: implement, commit, run the checker, and post [ready] when it "
                 "claims the stage. If your latest commit is already handed off and you are only waiting for verdicts, "
                 "end your turn without using any tool."),
+    "reviewer": ("Your turn ended, but you haven't sent anything to the room, so nobody has your verdict. If you "
+                 "reviewed a commit that was handed off with [ready], send your [review] now with band send, to the "
+                 "Builder and Nap Guard. If nothing is waiting for your review, end your turn without using any tool."),
     "examiner": ("Your turn ended, but you haven't sent anything to the room. If every part of the stage's task has "
                  "arrived and its exam isn't sealed yet, write it now and seal it with onsen-exam seal. If a [ready] is "
                  "waiting for your grade, grade it. If the exam is sealed and nothing is waiting, end your turn without "
@@ -104,7 +108,10 @@ class Filter:
             protocol = is_protocol(text)
             t = self.turns.get(sid)
             stop = (msg.get("result") or {}).get("stopReason")
-            posted = protocol and self.pass_remarks  # a closing remark that reaches the room counts as a message
+            # A tagged closing remark reaches the room when remarks pass, or when the seat sent nothing else this turn
+            # (then it is the seat's message, e.g. a verdict written as the turn's answer, not a duplicate of one).
+            forward = protocol and (self.pass_remarks or not (t and t["sent"]))
+            posted = forward
             if (self.keep_going and t and stop == "end_turn" and t["tools"] > 0 and not t["sent"] and not posted
                     and t["continued"] < self.max_keep_going):
                 # The agent stopped mid-work without telling anyone: ask it to carry on, in the same client turn.
@@ -117,7 +124,7 @@ class Filter:
                                                        "prompt": [{"type": "text", "text": KEEP_GOING.get(
                                                            self.role, KEEP_GOING["builder"])}]}}))
                 return []
-            kept = [raw for raw, _ in chunks] if protocol and self.pass_remarks else []
+            kept = [raw for raw, _ in chunks] if forward else []
             if t is not None:
                 self.turns.pop(sid, None)
                 if msg["id"] != t["client_id"]:  # the client's turn ends with its own request id

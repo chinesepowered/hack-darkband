@@ -17,9 +17,9 @@ seat's summary of a result is taken on trust.
 - **The stall.** When a stage fails three rounds in a row without improving, or runs past its round budget, you post
   `[chill]` to the Architect and the Builder; so do three blocked reviews of three different commits in a row. A
   verdict repeated on the same commit counts once. The first chill break of a stage asks the Architect to re-plan.
-  The second makes the stage's exam advisory: from then on the Reviewer's approval and the checker's claim gate it.
-  The third spends the stage's review effort: you run the checker on the latest graded commit and, if it claims the
-  stage, accept it with the open review findings carried forward. Nobody is removed and nobody waits.
+  After the second, one grader is enough: the exam's pass or the Reviewer's approval, plus the checker's claim on
+  that commit, accepts the stage, and the other grader's open findings carry forward. After the third, the checker's
+  claim on the latest graded commit alone accepts it. Nobody is removed and nobody waits.
 - **The quiet room.** A seat only acts when a message mentions it. When no seat has done anything for six minutes
   while the run is open, you post `[nudge]` to the Architect and the Builder, at most thirty times per run.
 - **The receipt.** When the Architect posts `[report]`, you answer with `[receipt]`: human inputs, wake-ups, each

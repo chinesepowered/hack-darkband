@@ -179,9 +179,10 @@ async def test_dark_second_chill_makes_the_exam_advisory_and_third_falls_back_to
     await deliver(ng, "@b @nap-guard [review] stage=1 commit=eee5555 APPROVED", "Reviewer", tools)
     for c in ("eee4444", "eee6666", "eee7777"):
         await deliver(ng, f"@b @nap-guard [exam] stage=1 verdict=FAIL passed=5/10 commit={c}", "Examiner", tools)
-    assert "break=2" in last(tools) and "advisory" in last(tools)
+    assert "break=2" in last(tools) and "one grader is enough" in last(tools)
     await ng.settle()  # the approval already on record is checked right away
-    assert posted and posted[-1]["content"].startswith("[gate] stage=1 ACCEPTED") and "advisory" in posted[-1]["content"]
+    gate = posted[-1]["content"] if posted else ""
+    assert gate.startswith("[gate] stage=1 ACCEPTED") and "review=approved" in gate and "carried forward" in gate
 
     # stage 2: three blocked commits after two breaks -> the third break gates on the checker alone
     ng2, posted2, runs2 = dark_guard({"fff9999": 2})
@@ -193,7 +194,7 @@ async def test_dark_second_chill_makes_the_exam_advisory_and_third_falls_back_to
         await deliver(ng2, f"@b @nap-guard [review] stage=2 commit={c} BLOCKED: city parser", "Reviewer", tools2)
     assert "break=3" in last(tools2) and "review effort is spent" in last(tools2)
     await ng2.settle()
-    assert runs2 == [(2, "fff9999")]
+    assert runs2[-1] == (2, "fff9999")
     gate = posted2[-1]["content"]
     assert gate.startswith("[gate] stage=2 ACCEPTED commit=fff9999") and "review=carried" in gate
 
@@ -208,7 +209,7 @@ async def test_dark_repeated_verdicts_on_one_commit_count_once(monkeypatch):
         await deliver(ng, "@b @nap-guard [review] stage=1 commit=abc0001 BLOCKED: greedy city", "Reviewer", tools)
         await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=14/14 commit=abc0001", "Examiner", tools)
     assert not any(m["content"].startswith("[chill]") for m in tools.messages_sent)
-    # blocks on two more distinct commits make three in a row: that is a stall
+    # blocks on two more distinct commits are two in a row: that is a stall
     for c in ("abc0002", "abc0003"):
         await deliver(ng, f"@b @nap-guard [review] stage=1 commit={c} BLOCKED: greedy city", "Reviewer", tools)
     assert last(tools).startswith("[chill] stage=1 break=1 reason=review-thrash")
@@ -217,3 +218,21 @@ async def test_dark_repeated_verdicts_on_one_commit_count_once(monkeypatch):
     await deliver(ng, "@b @nap-guard [review] stage=1 commit=abc0004 APPROVED", "Reviewer", tools)
     await ng.settle()
     assert runs == [(1, "abc0004")]
+
+
+async def test_dark_after_two_chill_breaks_a_passing_exam_and_the_checker_accept_the_stage(monkeypatch):
+    """Run N: the exam passed at 93% while the Reviewer kept blocking edge cases; after two breaks the exam's pass and
+    the checker's claim are enough, and the review findings carry forward."""
+    monkeypatch.setenv("ONSEN_DARK", "1")
+    ng, posted, runs = dark_guard({"bbb0007": 1})
+    tools = FakeAgentTools(participants=CREW)
+    for c in ("bbb0001", "bbb0002", "bbb0003", "bbb0004"):  # two blocked commits in a row are a stall
+        await deliver(ng, f"@b @nap-guard [exam] stage=1 verdict=PASS passed=14/15 commit={c}", "Examiner", tools)
+        await deliver(ng, f"@b @nap-guard [review] stage=1 commit={c} BLOCKED: empty exact search", "Reviewer", tools)
+    assert "break=2" in last(tools)
+    await ng.settle()
+    assert runs and runs[-1] == (1, "bbb0004") and posted[-1]["content"].startswith("[gate] stage=1 WAITING")
+    await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=14/15 commit=bbb0007", "Examiner", tools)
+    await ng.settle()
+    gate = posted[-1]["content"]
+    assert gate.startswith("[gate] stage=1 ACCEPTED commit=bbb0007") and "review=carried" in gate

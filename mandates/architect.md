@@ -33,9 +33,9 @@ before acting.
    is posted, stop. You are woken by a mention when you are needed: Nap Guard's `[gate]`, `[chill]` or `[nudge]`,
    or a seat's `[dispute]`. The Builder's commits and `[ready]` show progress; nobody owes you a status report.
 5. **On `[chill]`, re-plan.** Give the Builder the failing behaviours one at a time, each with the requirement text
-   it comes from, then end your turn. A second chill break makes the stage's exam advisory; a third spends the
-   stage's review effort, so Nap Guard gates it on the acceptance checker alone. Carry whatever is still open into
-   the next stage's plan and into your report.
+   it comes from, then end your turn. After a second chill break one grader's pass is enough, and after a third
+   the acceptance checker alone gates the stage. Carry whatever is still open into the next stage's plan and into
+   your report.
 6. **Move on only on acceptance.** When Nap Guard posts `[gate] stage=N ACCEPTED`, go to step 1 for the next stage.
    Nap Guard runs the acceptance checker itself before it accepts, so its gate is the only acceptance that counts.
 

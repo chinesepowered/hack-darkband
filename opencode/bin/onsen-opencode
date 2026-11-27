@@ -25,10 +25,10 @@ export GIT_AUTHOR_NAME="$seat" GIT_COMMITTER_NAME="$seat" \
 case "$role" in examiner|reviewer)
   export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0="$here/git-hooks" ;;
 esac
-# The Builder and the Examiner work until they hand off: a turn that ends mid-work without a message to the room is
+# The Builder, the Examiner and the Reviewer work until they post: a turn that ends mid-work without a message to the room is
 # continued by the proxy below (see "Keep going" in src/onsen/acp_filter.py).
 export ONSEN_ROLE="$role"
-case "$role" in builder|examiner) export ONSEN_KEEP_GOING="${ONSEN_KEEP_GOING:-1}" ;; esac
+case "$role" in builder|examiner|reviewer) export ONSEN_KEEP_GOING="${ONSEN_KEEP_GOING:-1}" ;; esac
 if [ "${1:-}" = acp ]; then
   # BAND Desktop posts whatever text a turn ends with; the crew speaks through `band send` instead, so closing
   # remarks that aren't protocol messages stay out of the room (see src/onsen/acp_filter.py).
