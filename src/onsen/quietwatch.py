@@ -6,8 +6,7 @@ this watches the room: when no seat is mid-turn and none has done anything (no m
 ONSEN_QUIET_MIN minutes (default 6), it posts `[nudge]` as Nap Guard to the Architect and the Builder, at most
 ONSEN_MAX_NUDGES times (default 30). A seat mid-turn is working even when the room shows nothing (a long check, a long
 answer), so the room isn't idle then; but a turn that shows nothing for ONSEN_STUCK_MIN minutes (default 30, longer
-than any capped check) is stuck, and the watcher interrupts it and says so. It exits once the room has a `[report]` or
-`[receipt]`.
+than any capped check) is stuck, and the watcher interrupts it and says so. It exits once Nap Guard posts the run's `[receipt]`.
 
 The late-handoff rule: a seat mid-turn hears nothing, so a Builder that keeps polishing a revision the acceptance
 checker already claims leaves the graders idle. When a checker run (in ONSEN_CHECKS_DIR) claims the open stage on a
@@ -191,9 +190,9 @@ def text_messages(c: httpx.Client, room: str) -> list[dict]:
 
 
 def ends_run(text: str) -> bool:
-    """A message that *is* the Architect's report or Nap Guard's receipt, not one that mentions them."""
-    body = MENTIONS.sub("", text).lstrip()
-    return body.startswith("[report]") or body.startswith("[receipt]")
+    """A message that *is* Nap Guard's receipt, not one that mentions it. The Architect's [report] alone doesn't end the
+    run: Nap Guard answers a report that comes too early (Run T's came three minutes in) and posts no receipt."""
+    return MENTIONS.sub("", text).lstrip().startswith("[receipt]")
 
 
 def main(argv: list[str] | None = None) -> int:

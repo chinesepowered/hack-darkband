@@ -35,7 +35,13 @@ uv run onsen-desktop prepare --workspace "$repo"
 for _ in $(seq 1 90); do grep -q "Agent started" "$logs/napguard.log" 2>/dev/null && break; sleep 1; done
 grep -q "Agent started" "$logs/napguard.log" && echo "✔ Nap Guard online (dark mode)" || { echo "✘ Nap Guard not online: $logs/napguard.log"; exit 1; }
 
+# The run's plan, for the room linter and Nap Guard: the final [report] may end the run only once the last stage is
+# accepted or the open stage has used its time budget (ONSEN_STAGES, default 4; ONSEN_STAGE_BUDGET_MIN, default 120).
+mkdir -p "$ONSEN_HOME/run"
+printf '{"stages": %s, "stage_budget_min": %s, "started_at": %s, "repo": "%s"}\n' "${ONSEN_STAGES:-4}" \
+  "${ONSEN_STAGE_BUDGET_MIN:-120}" "$(date +%s)" "$repo" > "$ONSEN_HOME/run/current.json"
 room="$(uv run onsen-kickoff --title "$title" --skip scout --say-file "$task")"
+cp "$ONSEN_HOME/run/current.json" "$ONSEN_HOME/run/$room.json"
 echo "$room" > "$ONSEN_HOME/last-room"
 nohup uv run onsen-quiet-watch "$room" > "$logs/quietwatch.log" 2>&1 &   # Nap Guard's quiet-room rule
 echo "$! quietwatch" >> "$ONSEN_HOME/factory.pids"

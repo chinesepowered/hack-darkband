@@ -13,6 +13,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import time
 
 HERE = pathlib.Path(__file__).resolve().parent
 TAGS = {"plan", "task", "seal", "ready", "exam", "review", "dispute", "reveal", "report", "decide"}
@@ -115,13 +116,25 @@ ONCE = {"ready": "You already handed off commit {c} with [ready]. A new [ready] 
         "review": "You already gave commit {c} its verdict. Judge each handed-off commit once: a repeated [ready] for "
                   "{c} needs no reply. End your turn.",
         "exam": "You already posted this result for commit {c}. Grade each handed-off commit once (again only after "
-                "voiding a check). End your turn."}
+                "voiding a check). End your turn.",
+        "task": "You already posted {c}, and every seat it names has it. Post each part once: a "
+                "seat that hasn't seen a part yet gets it with the rest, one per turn. End your turn.",
+        "seal": "You already sealed {c}'s exam; the seal stands until the stage is accepted. End your turn: the next "
+                "[ready] wakes you."}
 
 
 def once_key(text: str) -> tuple[str, str] | None:
-    """(tag, commit) for a message that may be sent once per commit."""
+    """(tag, what) for a message that may be sent once: a handoff or verdict per commit, a task part per stage, a seal
+    per stage."""
     m = HEAD.match(text.lstrip())
     tag = m.group(2).lower() if m else ""
+    first = text.lstrip().splitlines()[0] if text.strip() else ""
+    n = re.search(r"\bstage=(\d+)\b", first)
+    if tag == "task" and n:  # Run T: the Architect re-sent part 4/4 five times while a seat said it was missing
+        part = re.search(r"\bpart=(\d+)/\d+", first)
+        return (tag, f"part {part.group(1)} of stage {n.group(1)}'s task") if part else None
+    if tag == "seal" and n:  # Run T: the Examiner re-posted its seal four times
+        return tag, f"stage {n.group(1)}"
     c = re.search(r"\bcommit=([0-9a-f]{7,40})\b", text)
     if tag not in ONCE or not c:
         return None
@@ -179,6 +192,62 @@ CLOSED = ("Stage {n} is accepted, so it is closed: its folder is final and nothi
           "to do yet, end your turn.")
 UNHANDED = ("No [ready] names commit {c}: verdicts are only for commits the Builder handed off, and the gate counts "
             "only those. End your turn; the Builder's [ready] wakes you.")
+UNJUDGED = ("A [dispute] answers a verdict ([exam] or [review]) on a commit, and nothing has judged {c}. If a handoff's "
+            "parts are still arriving, keep each one and end your turn: BAND gives you the rest one per turn, and the "
+            "last part starts your work.")
+
+
+def judged(real: str, room: str, commit: str) -> bool:
+    """Whether an [exam] or [review] names this commit: the graders' ledgers first, then the room's newest messages.
+    If the room can't be read, the dispute goes through."""
+    for seat in ("Examiner", "Reviewer"):
+        try:
+            if any(str(k).endswith(":" + commit[:7]) for k in json.loads(ledger(room, seat).read_text())):
+                return True
+        except (OSError, ValueError):
+            pass
+    try:
+        out = subprocess.run([real, "room", "messages", room, "--json", "--type", "text"], capture_output=True,
+                             text=True, timeout=30).stdout
+        page = json.loads(out)
+        msgs = page if isinstance(page, list) else page.get("messages") or page.get("data") or []
+    except (OSError, ValueError, subprocess.SubprocessError, AttributeError):
+        return True
+    named = re.compile(rf"\bcommit={re.escape(commit[:7])}")
+    for m in msgs:
+        content = (m.get("content") or "").lstrip() if isinstance(m, dict) else ""
+        h = HEAD.match(content)
+        if h and h.group(2).lower() in ("exam", "review") and named.search(content.splitlines()[0]):
+            return True
+    return False
+
+
+def report_too_early(room: str, at: float | None = None) -> str | None:
+    """Why a final [report] would end the run too early, or None: the run ends when its last stage is accepted, or when
+    the open stage has used its whole time budget (the plan run-dark.sh writes, and Nap Guard's acceptance times). Run
+    T's Architect reported three minutes in, amid a confused handoff, and the run ended there."""
+    try:
+        plan = json.loads((onsen_home() / "run" / "current.json").read_text())
+    except (OSError, ValueError):
+        return None
+    try:
+        stages = json.loads((onsen_home() / "state" / f"napguard-{room}.json").read_text()).get("stages", {})
+    except (OSError, ValueError, AttributeError):
+        stages = {}
+    accepted = sorted(int(k) for k, v in stages.items() if isinstance(v, dict) and v.get("accepted"))
+    if int(plan.get("stages") or 0) in accepted:
+        return None
+    open_stage = (accepted[-1] + 1) if accepted else 1
+    opened = (stages.get(str(accepted[-1])) or {}).get("accepted_at") if accepted else None
+    opened = float(opened or plan.get("started_at") or 0)
+    budget = float(plan.get("stage_budget_min") or 120)
+    spent = ((at or time.time()) - opened) / 60
+    if spent >= budget:
+        return None
+    return (f"The run isn't over: stage {open_stage} has been open for {spent:.0f} of its {budget:.0f} minutes, and "
+            f"the band reports only when the last stage is accepted or the open stage's time is spent. Keep working on "
+            f"stage {open_stage}: resend whatever a seat is missing, then end your turn; the next handoff or verdict "
+            f"wakes you.")
 
 
 def check_flow(real: str, room: str, text: str) -> None:
@@ -192,6 +261,12 @@ def check_flow(real: str, room: str, text: str) -> None:
     c = re.search(r"\bcommit=([0-9a-f]{7,40})\b", first)
     if tag in {"review", "exam"} and c and not handed_off(real, room, c.group(1)):
         refuse(UNHANDED.format(c=c.group(1)[:7]))
+    if tag == "dispute" and c and not judged(real, room, c.group(1)):
+        refuse(UNJUDGED.format(c=c.group(1)[:7]))
+    if tag == "report":
+        early = report_too_early(room)
+        if early:
+            refuse(early)
 
 
 def main() -> None:

@@ -49,13 +49,15 @@ LOST_EDIT = ("Your last tool call was cut off before it finished (it was too lon
              "change was lost. Make it again in parts of at most about 300 lines per edit (a large new file can be "
              "written in several appends), and commit each part once it imports and runs.")
 KEEP_GOING = {
-    "builder": ("Your turn ended, but you haven't sent anything to the room, so nobody will wake you to finish. If the "
-                "stage's work is unfinished, carry on now: implement, commit, run the checker, and post [ready] when it "
-                "claims the stage. If your latest commit is already handed off and you are only waiting for verdicts, "
-                "end your turn without using any tool."),
+    "builder": ("Your turn ended, but you haven't sent anything to the room, so nobody will wake you to finish. If a "
+                "numbered handoff is still arriving (you have part i/k but not part k/k), end your turn now without "
+                "using any tool: the next part wakes you. If the stage's work is unfinished, carry on now: implement, "
+                "commit, run the checker, and post [ready] when it claims the stage. If your latest commit is already "
+                "handed off and you are only waiting for verdicts, end your turn without using any tool."),
     "reviewer": ("Your turn ended, but you haven't sent anything to the room, so nobody has your verdict. If you "
                  "reviewed a commit that was handed off with [ready], send your [review] now with band send, to the "
-                 "Builder and Nap Guard. If nothing is waiting for your review, end your turn without using any tool."),
+                 "Builder and Nap Guard. If nothing is waiting for your review, or a numbered handoff is still "
+                 "arriving, end your turn without using any tool."),
     "examiner": ("Your turn ended, but you haven't sent anything to the room. If every part of the stage's task has "
                  "arrived and its exam isn't sealed yet, write it now and seal it with onsen-exam seal. If a [ready] is "
                  "waiting for your grade, grade it. If the exam is sealed and nothing is waiting, end your turn without "

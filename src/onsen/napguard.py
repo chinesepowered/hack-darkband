@@ -56,6 +56,7 @@ from .common import (
     humans,
     load_env,
     now,
+    onsen_home,
     parse_kv,
     parse_tagged,
     run_agent,
@@ -109,6 +110,37 @@ def checker_claimed(n: int, commit: str | None) -> bool:
                 and _same_commit(str(r.get("revision") or ""), commit)):
             return True
     return False
+
+
+def run_plan() -> dict[str, Any] | None:
+    """The run's plan, written by run-dark.sh: how many stages, each stage's time budget, when the run started."""
+    try:
+        return json.loads((onsen_home() / "run" / "current.json").read_text())
+    except (OSError, ValueError):
+        return None
+
+
+def report_too_early(state: dict[str, Any], plan: dict[str, Any] | None = None, at: float | None = None) -> str | None:
+    """Why a final report would end the run too early, or None if it may end: the run ends when its last stage is
+    accepted, or when the open stage has used its whole time budget."""
+    plan = plan if plan is not None else run_plan()
+    if not plan:
+        return None
+    stages = state.get("stages") or {}
+    accepted = sorted(int(k) for k, v in stages.items() if v.get("accepted"))
+    if int(plan.get("stages") or 0) in accepted:
+        return None
+    open_stage = (accepted[-1] + 1) if accepted else 1
+    opened = (stages.get(str(accepted[-1])) or {}).get("accepted_at") if accepted else None
+    opened = opened or plan.get("started_at") or 0
+    budget = float(plan.get("stage_budget_min") or 120)
+    spent = ((at or now()) - float(opened)) / 60
+    if spent >= budget:
+        return None
+    return (f"The run isn't over: stage {open_stage} has been open for {spent:.0f} of its {budget:.0f} minutes, and "
+            f"the band reports only when the last stage is accepted or the open stage's time is spent. Keep working on "
+            f"stage {open_stage}: resend whatever a seat is missing, then end your turn; the next handoff or verdict "
+            f"wakes you.")
 
 
 def thrash_limit() -> int:
@@ -502,6 +534,7 @@ class NapGuardAdapter(SimpleAdapter[Any]):
         if res.get("claimed") == n:
             s["accepted"] = True
             s["accepted_commit"] = commit
+            s["accepted_at"] = now()
             curve = "→".join(f"{e['satisfaction']:.0%}" for e in s["exams"]) or "none"
             accepted = sorted(int(k) for k, v in st.data["stages"].items() if v["accepted"])
             st.save()
@@ -627,6 +660,11 @@ class NapGuardAdapter(SimpleAdapter[Any]):
         d = st.data
         if d["receipt_posted"]:
             await tools.no_reply("receipt already posted")
+            return
+        early = report_too_early(d) if dark() else None
+        if early:
+            # Run T: three minutes in, amid a confused handoff, the Architect reported the run over and it ended.
+            await tools.send_message(f"[decide] {early}", mentions=[msg.sender_id])
             return
         lines = []
         for k in sorted(d["stages"], key=int):

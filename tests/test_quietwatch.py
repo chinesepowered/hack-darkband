@@ -98,3 +98,11 @@ def test_a_handoff_that_quotes_the_gate_accepts_nothing():
     claimed = [(1, "fdf07f5", 1000.0)]
     assert late_handoff([task], claimed, 1000.0 + 301, set(), 300) == (1, "fdf07f5", 1000.0)
     assert newly_accepted([task]) == [] and already_nudged([task]) == set()
+
+
+def test_only_the_receipt_ends_the_watch():
+    """A premature [report] is answered by Nap Guard, not receipted, so the watch must keep going (Run T)."""
+    from onsen.quietwatch import ends_run
+    assert ends_run("@[[0a1b2c3d-0000-4000-8000-00000000000a]] [receipt] 🛁 Onsen dark run complete")
+    assert not ends_run("@[[0a1b2c3d-0000-4000-8000-00000000000a]] [report] stage 1 not accepted")
+    assert not ends_run("[task] stage=1 part=4/4 finish with your `[report]`; Nap Guard posts its `[receipt]`")

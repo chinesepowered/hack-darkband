@@ -84,3 +84,48 @@ def test_nothing_more_happens_in_an_accepted_stage(tmp_path):
     r = send(tmp_path, "Reviewer", "@o/builder @o/nap-guard [review] stage=1 commit=abc1234 BLOCKED: x")
     assert r.returncode == 2 and "closed" in r.stderr
     assert send(tmp_path, "Builder", "@o/examiner @o/reviewer [ready] stage=2 commit=abc1234 ok").returncode == 0
+
+
+
+def test_a_task_part_and_a_seal_are_posted_once(tmp_path):
+    """Run T: the Architect re-sent part 4/4 five times while the Builder said it was missing, and the Examiner
+    re-posted its seal four times."""
+    part = "@o/builder @o/examiner @o/reviewer [task] stage=1 part=4/4 Build stage 1 {}"
+    assert send(tmp_path, "Architect", part.format("in stage-1/")).returncode == 0
+    r = send(tmp_path, "Architect", part.format("again, reworded"))
+    assert r.returncode == 2 and "already posted part 4 of stage 1's task" in r.stderr
+    assert send(tmp_path, "Architect", "@o/builder [task] stage=2 part=4/4 next").returncode == 0
+    seal = "@o/architect @o/nap-guard [seal] stage=1 sha256=" + "a" * 64 + " checks=7"
+    assert send(tmp_path, "Examiner", seal).returncode == 0
+    r = send(tmp_path, "Examiner", seal + " still sealed")
+    assert r.returncode == 2 and "already sealed stage 1's exam" in r.stderr
+
+
+def test_a_dispute_answers_a_verdict(tmp_path):
+    """Run T: the Builder posted five disputes about handoff parts that hadn't reached it yet."""
+    dispute = "@o/architect [dispute] stage=1 commit={c} part 4/4 never arrived"
+    r = send(tmp_path, "Builder", dispute.format(c="4a9de4d"), room_messages=[])
+    assert r.returncode == 2 and "nothing has judged 4a9de4d" in r.stderr and "end your turn" in r.stderr
+    exam = {"content": "@[[0a1b2c3d-0000-4000-8000-00000000000b]] [exam] stage=1 verdict=FAIL passed=5/7 commit=abc1234"}
+    assert send(tmp_path, "Builder", dispute.format(c="abc1234"), room_messages=[exam]).returncode == 0
+
+
+def test_the_final_report_waits_for_the_last_stage_or_the_stage_budget(tmp_path):
+    """Run T: three minutes in, amid a confused handoff, the Architect posted its [report] and the run ended."""
+    import time
+    run = tmp_path / "home" / "run"
+    run.mkdir(parents=True)
+    state = tmp_path / "home" / "state"
+    state.mkdir(parents=True)
+    report = "@o/nap-guard [report] stage 1 not accepted; no later stages opened"
+    (run / "current.json").write_text(json.dumps({"stages": 4, "stage_budget_min": 120, "started_at": time.time() - 180}))
+    r = send(tmp_path, "Architect", report)
+    assert r.returncode == 2 and "stage 1 has been open for 3 of its 120 minutes" in r.stderr
+    # stage 2 opened 125 minutes ago (when stage 1 was accepted): its time is spent, so the band may report
+    (state / "napguard-ROOM.json").write_text(json.dumps({"stages": {
+        "1": {"accepted": True, "accepted_at": time.time() - 125 * 60}}}))
+    assert send(tmp_path, "Architect", report).returncode == 0
+    # the last stage accepted: the run is over
+    (state / "napguard-ROOM.json").write_text(json.dumps({"stages": {str(n): {"accepted": True, "accepted_at": time.time()}
+                                                                     for n in (1, 2, 3, 4)}}))
+    assert send(tmp_path, "Architect", report).returncode == 0

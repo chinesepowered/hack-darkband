@@ -278,3 +278,21 @@ def test_checker_claimed_reads_the_checker_reports(tmp_path, monkeypatch):
                                                                  "revision": rev}))
     assert not checker_claimed(2, "c312718") and checker_claimed(2, "abc1234") and checker_claimed(1, "abc1234")
     assert not checker_claimed(3, "abc1234") and not checker_claimed(2, None)
+
+
+async def test_dark_a_report_before_the_run_is_over_is_answered_not_receipted(monkeypatch):
+    """Run T's Architect reported three minutes in; the receipt ended the run. In a dark run Nap Guard now answers a
+    report that comes before the last stage is accepted, or before the open stage's time is spent, with [decide]."""
+    import time
+    from onsen import napguard
+    monkeypatch.setenv("ONSEN_DARK", "1")
+    monkeypatch.setattr(napguard, "run_plan", lambda: {"stages": 4, "stage_budget_min": 120,
+                                                       "started_at": time.time() - 180})
+    ng, posted, runs = dark_guard({})
+    tools = FakeAgentTools(participants=CREW)
+    await deliver(ng, "@nap-guard [report] stage 1 not accepted", "Architect", tools)
+    assert last(tools).startswith("[decide] The run isn't over: stage 1 has been open for 3 of its 120 minutes")
+    monkeypatch.setattr(napguard, "run_plan", lambda: {"stages": 4, "stage_budget_min": 120,
+                                                       "started_at": time.time() - 121 * 60})
+    await deliver(ng, "@nap-guard [report] stage 1 not accepted: the budget is spent", "Architect", tools)
+    assert last(tools).startswith("[receipt]")
