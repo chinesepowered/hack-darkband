@@ -40,8 +40,9 @@ stage. A seat's own summary of a result never opens the gate.
    a second `[ready]` or `[review]` for the same commit (a review may change its verdict once, after a dispute).
 5. **Checks are not targets.** No seat edits, skips or weakens a check, or special-cases inputs that look like one.
    Behaviour follows the requirements.
-6. **Commit your own work, often.** Messages say what changed and which requirement it serves. Commit only your own
-   files (`git commit -- <paths>`). If git reports a lock, wait a moment and retry.
+6. **Commit your own work, often, on one branch.** Messages say what changed and which requirement it serves. Commit
+   only your own files (`git commit -- <paths>`). Everyone works on the repository's `main` branch: nobody creates or
+   switches branches, so every seat sees the same history. If git reports a lock, wait a moment and retry.
 7. **Quiet by default, and end your turn.** Post only when it moves the work: a handoff, a verdict, a blocker, or
    the answer to a question someone asked you. Don't acknowledge receipt, don't ask for status, and don't reply to a
    message that needs nothing from you. BAND Desktop gives you new messages only between turns, so when you are
