@@ -98,7 +98,9 @@ def test_a_task_part_and_a_seal_are_posted_once(tmp_path):
     seal = "@o/architect @o/nap-guard [seal] stage=1 sha256=" + "a" * 64 + " checks=7"
     assert send(tmp_path, "Examiner", seal).returncode == 0
     r = send(tmp_path, "Examiner", seal + " still sealed")
-    assert r.returncode == 2 and "already sealed stage 1's exam" in r.stderr
+    assert r.returncode == 2 and "already posted this seal" in r.stderr
+    # Run U: re-sealed before any grading (27 checks instead of 12): the new hash must reach the room
+    assert send(tmp_path, "Examiner", seal.replace("a" * 64, "b" * 64)).returncode == 0
 
 
 def test_a_dispute_answers_a_verdict(tmp_path):

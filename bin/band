@@ -119,7 +119,7 @@ ONCE = {"ready": "You already handed off commit {c} with [ready]. A new [ready] 
                 "voiding a check). End your turn.",
         "task": "You already posted {c}, and every seat it names has it. Post each part once: a "
                 "seat that hasn't seen a part yet gets it with the rest, one per turn. End your turn.",
-        "seal": "You already sealed {c}'s exam; the seal stands until the stage is accepted. End your turn: the next "
+        "seal": "You already posted this seal ({c}); it stands until the stage is accepted. End your turn: the next "
                 "[ready] wakes you."}
 
 
@@ -133,8 +133,9 @@ def once_key(text: str) -> tuple[str, str] | None:
     if tag == "task" and n:  # Run T: the Architect re-sent part 4/4 five times while a seat said it was missing
         part = re.search(r"\bpart=(\d+)/\d+", first)
         return (tag, f"part {part.group(1)} of stage {n.group(1)}'s task") if part else None
-    if tag == "seal" and n:  # Run T: the Examiner re-posted its seal four times
-        return tag, f"stage {n.group(1)}"
+    if tag == "seal" and n:  # Run T: the Examiner re-posted its seal four times. A new hash (re-sealed before any
+        h = re.search(r"\bsha256=([0-9a-f]{12})", first)  # grading, as Run U's stage 4 was) is news and must post.
+        return tag, f"stage {n.group(1)}" + (f" ({h.group(1)})" if h else "")
     c = re.search(r"\bcommit=([0-9a-f]{7,40})\b", text)
     if tag not in ONCE or not c:
         return None
