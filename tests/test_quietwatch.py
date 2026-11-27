@@ -125,3 +125,26 @@ def test_a_stage_without_a_claimed_commit_for_45_minutes_is_slow():
             "content": "@[[0a1b2c3d-0000-4000-8000-00000000000a]] [gate] stage=1 ACCEPTED commit=abc1234"}
     opened = 1_000_000.0 + (14 * 3600 - (13 * 3600 + 46 * 60 + 40))
     assert slow_stage([gate], [], opened + 46 * 60, start) == (2, 45)
+
+
+
+def test_handoff_nudges_wait_for_running_checks_and_space_out(tmp_path):
+    """Run U: three handoff nudges in four minutes each interrupted the Builder mid-check."""
+    import fcntl, os
+    from onsen.quietwatch import checker_busy, last_handoff_nudge
+    assert not checker_busy(tmp_path)
+    fd = os.open(tmp_path / "onsen-check.lock", os.O_RDWR | os.O_CREAT)
+    fcntl.flock(fd, fcntl.LOCK_EX)
+    try:
+        import subprocess, sys
+        held = subprocess.run([sys.executable, "-c", "import sys; sys.path.insert(0, 'src'); from pathlib import Path; "
+                               f"from onsen.quietwatch import checker_busy; print(checker_busy(Path('{tmp_path}')))"],
+                              capture_output=True, text=True).stdout.strip()
+        assert held == "True"
+    finally:
+        os.close(fd)
+    texts = [{"inserted_at": "2026-11-27T15:54:33Z", "content": "@[[0a1b2c3d-0000-4000-8000-00000000000a]] [nudge] "
+              "stage=1 handoff=late commit=74a0edf late"},
+             {"inserted_at": "2026-11-27T15:50:00Z", "content": "@[[0a1b2c3d-0000-4000-8000-00000000000b]] [task] "
+              "stage=1 part=4/4 quotes [nudge] stage=1 handoff=late commit=abc1234"}]
+    assert last_handoff_nudge(texts, 1) > 0 and last_handoff_nudge(texts, 2) == 0.0

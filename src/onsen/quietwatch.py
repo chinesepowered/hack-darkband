@@ -185,6 +185,31 @@ def slow_stage(texts: list[dict], claimed: list[tuple[int, str, float]], now: fl
     return None
 
 
+def checker_busy(home: Path | None = None) -> bool:
+    """Whether an acceptance check is running on this machine (onsen-check holds its lock while it runs)."""
+    import fcntl
+    lock = (home or Path(os.environ.get("ONSEN_HOME") or Path.home() / ".onsen")) / "onsen-check.lock"
+    try:
+        fd = os.open(lock, os.O_RDWR | os.O_CREAT)
+    except OSError:
+        return False
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        return False
+    except BlockingIOError:
+        return True
+    finally:
+        os.close(fd)
+
+
+def last_handoff_nudge(texts: list[dict], stage: int) -> float:
+    """When the watch last nudged this stage's handoff (0 if never)."""
+    times = [_ts(m["inserted_at"]) for m in texts if m.get("inserted_at") and is_tag(m.get("content") or "", "nudge")
+             and any(int(st) == stage for st, _sha in NUDGED_RE.findall(m.get("content") or ""))]
+    return max(times, default=0.0)
+
+
 def already_nudged(texts: list[dict]) -> set:
     """(stage, commit) pairs a late-handoff nudge in the room already covers (so a restarted watcher doesn't repeat)."""
     return {(int(st), sha[:7]) for m in texts if is_tag(m.get("content") or "", "nudge")
@@ -267,6 +292,11 @@ def main(argv: list[str] | None = None) -> int:
                            "mentions": [{"id": builder["agent_id"], "name": NAMES["builder"]}]}})
             print(f"closed stage {stage} -> HTTP {r.status_code}", flush=True)
             continue
+        # Run U: three handoff nudges in four minutes, each interrupting the Builder mid-check (which killed the check)
+        # while it fixed the graders' findings before handing off. One nudge per stage per ten minutes, never while a
+        # check is running.
+        if late and (checker_busy() or time.time() - last_handoff_nudge(texts, late[0]) < 600):
+            late = None
         if late:
             stage, sha, t = late
             nudged.add((stage, sha))
