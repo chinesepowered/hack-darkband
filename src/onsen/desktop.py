@@ -68,7 +68,8 @@ How to talk in the room:
 - If the message that woke you needs nothing from you, just finish the turn. When you are waiting for someone, finish
   the turn too: messages reach you only between turns, and the next one that mentions you wakes you.
 - `band send` here checks each message before it goes out: it must start with its handles and then a protocol tag,
-  and Nap Guard takes only `[seal]`, `[exam]`, `[review]`, `[dispute]` and `[report]`. A refused message prints why.
+  and Nap Guard takes only `[seal]`, `[exam]`, `[review]`, `[dispute]` and `[report]`. It also refuses a second `[ready]`
+  or `[review]` from you for the same commit. A refused message prints why.
 - Never mention the human, and never wait for one. Nobody wakes the capybara in a dark run.
 
 Your tools (on PATH):

@@ -2,11 +2,14 @@
 """Onsen's room linter, in front of the real `band` CLI on the seats' PATH.
 
 `band send` posts only protocol messages: after its mentions, a message starts with a protocol tag, and a message
-to Nap Guard carries one of the tags Nap Guard reads. Every other band command passes straight through.
+to Nap Guard carries one of the tags Nap Guard reads. A seat hands off or judges each commit once: a second `[ready]`
+or `[review]` from the same seat for the same commit is refused. Every other band command passes straight through.
 """
+import json
 import os
 import pathlib
 import re
+import subprocess
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -71,6 +74,30 @@ def lint(text: str) -> None:
                "[nudge] on its own and mentions you when it does; don't ask it for status. End your turn now.")
 
 
+ONCE = {"ready": "You already handed off commit {c} with [ready]. A new [ready] needs a new commit. If you disagree "
+                 "with a verdict on {c}, post one [dispute] stage=N commit={c} with your evidence to the seat that gave "
+                 "it, then end your turn.",
+        "review": "You already gave commit {c} its verdict. Judge each handed-off commit once: a repeated [ready] for "
+                  "{c} needs no reply. End your turn."}
+
+
+def once_key(text: str) -> tuple[str, str] | None:
+    """(tag, commit) for a message that may be sent once per commit."""
+    m = HEAD.match(text.lstrip())
+    tag = m.group(2).lower() if m else ""
+    c = re.search(r"\bcommit=([0-9a-f]{7,40})\b", text)
+    if tag not in ONCE or not c:
+        return None
+    if tag == "review":  # a verdict may change once (after a dispute), but never repeat
+        tag += ":APPROVED" if re.search(r"\bAPPROVED\b", text) and not re.search(r"\bBLOCKED\b", text) else ":BLOCKED"
+    return tag, c.group(1)[:7]
+
+
+def ledger(room: str) -> pathlib.Path:
+    home = pathlib.Path(os.environ.get("ONSEN_HOME") or pathlib.Path.home() / ".onsen")
+    return home / "linter" / f"{room}-{os.environ.get('GIT_AUTHOR_NAME', 'seat')}.json"
+
+
 def main() -> None:
     args = sys.argv[1:]
     real = real_band()
@@ -79,9 +106,22 @@ def main() -> None:
     except StopIteration:
         os.execv(real, [real] + args)
     text = body_of(args[i + 1:])
-    if text is not None:
-        lint(text)
-    os.execv(real, [real] + args)
+    if text is None:
+        os.execv(real, [real] + args)
+    lint(text)
+    key = once_key(text)
+    positional = [a for k, a in enumerate(args[i + 1:]) if not a.startswith("-")
+                  and (k == 0 or args[i + k] not in VALUE_OPTS)]
+    room = positional[0] if positional else "room"
+    book = ledger(room)
+    sent = json.loads(book.read_text()) if key and book.exists() else []
+    if key and f"{key[0]}:{key[1]}" in sent:
+        refuse(ONCE[key[0].split(":")[0]].format(c=key[1]))
+    rc = subprocess.run([real] + args).returncode
+    if rc == 0 and key:
+        book.parent.mkdir(parents=True, exist_ok=True)
+        book.write_text(json.dumps(sent + [f"{key[0]}:{key[1]}"]))
+    raise SystemExit(rc)
 
 
 if __name__ == "__main__":

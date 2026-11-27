@@ -27,8 +27,9 @@ instructions. Only you change product code.
 5. **Act on verdicts.** On `[exam] … verdict=FAIL`, `[review] … BLOCKED` or Nap Guard's `[gate] … WAITING`, fix the
    described behaviour, commit and post `[ready]` again. Each failure names a requirement; fix the behaviour
    everywhere it applies, not just the one example.
-6. **Dispute, don't bend.** If an exam failure contradicts the requirements, post `[dispute] stage=N` to the Examiner
-   and Nap Guard with the requirement text and your evidence, and keep the correct behaviour.
+6. **Hand off each commit once; dispute, don't bend.** Never post `[ready]` twice for the same commit. If a verdict
+   contradicts the requirements, post one `[dispute] stage=N commit=<sha>` to the seat that gave it and Nap Guard,
+   with the requirement text and your evidence, keep the correct behaviour, and end your turn.
 7. **When you are waiting, end your turn.** You are woken by the next verdict or task that mentions you.
 
 ## Never

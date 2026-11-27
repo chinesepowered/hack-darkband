@@ -128,8 +128,8 @@ async def test_dark_run_never_wakes_the_human(monkeypatch):
     assert last(tools).startswith("[decide]")
 
     # a stall is a notice to the Architect; nobody is removed or woken
-    for sat in ("5/10", "5/10", "4/10"):
-        await deliver(ng, f"@b @nap-guard [exam] stage=2 verdict=FAIL passed={sat} commit=def5678", "Examiner", tools)
+    for i, sat in enumerate(("5/10", "5/10", "4/10")):
+        await deliver(ng, f"@b @nap-guard [exam] stage=2 verdict=FAIL passed={sat} commit=def567{i}", "Examiner", tools)
     assert last(tools).startswith("[chill] stage=2 break=1")
     assert not tools.participants_removed
 
@@ -169,25 +169,51 @@ async def test_dark_gate_needs_the_checker_to_claim_the_stage(monkeypatch):
     assert posted[-1]["content"].startswith("[gate] stage=1 ACCEPTED commit=ddd4444")
 
 
-async def test_dark_second_chill_makes_the_exam_advisory_and_third_ends_the_run(monkeypatch):
+async def test_dark_second_chill_makes_the_exam_advisory_and_third_falls_back_to_the_checker(monkeypatch):
     monkeypatch.setenv("ONSEN_DARK", "1")
     ng, posted, runs = dark_guard({"eee5555": 1})
     tools = FakeAgentTools(participants=CREW)
-    for _ in range(3):
-        await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=FAIL passed=5/10 commit=eee5555", "Examiner", tools)
+    for c in ("eee1111", "eee2222", "eee3333"):
+        await deliver(ng, f"@b @nap-guard [exam] stage=1 verdict=FAIL passed=5/10 commit={c}", "Examiner", tools)
     assert "break=1" in last(tools) and "re-plan" in last(tools)
     await deliver(ng, "@b @nap-guard [review] stage=1 commit=eee5555 APPROVED", "Reviewer", tools)
-    for _ in range(3):
-        await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=FAIL passed=5/10 commit=eee5555", "Examiner", tools)
+    for c in ("eee4444", "eee6666", "eee7777"):
+        await deliver(ng, f"@b @nap-guard [exam] stage=1 verdict=FAIL passed=5/10 commit={c}", "Examiner", tools)
     assert "break=2" in last(tools) and "advisory" in last(tools)
     await ng.settle()  # the approval already on record is checked right away
     assert posted and posted[-1]["content"].startswith("[gate] stage=1 ACCEPTED") and "advisory" in posted[-1]["content"]
 
-    ng2, posted2, _ = dark_guard({})
+    # stage 2: three blocked commits after two breaks -> the third break gates on the checker alone
+    ng2, posted2, runs2 = dark_guard({"fff9999": 2})
     tools2 = FakeAgentTools(participants=CREW)
-    for _ in range(6):
-        await deliver(ng2, "@b @nap-guard [exam] stage=2 verdict=FAIL passed=5/10 commit=fff6666", "Examiner", tools2)
+    for c in ("aaa0001", "aaa0002", "aaa0003", "aaa0004", "aaa0005", "aaa0006"):
+        await deliver(ng2, f"@b @nap-guard [exam] stage=2 verdict=FAIL passed=5/10 commit={c}", "Examiner", tools2)
     assert "break=2" in last(tools2)
-    for _ in range(3):
-        await deliver(ng2, "@b @nap-guard [review] stage=2 commit=fff6666 BLOCKED", "Reviewer", tools2)
-    assert "break=3" in last(tools2) and "[report]" in last(tools2)
+    for c in ("fff7777", "fff8888", "fff9999"):
+        await deliver(ng2, f"@b @nap-guard [review] stage=2 commit={c} BLOCKED: city parser", "Reviewer", tools2)
+    assert "break=3" in last(tools2) and "review effort is spent" in last(tools2)
+    await ng2.settle()
+    assert runs2 == [(2, "fff9999")]
+    gate = posted2[-1]["content"]
+    assert gate.startswith("[gate] stage=2 ACCEPTED commit=fff9999") and "review=carried" in gate
+
+
+async def test_dark_repeated_verdicts_on_one_commit_count_once(monkeypatch):
+    """A Builder re-posting [ready] for one commit and a Reviewer re-blocking it is one blocked commit, not a stall."""
+    monkeypatch.setenv("ONSEN_DARK", "1")
+    ng, posted, runs = dark_guard({"abc0001": 1})
+    tools = FakeAgentTools(participants=CREW)
+    await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=14/14 commit=abc0001", "Examiner", tools)
+    for _ in range(5):
+        await deliver(ng, "@b @nap-guard [review] stage=1 commit=abc0001 BLOCKED: greedy city", "Reviewer", tools)
+        await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=14/14 commit=abc0001", "Examiner", tools)
+    assert not any(m["content"].startswith("[chill]") for m in tools.messages_sent)
+    # blocks on two more distinct commits make three in a row: that is a stall
+    for c in ("abc0002", "abc0003"):
+        await deliver(ng, f"@b @nap-guard [review] stage=1 commit={c} BLOCKED: greedy city", "Reviewer", tools)
+    assert last(tools).startswith("[chill] stage=1 break=1 reason=review-thrash")
+    # an approval resets the count; the gate then runs the checker on the approved, passed commit
+    await deliver(ng, "@b @nap-guard [exam] stage=1 verdict=PASS passed=14/14 commit=abc0004", "Examiner", tools)
+    await deliver(ng, "@b @nap-guard [review] stage=1 commit=abc0004 APPROVED", "Reviewer", tools)
+    await ng.settle()
+    assert runs == [(1, "abc0004")]

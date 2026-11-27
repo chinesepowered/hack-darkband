@@ -14,9 +14,9 @@ routing.
 | `[exam] stage=N verdict=PASS\|FAIL passed=a/b satisfaction=P% commit=<sha>` | Examiner → Builder, Nap Guard | the exam's result, written by `onsen-exam grade`; failures as observed behaviour plus the requirement |
 | `[review] stage=N commit=<sha> APPROVED\|BLOCKED: …` | Reviewer → Builder **and** Nap Guard | code review against the requirements |
 | `[gate] stage=N ACCEPTED\|WAITING commit=<sha>` | Nap Guard → Architect, Examiner (accepted) or Builder, Architect (waiting) | the exam passed and the review approved the same commit; Nap Guard then ran the acceptance checker on it, and it claims the stage (or doesn't yet) |
-| `[dispute] stage=N` | Builder → Examiner, Nap Guard | evidence that an exam check contradicts the requirements |
+| `[dispute] stage=N commit=<sha>` | Builder → the seat whose verdict it disputes, and Nap Guard | evidence that a check or a review finding contradicts the requirements |
 | `[reveal] stage=N sha256=…` | Examiner → Architect, Nap Guard | the stage's exam is published in the repository; the hash matches the seal (written by `onsen-exam publish`) |
-| `[chill] stage=N break=B` | Nap Guard → Architect, Builder | the stage stopped improving. Break 1: re-plan. Break 2: the exam is advisory. Break 3: report |
+| `[chill] stage=N break=B` | Nap Guard → Architect, Builder | the stage stopped improving. Break 1: re-plan. Break 2: the exam is advisory. Break 3: the review effort is spent; the checker alone gates the stage and open findings carry forward |
 | `[nudge]` | Nap Guard → Architect, Builder | the room has been quiet for a while and the run isn't finished |
 | `[decide]` | Nap Guard → the asker | nobody asks the human: decide from the requirements |
 | `[report]` | Architect → Nap Guard, every seat | the end of the run: stages, accepted commits, blockers, evidence |
@@ -35,8 +35,9 @@ stage. A seat's own summary of a result never opens the gate.
    question; decide from the requirements and state your assumption in your next message.
 3. **One stage at a time.** Work only on the current stage. A stage's folder never changes once the next stage's
    requirements are open.
-4. **Verdicts name commits.** Every `[ready]`, `[exam]`, `[review]` and `[gate]` names the exact commit. An approval
-   is for that commit only.
+4. **Verdicts name commits, once.** Every `[ready]`, `[exam]`, `[review]` and `[gate]` names the exact commit. An
+   approval is for that commit only. A commit is handed off once and judged once by each grader; `band send` refuses
+   a second `[ready]` or `[review]` for the same commit (a review may change its verdict once, after a dispute).
 5. **Checks are not targets.** No seat edits, skips or weakens a check, or special-cases inputs that look like one.
    Behaviour follows the requirements.
 6. **Commit your own work, often.** Messages say what changed and which requirement it serves. Commit only your own
