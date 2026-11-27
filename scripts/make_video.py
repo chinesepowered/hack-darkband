@@ -115,8 +115,8 @@ CARDS = {
         <em>Verdicts are computed by tools now.</em></div></div>
       <div class="row"><span class="pill">Room</span><div>Seats argued by re-posting, and the gatekeeper counted every repeat.
         <em>A linter on <code>band send</code>: one tag owner, one verdict per commit.</em></div></div>
-      <div class="row"><span class="pill">Idle</span><div>The Builder ended turns on "I'll keep going" and slept.
-        <em>Its launcher keeps it going until it hands off.</em></div></div>
+      <div class="row"><span class="pill">Closed</span><div>A Builder kept polishing a stage after it was accepted.
+        <em>Accepted stages close: the repository refuses the commit.</em></div></div>
       <div class="row"><span class="pill">Hang</span><div>A busy-looping service froze the checker for everyone.
         <em>Checks are capped and say why.</em></div></div>
       </div></div><img class="corner" src="capybara-badge.svg">""",
