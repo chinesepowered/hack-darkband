@@ -14,6 +14,8 @@ export OPENCODE_DISABLE_CLAUDE_CODE=1 OPENCODE_DISABLE_EXTERNAL_SKILLS=1
 # BAND Desktop starts runtimes with /usr/bin first on PATH; the seats' tools, the room linter (`band`) among them,
 # must come first, or the seats reach the real CLI directly.
 export PATH="$(cd "$here/.." && pwd)/bin:$PATH"
+# OpenCode's shell tool stops a command after two minutes by default; the acceptance checker takes longer.
+export OPENCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS="${OPENCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS:-900000}"
 # Each seat commits under its own name, so the repository's history shows who did what.
 seat=$(printf '%s' "$role" | sed 's/^./\U&/')
 export GIT_AUTHOR_NAME="$seat" GIT_COMMITTER_NAME="$seat" \

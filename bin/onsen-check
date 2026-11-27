@@ -24,7 +24,7 @@ work=$(mktemp -d /tmp/onsen-check-XXXXXX)
 git -C "$repo" worktree add --detach -q "$work/repo" "$sha" || exit 2
 out="${ONSEN_CHECKS_DIR:-$HOME/.onsen/checks}/stage$stage-$sha-$(date +%H%M%S)"
 mkdir -p "$(dirname "$out")"
-echo "checking stage $stage at commit $sha ($mode mode) — this builds the service, a few minutes"
+echo "checking stage $stage at commit $sha ($mode mode) — this builds the service and takes a few minutes; give the command a timeout of at least 10 minutes"
 (cd "$ONSEN_CHECKER_DIR" && "$py" -m harness run --track "$ONSEN_TRACK" --repo "$work/repo" --stage "$stage" \
    --mode "$mode" --out "$out") 2>&1 | grep -v "^NOTE:" | tail -12
 echo "--- failing checks (first error line each):"
