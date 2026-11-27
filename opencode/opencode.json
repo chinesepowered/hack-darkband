@@ -45,6 +45,9 @@
         "webfetch": "deny",
         "external_directory": "allow",
         "question": "deny"
+      },
+      "tools": {
+        "jam-runtime_AskUserQuestion": false
       }
     },
     "onsen-builder": {
@@ -56,6 +59,9 @@
         "webfetch": "deny",
         "external_directory": "deny",
         "question": "deny"
+      },
+      "tools": {
+        "jam-runtime_AskUserQuestion": false
       }
     },
     "onsen-reviewer": {
@@ -67,6 +73,9 @@
         "webfetch": "deny",
         "external_directory": "deny",
         "question": "deny"
+      },
+      "tools": {
+        "jam-runtime_AskUserQuestion": false
       }
     },
     "onsen-examiner": {
@@ -78,7 +87,13 @@
         "webfetch": "deny",
         "external_directory": "deny",
         "question": "deny"
+      },
+      "tools": {
+        "jam-runtime_AskUserQuestion": false
       }
     }
+  },
+  "tools": {
+    "jam-runtime_AskUserQuestion": false
   }
 }

@@ -13,7 +13,7 @@ import pathlib
 import sys
 import tempfile
 
-LIMIT = 7000
+LIMIT = 28000
 
 
 def chunks(text: str) -> list[str]:

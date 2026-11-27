@@ -24,14 +24,17 @@ routing.
 ## Rules for every seat
 
 1. **Whole handoffs.** A handoff carries everything the receiver needs: the complete requirements and the task.
-   Never point at an earlier message or "see above".
-2. **One stage at a time.** Work only on the current stage. A stage's folder never changes once the next stage's
+   Never point at an earlier message or "see above". A handoff in numbered parts (`part=i/k`) is complete only when
+   part k/k arrives: until then, keep each part and end your turn without replying or asking for the rest.
+2. **Nobody asks the human.** There is no human to answer during the run. Never use a tool that asks the human a
+   question; decide from the requirements and state your assumption in your next message.
+3. **One stage at a time.** Work only on the current stage. A stage's folder never changes once the next stage's
    requirements are open.
-3. **Verdicts name commits.** Every `[ready]`, `[exam]`, `[review]` and `[gate]` names the exact commit. An approval
+4. **Verdicts name commits.** Every `[ready]`, `[exam]`, `[review]` and `[gate]` names the exact commit. An approval
    is for that commit only.
-4. **Checks are not targets.** No seat edits, skips or weakens a check, or special-cases inputs that look like one.
+5. **Checks are not targets.** No seat edits, skips or weakens a check, or special-cases inputs that look like one.
    Behaviour follows the requirements.
-5. **Commit your own work, often.** Messages say what changed and which requirement it serves. Commit only your own
+6. **Commit your own work, often.** Messages say what changed and which requirement it serves. Commit only your own
    files (`git commit -- <paths>`). If git reports a lock, wait a moment and retry.
-6. **Stay in the band.** Questions go to the seat that owns the answer, and the requirements decide. Make the most
+7. **Stay in the band.** Questions go to the seat that owns the answer, and the requirements decide. Make the most
    reasonable reading, state it in your next message, and keep going.
