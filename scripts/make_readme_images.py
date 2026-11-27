@@ -40,7 +40,7 @@ def banner() -> str:
     return (f"<style>{BANNER_CSS}</style>{make_video.STEAM}"
             f'<div class="hero"><div class="halo">{svg("capybara.svg", 380)}</div><div><h1>Onsen</h1>'
             '<div class="tag">A dark software factory on BAND</div><div class="sub">One rule: don\'t wake the capybara.</div>'
-            '<div class="badges"><span>BAND Desktop</span><span>Nimble</span><span>Qwen 3.8 on W&amp;B</span>'
+            '<div class="badges"><span>BAND Desktop</span><span>GPT-6 Luna</span><span>Nimble</span>'
             "<span>a sealed exam</span></div></div></div>")
 
 
@@ -71,12 +71,11 @@ svg.wires{position:absolute;left:0;top:0}
 """
 
 AGENTS = [  # x of the card's left edge, initials, color, name, what it does
-    (84, "A", "#f2cc60", "Architect", "plans the stages"),
-    (263, "B", "#d2a8ff", "Builder", "writes the code"),
-    (442, "R", "#79c0ff", "Reviewer", "read-only, can block a commit"),
-    (672, "E", "#ff7b72", "Examiner", "🔒 keeps the sealed exam"),
-    (851, "S", "#56d364", "Scout", "asks the live web"),
-    (1030, "NG", "#ffa657", "Nap Guard", "guards your nap"),
+    (84, "A", "#f2cc60", "Architect", "plans, hands off whole stages"),
+    (268, "B", "#d2a8ff", "Builder", "writes every line"),
+    (452, "E", "#ff7b72", "Examiner", "🔒 a sealed, executable exam"),
+    (636, "R", "#79c0ff", "Reviewer", "read-only, can block a commit"),
+    (949, "NG", "#ffa657", "Nap Guard", "gates every stage, no model"),
 ]
 
 
@@ -88,39 +87,41 @@ def architecture() -> str:
         <path d="M0 0L10 5L0 10z" fill="{wire}"/></marker></defs>
       <g fill="none" stroke="{wire}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".9">
         <path d="M470 61H{x['Architect'] + 18}q-18 0-18 18V{top - 4}" marker-end="url(#tip)"/>
-        <path d="M{x['Nap Guard']} {top - 4}V79q0-18-18-18H814" marker-start="url(#tip)" marker-end="url(#tip)"/>
-        <path d="M200 448V554" marker-end="url(#tip)"/>
-        <path d="M{x['Builder']} {bottom + 4}V496q0 16 16 16H544q16 0 16 16V554" marker-end="url(#tip)"/>
-        <path d="M{x['Examiner']} {bottom + 4}V554" marker-end="url(#tip)"/>
-        <path d="M{x['Scout']} {bottom + 4}V554" marker-start="url(#tip)" marker-end="url(#tip)"/>
-      </g></svg>"""
+        <path d="M244 448V554" marker-end="url(#tip)"/>
+        <path d="M{x['Builder']} {bottom + 4}V496q0 16 16 16H624q16 0 16 16V554" marker-end="url(#tip)"/>
+        <path d="M{x['Nap Guard']} {bottom + 4}V554" marker-end="url(#tip)"/>
+      </g>
+      <path d="M{x['Nap Guard']} {top - 4}V79q0-18-18-18H814" fill="none" stroke="#a9c0cf" stroke-width="2.4"
+        stroke-dasharray="3 9" stroke-linecap="round" opacity=".75"/></svg>"""
 
-    def at(cx: int, cy: int, text: str) -> str:
-        return f'<div class="box lbl" style="left:{cx}px;top:{cy}px">{text}</div>'
+    def at(cx: int, cy: int, text: str, quiet: bool = False) -> str:
+        style = "color:#a9c0cf;border-color:rgba(169,192,207,.35)" if quiet else ""
+        return f'<div class="box lbl" style="left:{cx}px;top:{cy}px;{style}">{text}</div>'
 
     cards = "".join(
         f'<div class="box agent" style="left:{left}px"><div class="av" style="background:{color}">{initials}</div>'
         f"<b>{name}</b><span>{what}</span></div>" for left, initials, color, name, what in AGENTS)
     return (f"<style>{ARCH_CSS}</style>"  # no steam here: it would show through the cards
             '<div class="box room"></div>'
-            '<div class="box title"><b>One BAND room</b> a message reaches only the agents it mentions</div>'
-            '<div class="box group" style="left:64px"></div><div class="box group" style="left:652px"></div>'
-            '<div class="box glabel" style="left:294px;color:#ffcf85;background:rgba(255,184,77,.12);'
-            'border:1px solid rgba(255,184,77,.3)">BAND Desktop · OpenCode runtimes</div>'
-            '<div class="box glabel" style="left:672px;color:#a8f0f8;background:rgba(155,231,242,.1);'
-            'border:1px solid rgba(155,231,242,.3)">band-sdk agents</div>'
+            '<div class="box title"><b>One BAND room</b> a message reaches only the seats it mentions</div>'
+            '<div class="box group" style="left:64px;width:760px"></div>'
+            '<div class="box group" style="left:848px;width:368px"></div>'
+            '<div class="box glabel" style="left:258px;color:#ffcf85;background:rgba(255,184,77,.12);'
+            'border:1px solid rgba(255,184,77,.3)">BAND Desktop · OpenCode · GPT-6 Luna</div>'
+            '<div class="box glabel" style="left:870px;color:#a8f0f8;background:rgba(155,231,242,.1);'
+            'border:1px solid rgba(155,231,242,.3)">band-sdk</div>'
             + cards + wires
             + f'<div class="box human">{svg("capybara-badge.svg", 54)}<div><b>You, the capybara</b>'
               "<span>napping in the hot spring</span></div></div>"
-            '<div class="box tile" style="left:64px;width:370px;--c:#ffbe00"><b>W&amp;B Inference</b>'
-            "<span>Qwen 3.8 27B · every model call</span></div>"
-            '<div class="box tile" style="left:470px;width:340px;--c:#fff6e8"><b>The app being built</b>'
-            "<span>CapyFinder, in run 7</span></div>"
-            '<div class="box tile" style="left:846px;width:370px;--c:#7ee2b8"><b>Nimble</b>'
-            "<span>web search agents · search · extract</span></div>"
-            + at(318, 61, "build SPEC.md") + at(963, 61, "the one wake-up · ship")
-            + at(200, 503, "every coding step") + at(452, 512, "builds")
-            + at(x["Examiner"], 503, "tests it in a real browser") + at(x["Scout"] + 52, 503, "live web"))
+            '<div class="box tile" style="left:64px;width:360px;--c:#ffbe00"><b>OpenAI · GPT-6 Luna</b>'
+            "<span>every coding seat's model calls</span></div>"
+            '<div class="box tile" style="left:460px;width:360px;--c:#fff6e8"><b>The result repository</b>'
+            "<span>stage-1 … stage-4 and exams/</span></div>"
+            '<div class="box tile" style="left:856px;width:360px;--c:#7ee2b8"><b>The event\'s checker</b>'
+            "<span>suites 1 to N, on the mock web</span></div>"
+            + at(300, 61, "one message: the task") + at(980, 61, "never wakes you", quiet=True)
+            + at(244, 503, "every model call") + at(510, 512, "commits")
+            + at(x["Nap Guard"], 503, "runs it before every gate"))
 
 
 FLOW_CSS = ARCH_CSS + """
