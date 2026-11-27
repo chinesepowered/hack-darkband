@@ -106,3 +106,63 @@ def test_only_the_receipt_ends_the_watch():
     assert ends_run("@[[0a1b2c3d-0000-4000-8000-00000000000a]] [receipt] 🛁 Onsen dark run complete")
     assert not ends_run("@[[0a1b2c3d-0000-4000-8000-00000000000a]] [report] stage 1 not accepted")
     assert not ends_run("[task] stage=1 part=4/4 finish with your `[report]`; Nap Guard posts its `[receipt]`")
+
+
+
+def test_a_stage_without_a_claimed_commit_for_45_minutes_is_slow():
+    """Run U: every check of the Builder's first hour ran out of time, and the factory said nothing while it was busy."""
+    from onsen.quietwatch import slow_stage
+    start = 1_000_000.0
+    assert slow_stage([], [], start + 44 * 60, start) is None
+    assert slow_stage([], [], start + 46 * 60, start) == (1, 45)
+    assert slow_stage([], [(1, "abc1234", start + 30 * 60)], start + 46 * 60, start) is None  # the checker claimed it
+    nudged = [{"inserted_at": "1970-01-12T13:47:00Z", "content": "@[[0a1b2c3d-0000-4000-8000-00000000000a]] "
+               "[nudge] stage=1 slow=45m the stage is slow"}]
+    assert slow_stage(nudged, [], start + 50 * 60, start) is None
+    assert slow_stage(nudged, [], start + 91 * 60, start) == (1, 90)
+    # stage 2 opens when Nap Guard accepts stage 1; a quoted gate opens nothing
+    gate = {"inserted_at": "1970-01-12T14:00:00Z",
+            "content": "@[[0a1b2c3d-0000-4000-8000-00000000000a]] [gate] stage=1 ACCEPTED commit=abc1234"}
+    opened = 1_000_000.0 + (14 * 3600 - (13 * 3600 + 46 * 60 + 40))
+    assert slow_stage([gate], [], opened + 46 * 60, start) == (2, 45)
+
+
+
+def test_handoff_nudges_wait_for_running_checks_and_space_out(tmp_path):
+    """Run U: three handoff nudges in four minutes each interrupted the Builder mid-check."""
+    import fcntl, os
+    from onsen.quietwatch import checker_busy, last_handoff_nudge
+    assert not checker_busy(tmp_path)
+    fd = os.open(tmp_path / "onsen-check.lock", os.O_RDWR | os.O_CREAT)
+    fcntl.flock(fd, fcntl.LOCK_EX)
+    try:
+        import subprocess, sys
+        held = subprocess.run([sys.executable, "-c", "import sys; sys.path.insert(0, 'src'); from pathlib import Path; "
+                               f"from onsen.quietwatch import checker_busy; print(checker_busy(Path('{tmp_path}')))"],
+                              capture_output=True, text=True).stdout.strip()
+        assert held == "True"
+    finally:
+        os.close(fd)
+    texts = [{"inserted_at": "2026-11-27T15:54:33Z", "content": "@[[0a1b2c3d-0000-4000-8000-00000000000a]] [nudge] "
+              "stage=1 handoff=late commit=74a0edf late"},
+             {"inserted_at": "2026-11-27T15:50:00Z", "content": "@[[0a1b2c3d-0000-4000-8000-00000000000b]] [task] "
+              "stage=1 part=4/4 quotes [nudge] stage=1 handoff=late commit=abc1234"}]
+    assert last_handoff_nudge(texts, 1) > 0 and last_handoff_nudge(texts, 2) == 0.0
+
+
+
+def test_an_accepted_stage_stays_accepted_when_its_gate_scrolls_out_of_the_window(tmp_path):
+    """Run U, four hours in: stage 1's [gate] had left the newest 100 messages, and the watch nudged the Builder every
+    minute about stage-1 commits from hours before. Nap Guard's state file says which stages are accepted."""
+    import json
+    from onsen.quietwatch import late_handoff, nap_guard_accepted, slow_stage
+    (tmp_path / "state").mkdir()
+    (tmp_path / "state" / "napguard-ROOM.json").write_text(json.dumps({"stages": {
+        "1": {"accepted": True, "accepted_at": 1000.0}, "2": {"accepted": True, "accepted_at": 2000.0},
+        "3": {"accepted": False}}}))
+    known = nap_guard_accepted("ROOM", tmp_path)
+    assert known == {1: 1000.0, 2: 2000.0}
+    claims = [(1, "6eb1549", 500.0), (3, "abc1234", 2100.0)]
+    assert late_handoff([], claims, 5000.0, set(), 300, set(known)) == (3, "abc1234", 2100.0)
+    assert late_handoff([], claims[:1], 5000.0, set(), 300, set(known)) is None
+    assert slow_stage([], [], 2000.0 + 46 * 60, 0.0, known=known) == (3, 45)
