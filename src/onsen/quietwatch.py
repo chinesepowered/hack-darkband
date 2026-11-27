@@ -2,9 +2,12 @@
 
 BAND Desktop starts a seat only when a message mentions it. If a seat ends its turn mid-stage without handing
 anything off, nothing would ever wake it again, and in a dark run nobody may step in. So while a run is open,
-this watches the room: when no seat has done anything (no message, thought or tool call) for ONSEN_QUIET_MIN
-minutes (default 6), it posts `[nudge]` as Nap Guard to the Architect and the Builder. It nudges at most
-ONSEN_MAX_NUDGES times (default 30) and exits once the room has a `[report]` or `[receipt]`.
+this watches the room: when no seat is mid-turn and none has done anything (no message, thought or tool call) for
+ONSEN_QUIET_MIN minutes (default 6), it posts `[nudge]` as Nap Guard to the Architect and the Builder, at most
+ONSEN_MAX_NUDGES times (default 30). A seat mid-turn is working even when the room shows nothing (a long check, a long
+answer), so the room isn't idle then; but a turn that shows nothing for ONSEN_STUCK_MIN minutes (default 30, longer
+than any capped check) is stuck, and the watcher interrupts it and says so. It exits once the room has a `[report]` or
+`[receipt]`.
 
 The late-handoff rule: a seat mid-turn hears nothing, so a Builder that keeps polishing a revision the acceptance
 checker already claims leaves the graders idle. When a checker run (in ONSEN_CHECKS_DIR) claims the open stage on a
@@ -43,8 +46,44 @@ def _ts(value: str) -> float:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
 
 
-def latest(c: httpx.Client, room: str) -> tuple[float, bool]:
-    """(time of the newest seat activity, whether the run has ended)."""
+def turn_state(msgs: list[dict]) -> dict[str, str]:
+    """Each seat's state from BAND Desktop's turn events: "idle" after a turn completes, "busy" after a turn starts or
+    any activity since (a tool call, a result, a message). Status lines (context size, runtime ready) don't count, and
+    Nap Guard, which has no turns, isn't a seat here."""
+    state: dict[str, str] = {}
+    for m in sorted(msgs, key=lambda m: m.get("inserted_at") or ""):
+        who = m.get("sender_name") or ""
+        if str(m.get("sender_type", "")).lower() != "agent" or who == NAMES["napguard"]:
+            continue
+        if m.get("message_type") == "task":
+            try:
+                event = (json.loads(m.get("content") or "") or {}).get("event")
+            except (ValueError, AttributeError):
+                event = None
+            if event == "turn_complete":
+                state[who] = "idle"
+            elif event == "turn_started":
+                state[who] = "busy"
+        else:
+            state[who] = "busy"
+    return state
+
+
+def interrupt_seat(room: str, seat: str) -> str:
+    """Interrupt a seat's active turn in this room: BAND Desktop keeps one host session per room, named after the seat
+    and the room, besides a parked default one; the interrupt has to name the room's."""
+    session = f"onsen-{seat.lower()}"
+    out = subprocess.run(["band", "status", "--session", session], capture_output=True, text=True).stdout
+    host = next((ln.split()[0] for ln in out.splitlines() if f"room={room}" in ln), "")
+    if not host:
+        return "no host session for this room"
+    r = subprocess.run(["band", "runtime", "interrupt", "--session", session, "--host-session", host],
+                       capture_output=True, text=True)
+    return (r.stdout + r.stderr).strip()[:200] or f"interrupted {host}"
+
+
+def latest(c: httpx.Client, room: str) -> tuple[float, bool, dict[str, str]]:
+    """(time of the newest seat activity, whether the run has ended, each seat's turn state)."""
     r = c.get(f"/api/v1/me/chats/{room}/messages", params={"page": 1, "page_size": 50})
     r.raise_for_status()
     body = r.json()
@@ -57,7 +96,7 @@ def latest(c: httpx.Client, room: str) -> tuple[float, bool]:
             newest = max(newest, _ts(m["inserted_at"]))
         if m.get("message_type", "text") == "text" and ends_run(m.get("content") or ""):
             ended = True
-    return newest, ended
+    return newest, ended, turn_state(msgs)
 
 
 READY_RE = re.compile(r"\[ready\]\s+stage=(\d+)\s+commit=([0-9a-f]{7,40})")
@@ -121,15 +160,7 @@ def newly_accepted(texts: list[dict]) -> list[int]:
 
 
 def interrupt_builder(room: str) -> str:
-    """Interrupt the Builder's active turn in this room: BAND Desktop keeps one host session per room, named after the
-    seat and the room, besides a parked default one; the interrupt has to name the room's."""
-    out = subprocess.run(["band", "status", "--session", "onsen-builder"], capture_output=True, text=True).stdout
-    host = next((ln.split()[0] for ln in out.splitlines() if f"room={room}" in ln), "")
-    if not host:
-        return "no host session for this room"
-    r = subprocess.run(["band", "runtime", "interrupt", "--session", "onsen-builder", "--host-session", host],
-                       capture_output=True, text=True)
-    return (r.stdout + r.stderr).strip()[:200] or f"interrupted {host}"
+    return interrupt_seat(room, NAMES["builder"])
 
 
 def text_messages(c: httpx.Client, room: str) -> list[dict]:
@@ -152,19 +183,20 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     quiet = float(os.environ.get("ONSEN_QUIET_MIN", "6")) * 60
     budget = int(os.environ.get("ONSEN_MAX_NUDGES", "30"))
+    stuck = float(os.environ.get("ONSEN_STUCK_MIN", "30")) * 60
     cfg = yaml.safe_load(agent_config_path().read_text()) or {}
     me, arch, builder = cfg["napguard"], cfg["architect"], cfg["builder"]
     human = httpx.Client(base_url=API, headers={"X-API-Key": os.environ["BAND_USER_KEY"]}, timeout=30)
     agent = httpx.Client(base_url=API, headers={"X-API-Key": me["api_key"]}, timeout=30)
-    last_nudge, nudges = 0.0, 0
+    last_nudge, nudges, unstuck = 0.0, 0, {}
     started, nudged = float(os.environ.get("ONSEN_RUN_STARTED") or time.time()), set()
     checks_dir = Path(os.environ.get("ONSEN_CHECKS_DIR") or Path.home() / ".onsen" / "checks")
     wait = float(os.environ.get("ONSEN_HANDOFF_MIN", "5")) * 60
     print(f"watching {args.room}: nudge after {quiet / 60:.0f} quiet minutes, at most {budget} times", flush=True)
-    while nudges < budget:
+    while True:  # the closed-stage and handoff rules hold until the run reports; only quiet nudges have a budget
         time.sleep(60)
         try:
-            newest, ended = latest(human, args.room)
+            newest, ended, turns = latest(human, args.room)
             texts = text_messages(human, args.room)
             nudged |= already_nudged(texts)
             late = late_handoff(texts, claims(checks_dir, started), time.time(), nudged, wait)
@@ -200,10 +232,30 @@ def main(argv: list[str] | None = None) -> int:
                        "Reviewer now, then keep improving in new revisions.")
             r = agent.post(f"/api/v1/agent/chats/{args.room}/messages", json={"message": {"content": content,
                            "mentions": [{"id": builder["agent_id"], "name": NAMES["builder"]}]}})
-            nudges += 1
-            print(f"handoff nudge {nudges}: stage {stage} commit {sha} after {minutes}m -> HTTP {r.status_code}", flush=True)
+            print(f"handoff nudge: stage {stage} commit {sha} after {minutes}m -> HTTP {r.status_code}", flush=True)
             continue
         now = time.time()
+        busy = sorted(s for s, v in turns.items() if v == "busy")
+        if busy and newest and now - newest >= stuck:
+            # Nothing has shown in the room for longer than any capped check takes: the turn is stuck, not working.
+            for seat in busy:
+                if unstuck.get(seat) == newest:
+                    continue  # already interrupted for this silence
+                unstuck[seat] = newest
+                minutes = int((now - newest) // 60)
+                print(f"interrupt {seat}: {interrupt_seat(args.room, seat)}", flush=True)
+                content = (f"@{seat} [nudge] stuck={minutes}m\n"
+                           f"⏳ Your turn has shown nothing in the room for {minutes} minutes, longer than any check "
+                           "takes, so I stopped it. Pick up where you were: commit what works, in smaller steps, and "
+                           "carry on with the stage.")
+                seat_id = (cfg.get(seat.lower()) or {}).get("agent_id")
+                body = {"message": {"content": content,
+                                    "mentions": [{"id": seat_id, "name": seat}] if seat_id else []}}
+                r = agent.post(f"/api/v1/agent/chats/{args.room}/messages", json=body)
+                print(f"stuck nudge: {seat} after {minutes}m -> HTTP {r.status_code}", flush=True)
+            continue
+        if busy or nudges >= budget:
+            continue  # a seat mid-turn is working, even when the room shows nothing
         if newest and now - newest >= quiet and now - last_nudge >= quiet:
             minutes = int((now - newest) // 60)
             content = (f"@{NAMES['architect']} @{NAMES['builder']} [nudge] quiet={minutes}m\n"
@@ -218,7 +270,6 @@ def main(argv: list[str] | None = None) -> int:
             nudges += 1
             last_nudge = now
             print(f"nudge {nudges}: quiet {minutes}m -> HTTP {r.status_code}", flush=True)
-    print("nudge budget spent; done", flush=True)
     return 0
 
 

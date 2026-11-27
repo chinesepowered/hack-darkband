@@ -51,3 +51,25 @@ def test_an_accepted_stage_is_closed_once():
     assert newly_accepted([gate, closed]) == []
     quoting = msg("@b [nudge] stage=2 handoff=late ... after [gate] stage=1 ACCEPTED", "2027-01-15T08:02:00Z")
     assert newly_accepted([quoting]) == []  # only Nap Guard's own gate message counts
+
+
+def test_a_seat_mid_turn_is_busy_and_a_finished_turn_is_idle():
+    """Run R: the room 'went quiet' while the Builder ran a seven-minute check and streamed a long patch, and the
+    watcher nudged the Architect for nothing. A seat whose turn has started and not completed is working."""
+    from onsen.quietwatch import turn_state
+
+    def ev(t, who, kind, content):
+        return {"inserted_at": f"2026-11-27T14:{t}Z", "sender_name": who, "sender_type": "Agent",
+                "message_type": kind, "content": content}
+    msgs = [
+        ev("00:01", "Builder", "task", '{"event":"turn_started"}'),
+        ev("00:02", "Builder", "tool_call", '{"name":"bash"}'),
+        ev("00:03", "Architect", "task", '{"event":"turn_started"}'),
+        ev("00:04", "Architect", "text", "[plan] stage=2"),
+        ev("00:05", "Architect", "task", "context 100197/400000 tokens"),
+        ev("00:06", "Architect", "task", '{"event":"turn_complete","outcome":"complete"}'),
+        ev("00:07", "Nap Guard", "text", "[nudge] quiet=6m"),
+        ev("00:08", "Reviewer", "tool_result", '{"name":"git diff"}'),  # its turn_started is older than the window
+    ]
+    assert turn_state(msgs) == {"Builder": "busy", "Architect": "idle", "Reviewer": "busy"}
+    assert turn_state(list(reversed(msgs))) == turn_state(msgs)  # pages come newest first
