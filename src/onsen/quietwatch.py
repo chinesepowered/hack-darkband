@@ -82,7 +82,8 @@ def late_handoff(texts: list[dict], claimed: list[tuple[int, str, float]], now: 
         body = m.get("content") or ""
         at = _ts(m["inserted_at"]) if m.get("inserted_at") else 0.0
         accepted |= {int(x) for x in ACCEPTED_RE.findall(body)}
-        readies += [(int(st), sha[:7], at) for st, sha in READY_RE.findall(body)]
+        if MENTIONS.sub("", body).lstrip().startswith("[ready]"):  # a handoff, not a message quoting one
+            readies += [(int(st), sha[:7], at) for st, sha in READY_RE.findall(body)]
     for stage, sha, t in sorted(claimed, key=lambda c: c[2]):
         if stage in accepted or (stage, sha) in nudged:
             continue

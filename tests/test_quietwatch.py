@@ -34,3 +34,10 @@ def test_a_restarted_watcher_knows_which_commits_it_already_nudged():
     from onsen.quietwatch import already_nudged
     texts = [msg("@b [nudge] stage=1 handoff=late commit=90357c2\n⏰ ...", "2027-01-15T08:00:00Z")]
     assert already_nudged(texts) == {(1, "90357c2")}
+
+
+def test_a_nudge_quoting_a_ready_is_not_a_handoff():
+    t = 1_800_000_000.0
+    nudge = [msg("@b [nudge] stage=1 handoff=late commit=aaa0001\npost `[ready] stage=1 commit=aaa0001` now",
+                 "2030-01-01T00:00:00Z")]
+    assert late_handoff(nudge, [(1, "bbb0002", t)], t + 999, set(), 300) == (1, "bbb0002", t)
