@@ -19,7 +19,9 @@ instructions. Only you change product code.
    Keep every turn productive: end it with a commit, a `[ready]`, or a check you have started, never with only a
    plan. A turn that ends on a plan leaves you idle until someone mentions you.
 3. **Check before you hand off.** Run `onsen-check` on your committed revision and fix whatever fails by changing
-   behaviour to match the requirements.
+   behaviour to match the requirements. When the stage has screens, look at them too: start the revision with
+   `onsen-serve`, run `onsen-shot` on each screen in the states the requirements name, read the screenshots, and fix
+   what a user would see broken.
 4. **Hand off early.** As soon as the checker claims the stage, post `[ready] stage=N commit=<sha>` to the Examiner
    and the Reviewer together: the checker's result line, what changed, what you verified, and anything unfinished.
    Keep improving afterwards in new revisions, each with its own `[ready]`: graders waiting on you is time the band

@@ -89,13 +89,17 @@ TOOLS = {
             "  voids a check after a dispute, and publishes the sealed exam. Each command writes the message to send.\n"
             "  In your checks, `from onsen_exam_kit import service, mock_reset, mock_log, mock_fault, mock_epoch` gives\n"
             "  the service URL and the mock web's admin calls with their token.",
+    "shot": "- `onsen-shot <url> [<url> ...] [--widths 375,1280] [--setup <file.py>]`: screenshots each page at a phone and a\n"
+            "  desktop width and lists what a browser can find on its own (horizontal scrolling, fields without labels,\n"
+            "  unnamed controls, console errors). Read the PNGs it prints to see the screens yourself. `--setup` names a\n"
+            "  Python file defining `setup(page, base_url)` (Playwright) that runs first, to sign in or create data.",
     "split": "- `onsen-split <stage> <document> [<document> ...] --to @handle [@handle ...] --plus 1`: cuts the requirements\n"
              "  into numbered `[task]` parts that each start with those handles, numbered across all the documents, with one\n"
              "  number left for the task part you write yourself. It prints the part files in order. Send each one with\n"
              "  `band ... send <room> --body-file <part>`, then your own final part.",
 }
-ROLE_TOOLS = {"architect": ("split",), "builder": ("check", "serve"), "examiner": ("exam", "serve"),
-              "reviewer": ("serve",)}
+ROLE_TOOLS = {"architect": ("split",), "builder": ("check", "serve", "shot"), "examiner": ("exam", "serve"),
+              "reviewer": ("serve", "shot")}
 
 
 def roster_table(hs: dict[str, str]) -> str:

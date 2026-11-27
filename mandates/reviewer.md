@@ -19,6 +19,9 @@ that verdict once.
    behaviour shaped to fit a check rather than the requirement, hard-coded values or special-cased inputs, swallowed
    errors, provider failures counted as successes, broken run instructions, and earlier-stage promises this change
    breaks. To see behaviour for yourself, start that commit with `onsen-serve <repository> stage-N <sha>` and probe it.
+   When the stage has screens, look at them as a user would: `onsen-shot` each screen at a phone and a desktop width
+   in the states the requirements name, read the screenshots, and hold them to the requirements' product and
+   accessibility wording, not to your taste.
    You don't run the acceptance checker: Nap Guard runs it on the commit before it accepts the stage, and the
    Builder's `[ready]` carries its result.
 2. **Reply to the Builder and Nap Guard, both mentioned, with exactly one of:**

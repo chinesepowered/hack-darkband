@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# See a running service's screens the way a user does: a screenshot of each page at a phone and a desktop width, and
+# the problems a browser can find on its own.
+#
+#   onsen-shot <url> [<url> ...] [--widths 375,1280] [--setup <file.py>] [--out <dir>]
+#
+# For each url and width it saves a full-page PNG (open it to look at it) and prints what a user would hit: a page
+# wider than the screen (horizontal scrolling), form fields without a label, buttons and links without a name, images
+# without alt text, and the page's console errors. --setup names a Python file defining `setup(page, base_url)`,
+# run once before the screenshots in the same browser session, to sign in or create data first.
+# It uses the checker's Python (ONSEN_CHECKER_PY), which has Playwright, and the machine's Chromium.
+set -uo pipefail
+py=${ONSEN_CHECKER_PY:-python3}
+[ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ] && [ -d /opt/pw-browsers ] && export PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
+exec "$py" - "$@" <<'PY'
+import argparse, pathlib, re, runpy, sys, time
+from urllib.parse import urlsplit
+from playwright.sync_api import sync_playwright
+
+ap = argparse.ArgumentParser(prog="onsen-shot")
+ap.add_argument("urls", nargs="+")
+ap.add_argument("--widths", default="375,1280")
+ap.add_argument("--setup")
+ap.add_argument("--out", default="/tmp/onsen-shots")
+a = ap.parse_args(sys.argv[1:])
+out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
+widths = [int(w) for w in a.widths.split(",") if w.strip()]
+FINDINGS = """() => {
+  const name = e => (e.getAttribute('aria-label') || e.getAttribute('aria-labelledby') || e.getAttribute('title')
+                     || (e.innerText || '').trim() || e.value || '').trim();
+  const desc = e => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') +
+                    (e.getAttribute('data-testid') ? '[data-testid=' + e.getAttribute('data-testid') + ']' : '') +
+                    (e.getAttribute('name') ? '[name=' + e.getAttribute('name') + ']' : '');
+  const shown = e => !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+  const out = [];
+  const W = document.documentElement.clientWidth, SW = document.documentElement.scrollWidth;
+  if (SW > W + 1) {
+    const wide = [...document.querySelectorAll('body *')].filter(e => shown(e) && e.getBoundingClientRect().right > W + 1)
+      .slice(0, 3).map(desc);
+    out.push(`page is ${SW}px wide on a ${W}px screen (scrolls horizontally): ` + wide.join(', '));
+  }
+  for (const e of document.querySelectorAll('input, select, textarea')) {
+    if (!shown(e) || ['hidden', 'submit', 'button'].includes(e.type)) continue;
+    const labelled = (e.id && document.querySelector(`label[for="${CSS.escape(e.id)}"]`)) || e.closest('label') ||
+                     e.getAttribute('aria-label') || e.getAttribute('aria-labelledby');
+    if (!labelled) out.push('field without a label: ' + desc(e));
+  }
+  for (const e of document.querySelectorAll('button, a[href], [role=button]')) if (shown(e) && !name(e)) out.push('control without a name: ' + desc(e));
+  for (const e of document.querySelectorAll('img')) if (shown(e) && !e.hasAttribute('alt')) out.push('image without alt: ' + desc(e));
+  return out;
+}"""
+with sync_playwright() as p:
+    browser = p.chromium.launch(args=["--no-sandbox"])
+    ctx = browser.new_context()
+    errors = []
+    if a.setup:
+        u = urlsplit(a.urls[0]); base = f"{u.scheme}://{u.netloc}"
+        page = ctx.new_page()
+        runpy.run_path(a.setup)["setup"](page, base)
+        page.close()
+    for url in a.urls:
+        for w in widths:
+            page = ctx.new_page(); page.set_viewport_size({"width": w, "height": 900})
+            page.on("console", lambda m: m.type == "error" and errors.append(m.text))
+            page.on("pageerror", lambda e: errors.append(str(e)))
+            errors.clear()
+            try:
+                r = page.goto(url, wait_until="networkidle", timeout=30000)
+                status = r.status if r else "?"
+            except Exception as e:  # noqa: BLE001
+                print(f"{url} @ {w}px: could not load ({str(e).splitlines()[0]})"); page.close(); continue
+            page.wait_for_timeout(500)
+            slug = re.sub(r"[^A-Za-z0-9]+", "-", urlsplit(url).path).strip("-") or "root"
+            png = out / f"{slug}-{w}-{time.strftime('%H%M%S')}.png"
+            page.screenshot(path=str(png), full_page=True)
+            found = page.evaluate(FINDINGS) + [f"console error: {e[:200]}" for e in errors[:5]]
+            print(f"{url} @ {w}px -> HTTP {status}, title {page.title()!r}, screenshot {png}")
+            for f in found:
+                print(f"  - {f}")
+            if not found:
+                print("  (no layout or labelling problems found; look at the screenshot for the rest)")
+            page.close()
+    browser.close()
+PY
