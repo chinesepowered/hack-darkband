@@ -11,6 +11,10 @@ checker already claims leaves the graders idle. When a checker run (in ONSEN_CHE
 commit and no `[ready]` for that commit or a later one follows within ONSEN_HANDOFF_MIN minutes (default 5), this
 interrupts the Builder's turn (`band runtime interrupt`) and posts `[nudge] handoff=late` to it, once per commit.
 
+The closed-stage rule: once Nap Guard accepts a stage, its folder is final, but a Builder mid-turn keeps editing it and
+can't see the next stage's handoff. On each newly accepted stage this interrupts the Builder's turn and posts
+`[nudge] stage=N closed`.
+
     uv run onsen-quiet-watch <room>
 """
 
@@ -102,6 +106,20 @@ def already_nudged(texts: list[dict]) -> set:
     return {(int(st), sha[:7]) for m in texts for st, sha in NUDGED_RE.findall(m.get("content") or "")}
 
 
+CLOSED_RE = re.compile(r"\[nudge\]\s+stage=(\d+)\s+closed")
+
+
+def newly_accepted(texts: list[dict]) -> list[int]:
+    """Stages Nap Guard has accepted that the Builder hasn't been told are closed yet."""
+    accepted, closed = set(), set()
+    for m in texts:
+        body = m.get("content") or ""
+        if MENTIONS.sub("", body).lstrip().startswith("[gate]"):
+            accepted |= {int(x) for x in ACCEPTED_RE.findall(body)}
+        closed |= {int(x) for x in CLOSED_RE.findall(body)}
+    return sorted(accepted - closed)
+
+
 def interrupt_builder(room: str) -> str:
     """Interrupt the Builder's active turn in this room: BAND Desktop keeps one host session per room, named after the
     seat and the room, besides a parked default one; the interrupt has to name the room's."""
@@ -156,6 +174,20 @@ def main(argv: list[str] | None = None) -> int:
         if ended:
             print("run reported; done", flush=True)
             return 0
+        closing = newly_accepted(texts)
+        if closing:
+            # A stage's folder is final once it is accepted, but a Builder mid-turn keeps polishing it and won't see the
+            # next stage's handoff until its turn ends: stop the turn and say so.
+            stage = closing[0]
+            print(f"interrupt: {interrupt_builder(args.room)}", flush=True)
+            content = (f"@{NAMES['builder']} [nudge] stage={stage} closed\n"
+                       f"🔒 Stage {stage} is accepted, so its folder is final: don't change it again. I interrupted your "
+                       f"turn so this reaches you. Your next task is the Architect's handoff for stage {stage + 1}; work "
+                       f"only in that stage's folder from now on.")
+            r = agent.post(f"/api/v1/agent/chats/{args.room}/messages", json={"message": {"content": content,
+                           "mentions": [{"id": builder["agent_id"], "name": NAMES["builder"]}]}})
+            print(f"closed stage {stage} -> HTTP {r.status_code}", flush=True)
+            continue
         if late:
             stage, sha, t = late
             nudged.add((stage, sha))

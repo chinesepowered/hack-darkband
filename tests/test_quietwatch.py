@@ -41,3 +41,13 @@ def test_a_nudge_quoting_a_ready_is_not_a_handoff():
     nudge = [msg("@b [nudge] stage=1 handoff=late commit=aaa0001\npost `[ready] stage=1 commit=aaa0001` now",
                  "2030-01-01T00:00:00Z")]
     assert late_handoff(nudge, [(1, "bbb0002", t)], t + 999, set(), 300) == (1, "bbb0002", t)
+
+
+def test_an_accepted_stage_is_closed_once():
+    from onsen.quietwatch import newly_accepted
+    gate = msg("@a @e [gate] stage=1 ACCEPTED commit=6feba80 exam=81% review=carried", "2027-01-15T08:00:00Z")
+    assert newly_accepted([gate]) == [1]
+    closed = msg("@b [nudge] stage=1 closed\n🔒 Stage 1 is accepted", "2027-01-15T08:01:00Z")
+    assert newly_accepted([gate, closed]) == []
+    quoting = msg("@b [nudge] stage=2 handoff=late ... after [gate] stage=1 ACCEPTED", "2027-01-15T08:02:00Z")
+    assert newly_accepted([quoting]) == []  # only Nap Guard's own gate message counts
