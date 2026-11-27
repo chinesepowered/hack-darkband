@@ -13,6 +13,8 @@ for a in "$@"; do case "$a" in --isolated) mode=isolated ;; *) commit=$a ;; esac
 : "${ONSEN_CHECKER_DIR:?the checker package directory (from the task)}"
 : "${ONSEN_TRACK:?the track name (from the task)}"
 py=${ONSEN_CHECKER_PY:-python3}
+# The checker's browser suites need Chromium; use the machine's preinstalled one when it has it.
+[ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ] && [ -d /opt/pw-browsers ] && export PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
 sha=$(git -C "$repo" rev-parse --short "$commit") || exit 2
 work=$(mktemp -d /tmp/onsen-check-XXXXXX)
 git -C "$repo" worktree add --detach -q "$work/repo" "$sha" || exit 2
