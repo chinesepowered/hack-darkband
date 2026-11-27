@@ -12,12 +12,20 @@ This stdio proxy sits between BAND Desktop and `opencode acp` (the Agent Client 
 While a turn is in flight, it holds the agent's message text. When the turn ends, it passes the text on only if it
 is a protocol message, i.e. it starts with a tag such as `[ready]`. Tool calls, reasoning, permission requests and
 everything else pass straight through. Standard library only, because the runtime's environment is minimal.
+
+Keep going (ONSEN_KEEP_GOING=1, set for the Builder): a seat is woken only by a mention, so a Builder that ends its
+turn on "I'll keep working on X" sits idle until someone mentions it. When a turn that used tools ends without the
+seat having sent anything to the room, the proxy doesn't end the turn: it asks the agent to carry on, up to
+ONSEN_KEEP_GOING_MAX times (default 4) per prompt, and ends the turn when the agent sends a message, stops using
+tools, or the limit is reached. BAND Desktop sees one longer turn.
 """
 
 from __future__ import annotations
 
 import asyncio
+import itertools
 import json
+import os
 import re
 import signal
 import sys
@@ -29,6 +37,11 @@ CREW_TAGS = ("ready", "review", "task", "plan", "dispute", "exam", "seal", "reve
              "question")
 PROTOCOL = re.compile(r"^\s*(?:@\S+\s+)*\[(?:" + "|".join(CREW_TAGS) + r")\]", re.I)
 LIMIT = 1 << 26  # tool output can make single lines very long
+SENDS = re.compile(r"\bband\b[^\n]{0,300}?\bsend\b")  # a tool call that posts to the room
+KEEP_GOING = ("Your turn ended, but you haven't sent anything to the room, so nobody will wake you to finish. If the "
+              "stage's work is unfinished, carry on now: implement, commit, run the checker, and post [ready] when it "
+              "claims the stage. If your latest commit is already handed off and you are only waiting for verdicts, "
+              "end your turn without using any tool.")
 
 
 def is_protocol(text: str) -> bool:
@@ -38,14 +51,20 @@ def is_protocol(text: str) -> bool:
 class Filter:
     """The decision logic, kept apart from the pipes so it can be tested line by line."""
 
-    def __init__(self) -> None:
+    def __init__(self, keep_going: bool = False, max_keep_going: int = 4) -> None:
         self.prompts: dict[Any, Any] = {}  # in-flight session/prompt request id -> sessionId
         self.held: dict[Any, list[tuple[bytes, str]]] = {}  # sessionId -> held message chunks
+        self.keep_going, self.max_keep_going = keep_going, max_keep_going
+        self.turns: dict[Any, dict[str, Any]] = {}  # sessionId -> {client_id, tools, sent, continued}
+        self.to_agent: list[bytes] = []  # lines the proxy itself sends to the agent (keep-going prompts)
+        self._ids = itertools.count(1)
 
     def from_client(self, line: bytes) -> None:
         msg = _parse(line)
         if msg and msg.get("method") == "session/prompt" and "id" in msg:
-            self.prompts[msg["id"]] = (msg.get("params") or {}).get("sessionId")
+            sid = (msg.get("params") or {}).get("sessionId")
+            self.prompts[msg["id"]] = sid
+            self.turns[sid] = {"client_id": msg["id"], "tools": 0, "sent": False, "continued": 0}
 
     def from_agent(self, line: bytes) -> list[bytes]:
         """The lines to forward to the client now (possibly none, possibly held ones too)."""
@@ -60,14 +79,43 @@ class Filter:
                 text = (update.get("content") or {}).get("text") or ""
                 self.held.setdefault(sid, []).append((line, text))
                 return []
+            if update.get("sessionUpdate") in ("tool_call", "tool_call_update") and sid in self.turns:
+                t = self.turns[sid]
+                if update.get("sessionUpdate") == "tool_call":
+                    t["tools"] += 1
+                if SENDS.search(json.dumps(update)):
+                    t["sent"] = True
             return [line]
         if "method" not in msg and msg.get("id") in self.prompts and ("result" in msg or "error" in msg):
             sid = self.prompts.pop(msg["id"])
             chunks = self.held.pop(sid, [])
             text = "".join(t for _, t in chunks)
-            kept = [raw for raw, _ in chunks] if is_protocol(text) else []
+            protocol = is_protocol(text)
+            t = self.turns.get(sid)
+            stop = (msg.get("result") or {}).get("stopReason")
+            if (self.keep_going and t and stop == "end_turn" and t["tools"] > 0 and not t["sent"] and not protocol
+                    and t["continued"] < self.max_keep_going):
+                # The agent stopped mid-work without telling anyone: ask it to carry on, in the same client turn.
+                t["continued"] += 1
+                t["tools"] = 0
+                rid = f"onsen-keep-going-{next(self._ids)}"
+                self.prompts[rid] = sid
+                self.to_agent.append(_line({"jsonrpc": "2.0", "id": rid, "method": "session/prompt",
+                                            "params": {"sessionId": sid,
+                                                       "prompt": [{"type": "text", "text": KEEP_GOING}]}}))
+                return []
+            kept = [raw for raw, _ in chunks] if protocol else []
+            if t is not None:
+                self.turns.pop(sid, None)
+                if msg["id"] != t["client_id"]:  # the client's turn ends with its own request id
+                    msg["id"] = t["client_id"]
+                    line = _line(msg)
             return [*kept, line]
         return [line]
+
+
+def _line(obj: dict[str, Any]) -> bytes:
+    return (json.dumps(obj) + "\n").encode()
 
 
 def _parse(line: bytes) -> dict[str, Any] | None:
@@ -85,7 +133,8 @@ async def run(argv: list[str]) -> int:
     stdin = asyncio.StreamReader(limit=LIMIT)
     await loop.connect_read_pipe(lambda: asyncio.StreamReaderProtocol(stdin), sys.stdin)
     out = sys.stdout.buffer
-    f = Filter()
+    f = Filter(keep_going=os.environ.get("ONSEN_KEEP_GOING", "") in ("1", "true", "yes"),
+               max_keep_going=int(os.environ.get("ONSEN_KEEP_GOING_MAX", "4")))
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(sig, proc.terminate)
 
@@ -98,11 +147,14 @@ async def run(argv: list[str]) -> int:
         proc.stdin.close()
 
     async def agent_to_client() -> None:
-        assert proc.stdout is not None
+        assert proc.stdout is not None and proc.stdin is not None
         while line := await proc.stdout.readline():
             for item in f.from_agent(line):
                 out.write(item)
             out.flush()
+            while f.to_agent:  # the proxy's own keep-going prompt
+                proc.stdin.write(f.to_agent.pop(0))
+                await proc.stdin.drain()
 
     pumps = [asyncio.create_task(client_to_agent()), asyncio.create_task(agent_to_client())]
     code = await proc.wait()

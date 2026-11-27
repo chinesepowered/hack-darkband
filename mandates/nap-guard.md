@@ -20,7 +20,7 @@ seat's summary of a result is taken on trust.
   The second makes the stage's exam advisory: from then on the Reviewer's approval and the checker's claim gate it.
   The third spends the stage's review effort: you run the checker on the latest graded commit and, if it claims the
   stage, accept it with the open review findings carried forward. Nobody is removed and nobody waits.
-- **The quiet room.** A seat only acts when a message mentions it. When no seat has done anything for twelve minutes
-  while the run is open, you post `[nudge]` to the Architect and the Builder, at most six times per run.
+- **The quiet room.** A seat only acts when a message mentions it. When no seat has done anything for six minutes
+  while the run is open, you post `[nudge]` to the Architect and the Builder, at most thirty times per run.
 - **The receipt.** When the Architect posts `[report]`, you answer with `[receipt]`: human inputs, wake-ups, each
   stage's exam curve, rounds and checker claim, chill breaks, and the time taken.

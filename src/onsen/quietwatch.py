@@ -3,8 +3,8 @@
 BAND Desktop starts a seat only when a message mentions it. If a seat ends its turn mid-stage without handing
 anything off, nothing would ever wake it again, and in a dark run nobody may step in. So while a run is open,
 this watches the room: when no seat has done anything (no message, thought or tool call) for ONSEN_QUIET_MIN
-minutes (default 12), it posts `[nudge]` as Nap Guard to the Architect and the Builder. It nudges at most
-ONSEN_MAX_NUDGES times (default 6) and exits once the room has a `[report]` or `[receipt]`.
+minutes (default 6), it posts `[nudge]` as Nap Guard to the Architect and the Builder. It nudges at most
+ONSEN_MAX_NUDGES times (default 30) and exits once the room has a `[report]` or `[receipt]`.
 
     uv run onsen-quiet-watch <room>
 """
@@ -59,8 +59,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("room")
     args = ap.parse_args(argv)
-    quiet = float(os.environ.get("ONSEN_QUIET_MIN", "12")) * 60
-    budget = int(os.environ.get("ONSEN_MAX_NUDGES", "6"))
+    quiet = float(os.environ.get("ONSEN_QUIET_MIN", "6")) * 60
+    budget = int(os.environ.get("ONSEN_MAX_NUDGES", "30"))
     cfg = yaml.safe_load(agent_config_path().read_text()) or {}
     me, arch, builder = cfg["napguard"], cfg["architect"], cfg["builder"]
     human = httpx.Client(base_url=API, headers={"X-API-Key": os.environ["BAND_USER_KEY"]}, timeout=30)

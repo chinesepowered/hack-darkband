@@ -48,3 +48,54 @@ def test_protocol_messages_pass():
 def test_text_outside_a_prompt_passes():
     # session/load replays history as message chunks with no prompt in flight; those go straight through.
     assert Filter().from_agent(chunk("s", "old message")) != []
+
+
+def tool_call(sid, command):
+    return line({"jsonrpc": "2.0", "method": "session/update",
+                 "params": {"sessionId": sid, "update": {"sessionUpdate": "tool_call", "title": "bash",
+                                                         "rawInput": {"command": command}}}})
+
+
+def end(rid, reason="end_turn"):
+    return line({"jsonrpc": "2.0", "id": rid, "result": {"stopReason": reason}})
+
+
+def test_keep_going_continues_a_builder_that_stopped_mid_work():
+    f = Filter(keep_going=True, max_keep_going=2)
+    f.from_client(line({"jsonrpc": "2.0", "id": 7, "method": "session/prompt", "params": {"sessionId": "s"}}))
+    assert f.from_agent(tool_call("s", "git commit -m wip")) != []
+    assert f.from_agent(chunk("s", "I'll keep fixing the parser.")) == []
+    # the turn ends without a message to the room: nothing reaches the client, a keep-going prompt reaches the agent
+    assert f.from_agent(end(7)) == []
+    assert len(f.to_agent) == 1
+    req = json.loads(f.to_agent.pop())
+    assert req["method"] == "session/prompt" and req["params"]["sessionId"] == "s"
+    # the continuation works and then posts to the room: the client's turn ends, with the client's own id
+    f.from_agent(tool_call("s", "onsen-check /repo 1 abc1234"))
+    f.from_agent(tool_call("s", "band --profile default --session onsen-builder send ROOM --body-file /tmp/r.md"))
+    out = f.from_agent(end(req["id"]))
+    assert json.loads(out[-1])["id"] == 7 and not f.to_agent
+
+
+def test_keep_going_stops_when_the_agent_only_talks_or_hits_the_limit():
+    f = Filter(keep_going=True, max_keep_going=1)
+    f.from_client(line({"jsonrpc": "2.0", "id": 9, "method": "session/prompt", "params": {"sessionId": "s"}}))
+    f.from_agent(tool_call("s", "pytest"))
+    assert f.from_agent(end(9)) == [] and len(f.to_agent) == 1
+    rid = json.loads(f.to_agent.pop())["id"]
+    f.from_agent(tool_call("s", "pytest"))
+    out = f.from_agent(end(rid))  # the limit is reached: the turn ends
+    assert json.loads(out[-1])["id"] == 9
+    # a turn with no tool calls (waiting for verdicts) ends right away; so does a cancelled one
+    f.from_client(line({"jsonrpc": "2.0", "id": 10, "method": "session/prompt", "params": {"sessionId": "s"}}))
+    assert json.loads(f.from_agent(end(10))[-1])["id"] == 10
+    f.from_client(line({"jsonrpc": "2.0", "id": 11, "method": "session/prompt", "params": {"sessionId": "s"}}))
+    f.from_agent(tool_call("s", "pytest"))
+    assert json.loads(f.from_agent(end(11, "cancelled"))[-1])["id"] == 11
+
+
+def test_keep_going_is_off_by_default():
+    f = Filter()
+    f.from_client(line({"jsonrpc": "2.0", "id": 7, "method": "session/prompt", "params": {"sessionId": "s"}}))
+    f.from_agent(tool_call("s", "git commit -m wip"))
+    assert json.loads(f.from_agent(end(7))[-1])["id"] == 7 and not f.to_agent
