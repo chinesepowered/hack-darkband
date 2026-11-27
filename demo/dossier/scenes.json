@@ -1,0 +1,14 @@
+[
+  {"n": 1, "kind": "card", "card": "title"},
+  {"n": 2, "kind": "card", "card": "crew"},
+  {"n": 3, "kind": "replay", "from": null, "to": "[task] stage=1 part=", "title": "Onsen · Dossier"},
+  {"n": 4, "kind": "replay", "from": null, "to": "[seal] stage=1", "title": "Onsen · Dossier"},
+  {"n": 5, "kind": "replay", "from": null, "to": "[review] stage=1", "title": "Onsen · Dossier"},
+  {"n": 6, "kind": "card", "card": "gate"},
+  {"n": 7, "kind": "replay", "from": "CAUGHT_FROM", "to": "CAUGHT_TO", "title": "Onsen · Dossier"},
+  {"n": 8, "kind": "replay", "from": null, "to": "[reveal] stage=1", "title": "Onsen · Dossier"},
+  {"n": 9, "kind": "card", "card": "lessons"},
+  {"n": 10, "kind": "app"},
+  {"n": 11, "kind": "card", "card": "numbers"},
+  {"n": 12, "kind": "card", "card": "outro"}
+]

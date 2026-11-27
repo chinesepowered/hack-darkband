@@ -51,6 +51,7 @@ def main() -> int:
     ap.add_argument("repo")
     ap.add_argument("room")
     ap.add_argument("--exam-dir")
+    ap.add_argument("--workdir", action="append", help="another directory the seats worked in (a moved repository's old path)")
     ap.add_argument("--json")
     a = ap.parse_args()
     repo = Path(a.repo).resolve()
@@ -73,7 +74,7 @@ def main() -> int:
             exam = re.search(r"\bexam=(\S+)", first)
             review = re.search(r"\breview=(\w+)", first)
             shipped = re.search(r"\((\d+)/(\d+) shipped checks\)", first)
-            gates[g.group(1)] = {"commit": g.group(2), "at": ts(m).strftime("%H:%M"),
+            gates[g.group(1)] = {"commit": g.group(2), "at": ts(m).strftime("%H:%M"), "at_iso": ts(m).isoformat(),
                                  "minutes_from_task": round((ts(m) - start).total_seconds() / 60),
                                  "exam_curve": exam.group(1) if exam else None,
                                  "review": review.group(1) if review else None,
@@ -85,8 +86,8 @@ def main() -> int:
             tags[f"{m.get('sender_name') or m.get('senderName')} [{t.group(1)}]"] += 1
 
     db = Path.home() / ".local/share/opencode/opencode.db"
-    dirs = {str(repo)} | ({str(Path(a.exam_dir).resolve())} if a.exam_dir else set())
-    spend = {}
+    dirs = {str(repo), *(a.workdir or [])} | ({str(Path(a.exam_dir).resolve())} if a.exam_dir else set())
+    spend, per_stage = {}, {}
     if db.exists():
         con = sqlite3.connect(db)
         since = int(start.timestamp() * 1000) - 120_000
@@ -102,6 +103,20 @@ def main() -> int:
             s["reasoning"] += tr or 0
             s["cache_read"] += cr or 0
             s["cache_write"] += cw or 0
+        # Spend per stage: each model response counts for the stage that was open when it was made (a stage is open
+        # from the previous stage's acceptance, or the task, until its own acceptance; after the last one, the rest).
+        ends = sorted((int(k), datetime.fromisoformat(v["at_iso"]).timestamp() * 1000) for k, v in gates.items())
+        for created, data in con.execute(
+                "select m.time_created, m.data from message m join session s on m.session_id = s.id "
+                "where s.time_created >= ? and s.directory in (%s)" % ",".join("?" * len(dirs)), (since, *dirs)):
+            try:
+                d = json.loads(data)
+            except ValueError:
+                continue
+            if d.get("role") != "assistant":
+                continue
+            stage = next((n for n, end in ends if created < end), (ends[-1][0] + 1) if ends else 1)
+            per_stage[stage] = per_stage.get(stage, 0.0) + (d.get("cost") or 0)
     facts = {
         "room": a.room,
         "task_at": start.isoformat(timespec="seconds"),
@@ -113,6 +128,7 @@ def main() -> int:
         "commits": dict(commits),
         "model_spend": {k: {**v, "usd": round(v["usd"], 2)} for k, v in sorted(spend.items())},
         "model_spend_total_usd": round(sum(v["usd"] for v in spend.values()), 2),
+        "model_spend_by_stage_usd": {str(k): round(v, 2) for k, v in sorted(per_stage.items())},
     }
     out = json.dumps(facts, indent=2, default=str)
     print(out)
