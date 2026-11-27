@@ -81,13 +81,14 @@ def deck(f: dict) -> str:
             "<b>Architect</b> opens the stage's spec and hands off the <b>whole</b> spec, in numbered parts, plus the task.",
             "<b>Examiner</b> writes the stage's exam as <b>code</b>, from the spec alone, and <b>seals</b> it by SHA-256 before any build.",
             "<b>Builder</b> commits small steps; the moment the checker claims the stage it posts <b>[ready] commit=…</b>.",
-            "<b>Examiner</b> grades that commit with <code>onsen-exam</code>; <b>Reviewer</b> reads the diff and probes the running service.",
+            "<b>Examiner</b> grades that commit with <code>onsen-exam</code>; <b>Reviewer</b> reads the diff, probes the running service and looks at its screens.",
             "<b>Nap Guard</b> recounts the exam, needs the approval on the <b>same commit</b>, then runs the checker itself."]),
         bullets("How it catches bad work", [
             "<b>No seat's word opens the gate</b>: tools compute the exam's verdict; Nap Guard runs the event's checker itself.",
             "<b>A hidden exam</b>: the Builder can't fit the code to checks it never sees; the seal makes it tamper-evident.",
             "<b>A room that stays a protocol</b>: <code>band send</code> is a linter; each tag has one owner, each commit one verdict.",
             "<b>Bounded review</b>: stalls escalate (re-plan, one grader, checker) instead of looping or ending the run.",
+            "<b>Only the run's end ends the run</b>: the final report is refused until the last stage is in or its time is spent.",
             f"<b>A bad result it caught:</b> {f.get('caught', '—')}"]),
         slide('<div class="body"><div class="k">The judged run</div>'
               f'<div class="stats"><div class="stat"><div class="v">{top}</div><div class="l">highest stage claimed</div></div>'
