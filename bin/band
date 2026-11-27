@@ -20,7 +20,7 @@ TAGS = {"plan", "task", "seal", "ready", "exam", "review", "dispute", "reveal", 
 OWNERS = {"plan": {"Architect"}, "task": {"Architect"}, "report": {"Architect"}, "decide": {"Architect"},
           "ready": {"Builder"}, "seal": {"Examiner"}, "exam": {"Examiner"}, "reveal": {"Examiner"},
           "review": {"Reviewer"}, "dispute": {"Builder", "Examiner", "Reviewer", "Architect"}}
-FOR_NAP_GUARD = {"seal", "exam", "review", "report", "dispute"}
+FOR_NAP_GUARD = {"seal", "exam", "review", "report", "dispute", "reveal"}
 QUESTIONS = {"question", "blocking-question", "ask", "help"}
 VALUE_OPTS = {"--profile", "--session", "--scope", "--config-dir", "--as", "--body-file", "--artifact", "--type",
               "--page", "--cursor"}
@@ -106,7 +106,7 @@ def lint(text: str) -> None:
         refuse(f"A [{tag}] needs {', '.join(missing)} on its first line, so the gate can read it; for example: "
                f"{EXAMPLE[tag]}")
     if re.search(r"nap-guard|nap guard", mentions, re.I) and tag not in FOR_NAP_GUARD:
-        refuse("Nap Guard reads only [seal], [exam], [review], [dispute] and [report]. It posts [gate], [chill] and "
+        refuse("Nap Guard reads only [seal], [exam], [review], [dispute], [reveal] and [report]. It posts [gate], [chill] and "
                "[nudge] on its own and mentions you when it does; don't ask it for status. End your turn now.")
 
 

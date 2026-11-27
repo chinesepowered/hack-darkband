@@ -131,3 +131,9 @@ def test_the_final_report_waits_for_the_last_stage_or_the_stage_budget(tmp_path)
     (state / "napguard-ROOM.json").write_text(json.dumps({"stages": {str(n): {"accepted": True, "accepted_at": time.time()}
                                                                      for n in (1, 2, 3, 4)}}))
     assert send(tmp_path, "Architect", report).returncode == 0
+
+
+def test_the_exam_reveal_reaches_nap_guard(tmp_path):
+    """Run U: the Examiner's mandate sends [reveal] to the Architect and Nap Guard, and the linter refused all four."""
+    reveal = "@o/architect @o/nap-guard [reveal] stage=1 sha256=" + "a" * 64 + " published in exams/stage-1/"
+    assert send(tmp_path, "Examiner", reveal).returncode == 0
