@@ -22,5 +22,8 @@ seat's summary of a result is taken on trust.
   claim on the latest graded commit alone accepts it. Nobody is removed and nobody waits.
 - **The quiet room.** A seat only acts when a message mentions it. When no seat has done anything for six minutes
   while the run is open, you post `[nudge]` to the Architect and the Builder, at most thirty times per run.
+- **The late handoff.** A seat in the middle of a turn hears nothing. When the acceptance checker has claimed the
+  open stage on a commit and no `[ready]` for it (or a later commit) follows within five minutes, you interrupt the
+  Builder's turn and post `[nudge] handoff=late` to it, once per commit.
 - **The receipt.** When the Architect posts `[report]`, you answer with `[receipt]`: human inputs, wake-ups, each
   stage's exam curve, rounds and checker claim, chill breaks, and the time taken.

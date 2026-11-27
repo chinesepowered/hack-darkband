@@ -6,17 +6,25 @@ this watches the room: when no seat has done anything (no message, thought or to
 minutes (default 6), it posts `[nudge]` as Nap Guard to the Architect and the Builder. It nudges at most
 ONSEN_MAX_NUDGES times (default 30) and exits once the room has a `[report]` or `[receipt]`.
 
+The late-handoff rule: a seat mid-turn hears nothing, so a Builder that keeps polishing a revision the acceptance
+checker already claims leaves the graders idle. When a checker run (in ONSEN_CHECKS_DIR) claims the open stage on a
+commit and no `[ready]` for that commit or a later one follows within ONSEN_HANDOFF_MIN minutes (default 5), this
+interrupts the Builder's turn (`band runtime interrupt`) and posts `[nudge] handoff=late` to it, once per commit.
+
     uv run onsen-quiet-watch <room>
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 import httpx
 import yaml
@@ -48,6 +56,50 @@ def latest(c: httpx.Client, room: str) -> tuple[float, bool]:
     return newest, ended
 
 
+READY_RE = re.compile(r"\[ready\]\s+stage=(\d+)\s+commit=([0-9a-f]{7,40})")
+ACCEPTED_RE = re.compile(r"\[gate\]\s+stage=(\d+)\s+ACCEPTED")
+
+
+def claims(checks_dir: Path, since: float) -> list[tuple[int, str, float]]:
+    """(stage, commit, time) of every finished checker run since `since` that claims a stage."""
+    out = []
+    for rep in checks_dir.glob("stage*/report.json"):
+        try:
+            t = rep.stat().st_mtime
+            r = json.loads(rep.read_text())
+        except (OSError, ValueError):
+            continue
+        if t >= since and r.get("state") == "completed" and str(r.get("claimed_stage") or "").isdigit():
+            out.append((int(r["claimed_stage"]), str(r.get("revision") or "")[:7], t))
+    return out
+
+
+def late_handoff(texts: list[dict], claimed: list[tuple[int, str, float]], now: float, nudged: set,
+                 wait: float) -> tuple[int, str, float] | None:
+    """The first claimed commit of an open stage that wasn't handed off (nor a later commit) within `wait` seconds."""
+    readies, accepted = [], set()
+    for m in texts:
+        body = m.get("content") or ""
+        at = _ts(m["inserted_at"]) if m.get("inserted_at") else 0.0
+        accepted |= {int(x) for x in ACCEPTED_RE.findall(body)}
+        readies += [(int(st), sha[:7], at) for st, sha in READY_RE.findall(body)]
+    for stage, sha, t in sorted(claimed, key=lambda c: c[2]):
+        if stage in accepted or (stage, sha) in nudged:
+            continue
+        if any(st == stage and (c == sha or rt >= t) for st, c, rt in readies):
+            continue
+        if now - t >= wait:
+            return stage, sha, t
+    return None
+
+
+def text_messages(c: httpx.Client, room: str) -> list[dict]:
+    r = c.get(f"/api/v1/me/chats/{room}/messages", params={"page": 1, "page_size": 100, "message_type": "text"})
+    r.raise_for_status()
+    body = r.json()
+    return body.get("data") or body.get("messages") or []
+
+
 def ends_run(text: str) -> bool:
     """A message that *is* the Architect's report or Nap Guard's receipt, not one that mentions them."""
     body = MENTIONS.sub("", text).lstrip()
@@ -66,17 +118,36 @@ def main(argv: list[str] | None = None) -> int:
     human = httpx.Client(base_url=API, headers={"X-API-Key": os.environ["BAND_USER_KEY"]}, timeout=30)
     agent = httpx.Client(base_url=API, headers={"X-API-Key": me["api_key"]}, timeout=30)
     last_nudge, nudges = 0.0, 0
+    started, nudged = time.time(), set()
+    checks_dir = Path(os.environ.get("ONSEN_CHECKS_DIR") or Path.home() / ".onsen" / "checks")
+    wait = float(os.environ.get("ONSEN_HANDOFF_MIN", "5")) * 60
     print(f"watching {args.room}: nudge after {quiet / 60:.0f} quiet minutes, at most {budget} times", flush=True)
     while nudges < budget:
         time.sleep(60)
         try:
             newest, ended = latest(human, args.room)
+            late = late_handoff(text_messages(human, args.room), claims(checks_dir, started), time.time(), nudged, wait)
         except httpx.HTTPError as exc:
             print(f"read failed: {exc}", flush=True)
             continue
         if ended:
             print("run reported; done", flush=True)
             return 0
+        if late:
+            stage, sha, t = late
+            nudged.add((stage, sha))
+            minutes = int((time.time() - t) // 60)
+            subprocess.run(["band", "runtime", "interrupt", "--session", "onsen-builder"], capture_output=True)
+            content = (f"@{NAMES['builder']} [nudge] stage={stage} handoff=late commit={sha}\n"
+                       f"⏰ The acceptance checker claimed stage {stage} on commit {sha} {minutes} minutes ago, and it "
+                       "hasn't been handed off. I interrupted your turn so this reaches you. Builder: post `[ready] "
+                       f"stage={stage} commit={sha}` (or a later commit the checker claims) to the Examiner and the "
+                       "Reviewer now, then keep improving in new revisions.")
+            r = agent.post(f"/api/v1/agent/chats/{args.room}/messages", json={"message": {"content": content,
+                           "mentions": [{"id": builder["agent_id"], "name": NAMES["builder"]}]}})
+            nudges += 1
+            print(f"handoff nudge {nudges}: stage {stage} commit {sha} after {minutes}m -> HTTP {r.status_code}", flush=True)
+            continue
         now = time.time()
         if newest and now - newest >= quiet and now - last_nudge >= quiet:
             minutes = int((now - newest) // 60)
