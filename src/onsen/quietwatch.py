@@ -69,6 +69,16 @@ def turn_state(msgs: list[dict]) -> dict[str, str]:
     return state
 
 
+def last_seen(msgs: list[dict]) -> dict[str, float]:
+    """When each seat last showed anything in the room (a turn event, a tool call, a message)."""
+    seen: dict[str, float] = {}
+    for m in msgs:
+        who = m.get("sender_name") or ""
+        if str(m.get("sender_type", "")).lower() == "agent" and m.get("inserted_at"):
+            seen[who] = max(seen.get(who, 0.0), _ts(m["inserted_at"]))
+    return seen
+
+
 def interrupt_seat(room: str, seat: str) -> str:
     """Interrupt a seat's active turn in this room: BAND Desktop keeps one host session per room, named after the seat
     and the room, besides a parked default one; the interrupt has to name the room's."""
@@ -82,8 +92,8 @@ def interrupt_seat(room: str, seat: str) -> str:
     return (r.stdout + r.stderr).strip()[:200] or f"interrupted {host}"
 
 
-def latest(c: httpx.Client, room: str) -> tuple[float, bool, dict[str, str]]:
-    """(time of the newest seat activity, whether the run has ended, each seat's turn state)."""
+def latest(c: httpx.Client, room: str) -> tuple[float, bool, dict[str, tuple[str, float]]]:
+    """(time of the newest seat activity, whether the run has ended, each seat's turn state and when it last showed)."""
     r = c.get(f"/api/v1/me/chats/{room}/messages", params={"page": 1, "page_size": 50})
     r.raise_for_status()
     body = r.json()
@@ -96,7 +106,8 @@ def latest(c: httpx.Client, room: str) -> tuple[float, bool, dict[str, str]]:
             newest = max(newest, _ts(m["inserted_at"]))
         if m.get("message_type", "text") == "text" and ends_run(m.get("content") or ""):
             ended = True
-    return newest, ended, turn_state(msgs)
+    seen = last_seen(msgs)
+    return newest, ended, {who: (state, seen.get(who, 0.0)) for who, state in turn_state(msgs).items()}
 
 
 READY_RE = re.compile(r"\[ready\]\s+stage=(\d+)\s+commit=([0-9a-f]{7,40})")
@@ -235,14 +246,15 @@ def main(argv: list[str] | None = None) -> int:
             print(f"handoff nudge: stage {stage} commit {sha} after {minutes}m -> HTTP {r.status_code}", flush=True)
             continue
         now = time.time()
-        busy = sorted(s for s, v in turns.items() if v == "busy")
-        if busy and newest and now - newest >= stuck:
-            # Nothing has shown in the room for longer than any capped check takes: the turn is stuck, not working.
-            for seat in busy:
-                if unstuck.get(seat) == newest:
+        busy = sorted(s for s, (state, _) in turns.items() if state == "busy")
+        silent = [s for s in busy if turns[s][1] and now - turns[s][1] >= stuck]
+        if silent:
+            # A turn that has shown nothing for longer than any capped check takes is stuck, not working.
+            for seat in silent:
+                if unstuck.get(seat) == turns[seat][1]:
                     continue  # already interrupted for this silence
-                unstuck[seat] = newest
-                minutes = int((now - newest) // 60)
+                unstuck[seat] = turns[seat][1]
+                minutes = int((now - turns[seat][1]) // 60)
                 print(f"interrupt {seat}: {interrupt_seat(args.room, seat)}", flush=True)
                 content = (f"@{seat} [nudge] stuck={minutes}m\n"
                            f"⏳ Your turn has shown nothing in the room for {minutes} minutes, longer than any check "

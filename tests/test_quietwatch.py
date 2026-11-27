@@ -73,3 +73,13 @@ def test_a_seat_mid_turn_is_busy_and_a_finished_turn_is_idle():
     ]
     assert turn_state(msgs) == {"Builder": "busy", "Architect": "idle", "Reviewer": "busy"}
     assert turn_state(list(reversed(msgs))) == turn_state(msgs)  # pages come newest first
+
+
+def test_each_seat_is_last_seen_at_its_own_newest_event():
+    from onsen.quietwatch import last_seen
+    msgs = [{"inserted_at": "2026-11-27T13:54:31Z", "sender_name": "Builder", "sender_type": "Agent"},
+            {"inserted_at": "2026-11-27T14:08:08Z", "sender_name": "Architect", "sender_type": "Agent"},
+            {"inserted_at": "2026-11-27T13:50:00Z", "sender_name": "Builder", "sender_type": "Agent"},
+            {"inserted_at": "2026-11-27T14:09:00Z", "sender_name": "the human", "sender_type": "User"}]
+    seen = last_seen(msgs)
+    assert set(seen) == {"Builder", "Architect"} and seen["Architect"] - seen["Builder"] == 13 * 60 + 37
