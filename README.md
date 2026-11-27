@@ -31,7 +31,8 @@ The Builder made 142 commits; the Examiner graded 23 handoffs against exams it s
 blocked 22, each on a file and line; Nap Guard ran the event's checker before each of its 4 gates. The run showed six
 weaknesses, each fixed afterwards on this repository's `main` (listed under
 [After the judged run](https://github.com/chinesepowered/hack-band-dossier/blob/main/FACTORY.md#after-the-judged-run));
-`defe350` is the factory exactly as it ran.
+`defe350` is the factory exactly as it ran. On a fresh clone of the entry, the event's harness in isolated mode has every
+stage folder claim its stage on the shipped checks (96%, 92%, 78% and 80% of their own suites).
 
 The entry, with the band's code, its git history, the room log and the published exams, is
 [chinesepowered/hack-band-dossier](https://github.com/chinesepowered/hack-band-dossier). Its
