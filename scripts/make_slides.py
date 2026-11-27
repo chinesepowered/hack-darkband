@@ -79,15 +79,15 @@ def deck(f: dict) -> str:
               '<img class="wide" src="architecture.png"></div>'),
         bullets("One stage, step by step", [
             "<b>Architect</b> opens the stage's spec and hands off the <b>whole</b> spec, in numbered parts, plus the task.",
-            "<b>Examiner</b> writes a hidden exam from the spec alone and <b>seals</b> it by SHA-256.",
-            "<b>Builder</b> commits small steps, tests against the mock web, posts <b>[ready] commit=…</b>.",
-            "<b>Examiner</b> and <b>Reviewer</b> grade that exact commit in parallel: hidden exam, and the event checker + diff review.",
-            "<b>Nap Guard</b> accepts only PASS + APPROVED on the <b>same commit</b>, which the checker claims."]),
+            "<b>Examiner</b> writes the stage's exam as <b>code</b>, from the spec alone, and <b>seals</b> it by SHA-256 before any build.",
+            "<b>Builder</b> commits small steps; the moment the checker claims the stage it posts <b>[ready] commit=…</b>.",
+            "<b>Examiner</b> grades that commit with <code>onsen-exam</code>; <b>Reviewer</b> reads the diff and probes the running service.",
+            "<b>Nap Guard</b> recounts the exam, needs the approval on the <b>same commit</b>, then runs the checker itself."]),
         bullets("How it catches bad work", [
+            "<b>No seat's word opens the gate</b>: tools compute the exam's verdict; Nap Guard runs the event's checker itself.",
             "<b>A hidden exam</b>: the Builder can't fit the code to checks it never sees; the seal makes it tamper-evident.",
-            "<b>Commit-bound verdicts</b>: an approval is for one commit; a later block reopens the stage.",
-            "<b>Disputes, not workarounds</b>: a wrong check is voided in public, with the spec text.",
-            "<b>Stalls and silence</b>: Nap Guard's [chill] and [nudge] keep a dark run moving with nobody to ask.",
+            "<b>A room that stays a protocol</b>: <code>band send</code> is a linter; each tag has one owner, each commit one verdict.",
+            "<b>Bounded review</b>: stalls escalate (re-plan, one grader, checker) instead of looping or ending the run.",
             f"<b>A bad result it caught:</b> {f.get('caught', '—')}"]),
         slide('<div class="body"><div class="k">The judged run</div>'
               f'<div class="stats"><div class="stat"><div class="v">{top}</div><div class="l">highest stage claimed</div></div>'
@@ -96,15 +96,15 @@ def deck(f: dict) -> str:
               f'<div class="stat"><div class="v">{f.get("seats", 5)}</div><div class="l">seats</div></div></div>'
               f'<ul style="margin-top:26px">{stage_rows}<li><b>Commits by seat:</b> {commits or "—"}</li></ul></div>'),
         bullets("What it cost", [
-            f"<b>Model:</b> Qwen 3.8 27B on W&amp;B Inference for every coding seat · {f.get('tokens_text', '—')}",
+            f"<b>Model:</b> GPT-6 Luna (OpenAI) for every coding seat, through OpenCode · {f.get('tokens_text', '—')}",
             f"<b>Spend:</b> {f.get('spend_text', '—')}",
             f"<b>Time:</b> {f.get('time_text', '—')}",
-            "<b>Why an open 27B model:</b> cheap enough to let four seats think in parallel; the factory's checks make up "
-            "for what the model misses."]),
+            "<b>Why a small fast model:</b> cheap enough to let four seats work in parallel all day; the factory's "
+            "tools and gate make up for what the model gets wrong."]),
         bullets("Built on", [
             "<b>BAND Desktop</b>: four OpenCode seats, live reasoning and Interrupt; the room's mention routing keeps the exam sealed.",
-            "<b>Nimble</b> via WebRouter: the service researches every company on the live web, each value with its excerpt.",
-            "<b>W&amp;B Inference</b>: Qwen 3.8 27B behind every coding seat."]),
+            "<b>band-sdk</b>: Nap Guard, a deterministic seat with no model, gates every stage.",
+            "<b>Nimble</b> via WebRouter: the service researches every company on the live web, each value with its excerpt."]),
         slide('<div style="text-align:center"><div class="halo"><img src="capybara.svg" width="220"></div>'
               '<h1 style="font-size:96px;margin:6px 0 0">Onsen</h1>'
               '<div class="sub" style="color:#fff6e8">One message in. The capybara slept through all of it.</div>'
