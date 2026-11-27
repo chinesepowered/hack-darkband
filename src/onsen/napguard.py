@@ -132,9 +132,13 @@ async def run_checker(n: int, commit: str) -> dict[str, Any]:
         except (OSError, ValueError):
             pass
     failing = text.split("--- failing checks", 1)[-1].split("--- full logs", 1)[0] if "--- failing checks" in text else text[-1500:]
+    summary = "\n".join(ln for ln in failing.splitlines()[1:] if ln.strip())
+    stopped = re.search(r"^--- stopped:.*?(?=^---|\Z)", text, re.M | re.S)
+    if stopped:  # the run hit its time cap: that is the finding
+        summary = stopped.group(0).strip() + ("\n" + summary if summary else "")
     return {"claimed": int(claimed) if str(claimed or "").isdigit() else None,
             "passed": counts.get("passed"), "total": counts.get("collected"),
-            "summary": clip("\n".join(ln for ln in failing.splitlines()[1:] if ln.strip()), 1500)}
+            "summary": clip(summary, 1500)}
 
 
 async def post_as_napguard(room: str, content: str, roles: list[str]) -> None:
