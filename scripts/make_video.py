@@ -55,6 +55,9 @@ h1{font-family:'Inter Display',Inter,sans-serif;font-size:112px;font-weight:800;
 .chip{display:inline-block;margin-top:8px;font-size:15px;font-weight:600;color:#ffcf85;background:rgba(255,184,77,.12);
   border:1px solid rgba(255,184,77,.28);border-radius:999px;padding:3px 11px;width:max-content}
 .foot{margin-top:26px;font-size:20px;color:#8fa6b6}
+.grid.five{grid-template-columns:repeat(6,1fr)}.grid.five .cell{grid-column:span 2}
+.grid.five .cell:nth-child(4){grid-column:2 / span 2}
+.rows code,.cell code{white-space:nowrap}
 .corner{position:absolute;right:34px;bottom:30px;width:78px;height:78px}
 .shot{border-radius:16px;border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 50px rgba(0,0,0,.45)}
 .chips{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
@@ -83,7 +86,7 @@ def _agent(initials: str, color: str, name: str, what: str, chip: str) -> str:
 CARDS = {
     "title": STEAM + """<div class="wrap"><div class="halo"><img src="capybara.svg" width="300"></div><h1>Onsen</h1>
       <div class="tag">A dark software factory on BAND</div><div class="sub">One rule: don't wake the capybara.</div></div>""",
-    "crew": STEAM + '<div class="wrap wide"><div class="tag">Five seats · one BAND room · one human message</div><div class="grid">'
+    "crew": STEAM + '<div class="wrap wide"><div class="tag">Five seats · one BAND room · one human message</div><div class="grid five">'
       + _agent("A", "#f2cc60", "Architect", "plans, hands off whole stages", "BAND Desktop · OpenCode")
       + _agent("B", "#d2a8ff", "Builder", "writes every line of the service", "BAND Desktop · OpenCode")
       + _agent("E", "#ff7b72", "Examiner", "keeps a sealed, executable exam", "BAND Desktop · OpenCode")
