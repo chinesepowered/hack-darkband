@@ -184,15 +184,22 @@ async def render_card(name: str, out_png: Path) -> Path:
 
 
 async def record_app(url: str, out: Path, seconds: float) -> Path:
-    """Drive the app the factory built, the way a visitor would, using only the spec's labels."""
+    """Drive the service the band built the way a reader would, through the spec's own element ids (`data-testid`):
+    sign in, the dossier list and its search, one dossier with its citations, its evidence, the contested fields.
+
+    The account and the dossiers come from `scripts/app_demo.py prepare`, which writes ONSEN_APP_DEMO (a JSON file with
+    the email, password and the domains it researched), so the tour shows finished dossiers rather than a build."""
     from playwright.async_api import async_playwright
 
     from screencast import screencast
 
+    demo = json.loads(Path(os.environ["ONSEN_APP_DEMO"]).read_text())
+    domains = demo.get("domains") or []
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path=os.environ.get("ONSEN_CHROMIUM_PATH") or None, args=["--no-sandbox"])
         page = await b.new_page(viewport={"width": APP_W, "height": APP_H})
-        pause = max(600, int(seconds * 1000 / 9))
+        pause = max(700, int(seconds * 1000 / 10))
+        tid = page.get_by_test_id
 
         async def attempt(coro):
             try:
@@ -201,22 +208,30 @@ async def record_app(url: str, out: Path, seconds: float) -> Path:
                 print(f"  (skipped a step: {str(exc).splitlines()[0][:80]})")
 
         async def tour() -> None:
-            await page.goto(url)
-            await page.wait_for_timeout(pause)
-            await attempt(page.get_by_label("Search spots").fill("izu"))
-            await attempt(page.get_by_label("Search spots").press("Enter"))
-            await page.wait_for_timeout(pause)
-            await attempt(page.get_by_label("Search spots").fill(""))
-            await attempt(page.get_by_label("Search spots").press("Enter"))
+            await page.goto(url.rstrip("/") + "/login")
             await page.wait_for_timeout(pause // 2)
-            await attempt(page.get_by_label("Country").select_option(label="JP"))
+            await attempt(tid("login-email").fill(demo["email"]))
+            await attempt(tid("login-password").fill(demo["password"]))
+            await attempt(tid("login-submit").click())
             await page.wait_for_timeout(pause)
-            await attempt(page.get_by_label("Hot spring spots only").check())
+            await attempt(page.goto(url.rstrip("/") + "/"))
             await page.wait_for_timeout(pause)
-            await attempt(page.get_by_test_id("spot-card").first.get_by_role("link").first.click())
+            if len(domains) > 1:
+                await attempt(tid("dossier-search").fill(domains[1].split(".")[0][:4]))
+                await page.wait_for_timeout(pause)
+                await attempt(tid("dossier-search").fill(""))
+                await page.wait_for_timeout(pause // 2)
+            if domains:
+                await attempt(tid(f"dossier-item-{domains[0]}").click())
+                await page.wait_for_timeout(pause * 2)
+                await attempt(page.mouse.wheel(0, 500))
+                await page.wait_for_timeout(pause)
+                await attempt(tid("dossier-evidence-link").click())
+                await page.wait_for_timeout(pause * 2)
+                await attempt(page.mouse.wheel(0, 600))
+                await page.wait_for_timeout(pause)
+            await attempt(page.goto(url.rstrip("/") + "/contested"))
             await page.wait_for_timeout(pause * 2)
-            await attempt(page.get_by_role("link", name="Back to all spots").click())
-            await page.wait_for_timeout(pause)
 
         await screencast(page, tour, out.with_suffix(".mp4"), width=APP_W, height=APP_H)
         await b.close()
