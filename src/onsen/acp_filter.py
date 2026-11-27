@@ -42,6 +42,12 @@ CREW_TAGS = ("ready", "review", "task", "plan", "dispute", "exam", "seal", "reve
 PROTOCOL = re.compile(r"^\s*(?:@\S+\s+)*\[(?:" + "|".join(CREW_TAGS) + r")\]", re.I)
 LIMIT = 1 << 26  # tool output can make single lines very long
 SENDS = re.compile(r"\bband\b[^\n]{0,300}?\bsend\b")  # a tool call that posts to the room
+ABORTED = re.compile(r"\babort", re.I)  # "Tool execution aborted": an edit cut off mid-stream, lost whole
+# Run R: a Builder streamed one stage-2 patch for 17 minutes until the model's output limit cut it off, and then,
+# prompted to carry on, started the same patch again.
+LOST_EDIT = ("Your last tool call was cut off before it finished (it was too long for one response), so that whole "
+             "change was lost. Make it again in parts of at most about 300 lines per edit (a large new file can be "
+             "written in several appends), and commit each part once it imports and runs.")
 KEEP_GOING = {
     "builder": ("Your turn ended, but you haven't sent anything to the room, so nobody will wake you to finish. If the "
                 "stage's work is unfinished, carry on now: implement, commit, run the checker, and post [ready] when it "
@@ -100,6 +106,8 @@ class Filter:
                     t["tools"] += 1
                 if SENDS.search(json.dumps(update)):
                     t["sent"] = True
+                if update.get("status") == "failed" and ABORTED.search(json.dumps(update)):
+                    t["lost"] = True
             return [line]
         if "method" not in msg and msg.get("id") in self.prompts and ("result" in msg or "error" in msg):
             sid = self.prompts.pop(msg["id"])
@@ -117,12 +125,11 @@ class Filter:
                 # The agent stopped mid-work without telling anyone: ask it to carry on, in the same client turn.
                 t["continued"] += 1
                 t["tools"] = 0
+                text = LOST_EDIT if t.pop("lost", False) else KEEP_GOING.get(self.role, KEEP_GOING["builder"])
                 rid = f"onsen-keep-going-{next(self._ids)}"
                 self.prompts[rid] = sid
                 self.to_agent.append(_line({"jsonrpc": "2.0", "id": rid, "method": "session/prompt",
-                                            "params": {"sessionId": sid,
-                                                       "prompt": [{"type": "text", "text": KEEP_GOING.get(
-                                                           self.role, KEEP_GOING["builder"])}]}}))
+                                            "params": {"sessionId": sid, "prompt": [{"type": "text", "text": text}]}}))
                 return []
             kept = [raw for raw, _ in chunks] if forward else []
             if t is not None:

@@ -128,3 +128,27 @@ def test_the_reviewer_is_asked_to_send_its_verdict():
     assert f.from_agent(end(4)) == []
     prompt = json.loads(f.to_agent.pop())["params"]["prompt"][0]["text"]
     assert "send your [review] now" in prompt
+
+
+def test_an_edit_cut_off_mid_stream_gets_a_smaller_steps_prompt():
+    """Run R: a 17-minute patch hit the output limit and was aborted; told only to carry on, the Builder started the
+    same patch again. The keep-going prompt now says the change was lost and to make it in parts."""
+    f = Filter(keep_going=True, role="builder")
+    f.from_client(line({"jsonrpc": "2.0", "id": 3, "method": "session/prompt", "params": {"sessionId": "s"}}))
+    f.from_agent(line({"jsonrpc": "2.0", "method": "session/update", "params": {"sessionId": "s", "update": {
+        "sessionUpdate": "tool_call", "toolCallId": "c1", "title": "apply_patch", "kind": "edit"}}}))
+    f.from_agent(line({"jsonrpc": "2.0", "method": "session/update", "params": {"sessionId": "s", "update": {
+        "sessionUpdate": "tool_call_update", "toolCallId": "c1", "status": "failed",
+        "content": [{"type": "content", "content": {"type": "text", "text": "Tool execution aborted"}}]}}}))
+    assert f.from_agent(end(3)) == []  # the turn goes on
+    prompt = json.loads(f.to_agent.pop())["params"]["prompt"][0]["text"]
+    assert "cut off" in prompt and "300 lines" in prompt
+    # the next stop without a lost edit gets the ordinary prompt
+    rid = json.loads(_last_prompt_id(f))
+    f.from_agent(tool_call("s", "pytest -q"))
+    assert f.from_agent(end(rid)) == []
+    assert "carry on" in json.loads(f.to_agent.pop())["params"]["prompt"][0]["text"]
+
+
+def _last_prompt_id(f):
+    return json.dumps(next(k for k in reversed(list(f.prompts)) if str(k).startswith("onsen-keep-going")))
