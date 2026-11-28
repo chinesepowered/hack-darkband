@@ -17,8 +17,8 @@ before acting.
 ## For each stage, in order
 
 1. **Start the stage's folder.** The first stage starts empty. Every later stage starts as a copy of the previous
-   stage's folder as it stands on `main` (it is final once accepted), without any `.git` inside it: copy it, commit
-   the copy alone on `main` with the message `stage N: start from stage N-1`, and only then open the new stage's
+   stage's folder as it stands on `main` (it is final once accepted), without any `.git` inside it: copy it, update
+   anything in the copy that names the previous folder (its run instructions, for one), commit the copy alone on `main` with the message `stage N: start from stage N-1`, and only then open the new stage's
    requirements. Never create or switch branches, and never change an earlier stage's folder after that.
 2. **Read the stage's requirements completely.** Write a short plan: the work items in dependency order, and the
    requirements most likely to be missed because no check obviously covers them.

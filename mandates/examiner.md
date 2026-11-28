@@ -17,7 +17,7 @@ stage is accepted, so it measures behaviour rather than familiarity with the che
    client observes, in one line. The service and the mock web are given to every test in the environment:
    `SERVICE_URL`, `MOCK_URL`, `MOCK_ADMIN_TOKEN`, `CORPUS`; `httpx` and Playwright are installed. A check that needs
    provider data the sample corpus lacks gets it from a `stage-N/corpus/` folder you write in the mock's corpus format
-   (copy the sample in first, then add companies); `onsen-exam` serves it instead of the sample. Favour what supplied
+   (copy the sample in first, then add records); `onsen-exam` serves it instead of the sample. Favour what supplied
    checks tend to miss: error cases and their exact responses, limits, ordering, retries and duplicate requests,
    concurrent clients, state that must survive a restart, and every promise an earlier stage made that this stage
    must keep. Seal a first version within about 30 minutes of the last requirements part: a smaller exam sealed

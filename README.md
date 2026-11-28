@@ -3,7 +3,7 @@
 <p align="center">
 <a href="https://github.com/chinesepowered/hack-band-dossier"><b>The Dossier entry</b></a> ·
 <a href="https://github.com/chinesepowered/hack-band-dossier/blob/main/FACTORY.md">FACTORY.md</a> ·
-▶ <a href="demo/onsen-demo.mp4">Demo video</a> ·
+▶ <a href="https://www.youtube.com/watch?v=wGgJNxGTKHM">Demo video</a> ·
 <a href="demo/onsen-slides.pdf">Slides</a> ·
 <a href="docs/practice-runs.md">Every practice run</a>
 </p>
@@ -28,7 +28,7 @@ stages accepted, from one human message, in 5 hours 14 minutes, for $9.60 of mod
 | 4 · independent sources, batches, failures | 64 min | claims stage 4 (stage-4 suite 8/10) | 67% |
 
 The Builder made 142 commits; the Examiner graded 23 handoffs against exams it sealed before any build; the Reviewer
-blocked 22, each on a file and line; Nap Guard ran the event's checker before each of its 4 gates. The run showed six
+blocked 22, each on a file and line; Nap Guard ran the event's checker before each of its 4 gates. The run showed seven
 weaknesses, each fixed afterwards on this repository's `main` (listed under
 [After the judged run](https://github.com/chinesepowered/hack-band-dossier/blob/main/FACTORY.md#after-the-judged-run));
 `defe350` is the factory exactly as it ran. On a fresh clone of the entry, the event's harness in isolated mode has every
