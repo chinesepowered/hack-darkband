@@ -3,7 +3,7 @@
 <p align="center">
 <a href="https://github.com/chinesepowered/hack-band-dossier"><b>The Dossier entry</b></a> ·
 <a href="https://github.com/chinesepowered/hack-band-dossier/blob/main/FACTORY.md">FACTORY.md</a> ·
-▶ <a href="https://www.youtube.com/watch?v=wGgJNxGTKHM">Demo video</a> ·
+▶ <a href="https://www.youtube.com/watch?v=Wd1LZ2AjMvk">Demo video</a> ·
 <a href="demo/onsen-slides.pdf">Slides</a> ·
 <a href="docs/practice-runs.md">Every practice run</a>
 </p>

@@ -1,6 +1,6 @@
 # Demo video: "Don't wake the capybara" (Dossier track, about 2½ minutes)
 
-Built by `scripts/make_video.py` from the judged run (Run U): each `> VO:` line becomes narration (ElevenLabs), the
+Built by `scripts/make_video.py` from the judged run (Run U): each `> VO:` line becomes narration (ElevenLabs),
 scenes 3 and 5 are a screen recording of the judged room in BAND Desktop (scrolled from the task, cut with held
 frames; the clips are in `$ONSEN_DESKTOP_CLIPS`), the replay scenes play the real room transcript
 (`scripts/fetch_room.py`), and the app scene records the service the band built (stage 4, beside the event's mock
