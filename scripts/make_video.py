@@ -341,7 +341,8 @@ def main() -> int:
                    "-vf", f"{crop}scale=-2:{CLIP_H},setpts=PTS/{speed:.4f},fps=30,format=yuv420p",
                    "-an", "-c:v", "libx264", str(raw))
             cw = int(ffmpeg_probe_width(raw))
-            label = sc.get("label", "BAND Desktop · the room, live") + f" · {speed:.0f}× speed"
+            # "speed_label" describes a clip that was cut beforehand (held frames, a sped-up scroll) better than one figure
+            label = sc.get("label", "BAND Desktop · the room, live") + sc.get("speed_label", f" · {speed:.0f}× speed")
             frame = asyncio.run(render_card(window_frame((W - cw) // 2, CLIP_Y, cw, CLIP_H, label), work / f"clip-frame-{n:02d}.png"))
             video = work / f"clip-{n:02d}.mp4"
             ffmpeg("-loop", "1", "-i", str(frame), "-i", str(raw), "-filter_complex",

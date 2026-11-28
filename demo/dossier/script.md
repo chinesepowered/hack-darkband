@@ -1,8 +1,10 @@
 # Demo video: "Don't wake the capybara" (Dossier track, about 2½ minutes)
 
 Built by `scripts/make_video.py` from the judged run (Run U): each `> VO:` line becomes narration (ElevenLabs), the
-replay scenes play the real room transcript (`scripts/fetch_room.py`), and the app scene records the service the
-band built (stage 4, beside the event's mock web). Every number comes from `scripts/run_facts.py` on that run.
+scenes 3 and 5 are a screen recording of the judged room in BAND Desktop (scrolled from the task, cut with held
+frames; the clips are in `$ONSEN_DESKTOP_CLIPS`), the replay scenes play the real room transcript
+(`scripts/fetch_room.py`), and the app scene records the service the band built (stage 4, beside the event's mock
+web). Every number comes from `scripts/run_facts.py` on that run.
 
 ### 1. Title (card: title)
 > VO: This capybara is the only human on our team. Our software factory has one rule: don't wake the capybara.
@@ -10,13 +12,13 @@ band built (stage 4, beside the event's mock web). Every number comes from `scri
 ### 2. The band (card: crew)
 > VO: Onsen is five seats in one BAND room. An Architect, a Builder, an Examiner and a Reviewer run in BAND Desktop, on OpenCode with GPT-6 Luna. The fifth, Nap Guard, has no model at all. It's code, and it gates every stage.
 
-### 3. One message (replay: the task and the first handoff part)
+### 3. One message (BAND Desktop: the task, then the Architect's numbered parts)
 > VO: I sent one message, the whole task: four stages of a company research service. Then I went back to my bath. The Architect hands every seat the complete spec, in numbered parts.
 
 ### 4. The sealed exam (replay: to the first seal)
 > VO: Before any code exists, the Examiner writes its own exam as executable checks, and seals it by hash. The Builder never sees it.
 
-### 5. Build, hand off, judge (replay: the first handoff and its exam)
+### 5. Build, hand off, judge (BAND Desktop: the seal, the first handoff, its exam and its review)
 > VO: The Builder commits in small steps, runs the event's checker, and hands off one exact commit. The Examiner grades it with a tool that computes the verdict, while the Reviewer reads the diff and probes the running service.
 
 ### 6. The gate (card: gate)

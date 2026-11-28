@@ -1,9 +1,9 @@
 [
   {"n": 1, "kind": "card", "card": "title"},
   {"n": 2, "kind": "card", "card": "crew"},
-  {"n": 3, "kind": "replay", "from": null, "to": "[task] stage=1 part=1/4", "title": "Onsen · Dossier"},
-  {"n": 4, "kind": "replay", "from": null, "to": "[seal] stage=1", "title": "Onsen · Dossier"},
-  {"n": 5, "kind": "replay", "from": null, "to": "[exam] stage=1 verdict=FAIL passed=21/24", "title": "Onsen · Dossier"},
+  {"n": 3, "kind": "clip", "file": "$ONSEN_DESKTOP_CLIPS/s3.mp4", "start": 0, "end": 13.05, "label": "BAND Desktop · the judged room", "speed_label": " · from the task, scrolling at 8×"},
+  {"n": 4, "kind": "replay", "from": "[task] stage=1 part=2/4", "to": "[seal] stage=1", "title": "Onsen · Dossier"},
+  {"n": 5, "kind": "clip", "file": "$ONSEN_DESKTOP_CLIPS/s5.mp4", "start": 0, "end": 14.02, "label": "BAND Desktop · the judged room", "speed_label": " · stage 1, 2:57 to 3:47 PM"},
   {"n": 6, "kind": "card", "card": "gate"},
   {"n": 7, "kind": "replay", "from": "[review] stage=1 commit=6eb1549", "to": "[exam] stage=1 verdict=PASS passed=23/24 satisfaction=96% commit=e54dfef", "title": "Onsen · Dossier"},
   {"n": 8, "kind": "replay", "from": null, "to": "[gate] stage=1 ACCEPTED", "title": "Onsen · Dossier"},
